@@ -10,7 +10,10 @@ import 'contact_special_screen.dart';
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
-  Future<void> _showEditProfileDialog(BuildContext context, WidgetRef ref) async {
+  Future<void> _showEditProfileDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final profile = ref.read(profileProvider);
     final nameController = TextEditingController(text: profile.name);
     final emailController = TextEditingController(text: profile.email);
@@ -51,10 +54,12 @@ class ProfileScreen extends ConsumerWidget {
       return;
     }
 
-    final ok = await ref.read(profileProvider.notifier).updateProfile(
-      name: nameController.text.trim(),
-      email: emailController.text.trim(),
-    );
+    final ok = await ref
+        .read(profileProvider.notifier)
+        .updateProfile(
+          name: nameController.text.trim(),
+          email: emailController.text.trim(),
+        );
 
     if (!context.mounted) {
       return;
@@ -62,14 +67,18 @@ class ProfileScreen extends ConsumerWidget {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content:
-            Text(ok ? "Cập nhật hồ sơ thành công" : "Cập nhật hồ sơ thất bại"),
+        content: Text(
+          ok ? "Cập nhật hồ sơ thành công" : "Cập nhật hồ sơ thất bại",
+        ),
         backgroundColor: ok ? Colors.green : Colors.red,
       ),
     );
   }
 
-  Future<void> _showAddDocumentDialog(BuildContext context, WidgetRef ref) async {
+  Future<void> _showAddDocumentDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final titleController = TextEditingController();
     final descriptionController = TextEditingController();
 
@@ -124,8 +133,9 @@ class ProfileScreen extends ConsumerWidget {
       return;
     }
 
-    final ok =
-        await ref.read(documentsProvider.notifier).addDocument(title: title, description: description);
+    final ok = await ref
+        .read(documentsProvider.notifier)
+        .addDocument(title: title, description: description);
     if (!context.mounted) {
       return;
     }
@@ -151,9 +161,59 @@ class ProfileScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 24),
-              const Text(
-                "Hồ sơ của tôi",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Expanded(
+                    child: Text(
+                      "Hồ sơ của tôi",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryBlue.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: AppTheme.primaryBlue.withOpacity(0.2),
+                        width: 1,
+                      ),
+                    ),
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/login');
+                      },
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        foregroundColor: AppTheme.primaryBlue,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          Icon(Icons.login, size: 16),
+                          SizedBox(width: 8),
+                          Text(
+                            "Đăng nhập",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
               Container(
@@ -178,8 +238,11 @@ class ProfileScreen extends ConsumerWidget {
                         color: AppTheme.primaryBlue,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.person,
-                          color: Colors.white, size: 32),
+                      child: const Icon(
+                        Icons.person,
+                        color: Colors.white,
+                        size: 32,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -189,12 +252,16 @@ class ProfileScreen extends ConsumerWidget {
                           Text(
                             profile.name,
                             style: const TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           Text(
                             profile.email,
                             style: const TextStyle(
-                                fontSize: 14, color: Colors.grey),
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
                           ),
                         ],
                       ),
@@ -222,7 +289,7 @@ class ProfileScreen extends ConsumerWidget {
                       color: AppTheme.primaryBlue.withValues(alpha: 0.25),
                       blurRadius: 12,
                       offset: const Offset(0, 6),
-                    )
+                    ),
                   ],
                 ),
                 child: Row(
@@ -264,7 +331,10 @@ class ProfileScreen extends ConsumerWidget {
                         backgroundColor: Colors.white,
                         foregroundColor: AppTheme.primaryBlue,
                         elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
