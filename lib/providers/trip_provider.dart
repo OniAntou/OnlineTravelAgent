@@ -97,6 +97,17 @@ class TripNotifier extends Notifier<List<Trip>> {
       throw ApiException(statusCode: 500, message: getErrorMessage(e));
     }
   }
+
+  Future<void> cancelTrip(String tripId) async {
+    try {
+      final updatedTrip = await ref.read(apiProvider).cancelTrip(tripId);
+      state = state.map((t) => t.id == tripId ? updatedTrip : t).toList();
+    } on ApiException {
+      rethrow;
+    } catch (e) {
+      throw ApiException(statusCode: 500, message: getErrorMessage(e));
+    }
+  }
 }
 
 final tripsProvider = NotifierProvider<TripNotifier, List<Trip>>(TripNotifier.new);

@@ -280,6 +280,13 @@ export const adminController = {
     if (body.statusOverride !== undefined) data.statusOverride = body.statusOverride;
     if (body.note !== undefined) data.note = body.note;
     const item = await prisma.tripScheduleItem.update({ where: { id: itemId }, data });
+    
+    // Emit real-time update
+    const tripDay = await prisma.tripScheduleDay.findUnique({ where: { id: item.dayId } });
+    const io = req.app.get("io");
+    if (io && tripDay) {
+      io.to(`trip_${tripDay.tripId}`).emit("schedule_updated");
+    }
     res.json(item);
   }),
 
@@ -292,6 +299,13 @@ export const adminController = {
         message: body.message
       }
     });
+
+    // Emit real-time update
+    const io = req.app.get("io");
+    if (io) {
+      io.to(`trip_${tripId}`).emit("schedule_updated");
+    }
+
     res.status(201).json(update);
   }),
 

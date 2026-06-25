@@ -45,10 +45,10 @@ class TripScheduleItem {
     return TripScheduleItem(
       id: json['id'] as String,
       title: json['title'] as String,
-      description: json['description'] as String,
+      description: json['description'] as String? ?? '',
       startTime: json['startTime'] as String,
-      endTime: json['endTime'] as String,
-      location: json['location'] as String,
+      endTime: json['endTime'] as String? ?? '',
+      location: (json['location'] ?? json['locationName']) as String? ?? '',
       latitude: json['latitude'] != null ? (json['latitude'] as num).toDouble() : null,
       longitude: json['longitude'] != null ? (json['longitude'] as num).toDouble() : null,
       statusOverride: json['statusOverride'] as String?,

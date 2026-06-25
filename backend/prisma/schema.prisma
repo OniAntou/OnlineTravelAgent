@@ -33,7 +33,7 @@ model Destination {
   duration      String
   imagePath     String  @map("image_path")
   description   String
-  price         String
+  price         Float
   reviewsCount  String  @default("0") @map("reviews_count")
   category      String
   isFavorite    Boolean @default(false) @map("is_favorite")

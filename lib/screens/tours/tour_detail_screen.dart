@@ -183,7 +183,7 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
 
     final coordinates = _getCoordinates();
     final center = coordinates.first;
-    final itinerary = _generateItinerary();
+    final fallbackItinerary = _generateItinerary();
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundGray,
@@ -641,159 +641,56 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                           const SizedBox(height: 28),
 
                           // F. Detailed Daily Itinerary
-                          const Text(
-                            'Lịch trình chi tiết từng ngày',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.textBlack,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            padding: EdgeInsets.zero,
-                            itemCount: itinerary.length,
-                            itemBuilder: (context, index) {
-                              final step = itinerary[index];
-                              final isLast = index == itinerary.length - 1;
-                              final milestones = step['milestones'] as List<Map<String, String>>;
-
-                              return IntrinsicHeight(
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Left Column: Dot & Connecting Line
-                                    Column(
-                                      children: [
-                                        Container(
-                                          width: 16,
-                                          height: 16,
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            shape: BoxShape.circle,
-                                            border: Border.all(color: AppTheme.primaryBlue, width: 3),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: AppTheme.primaryBlue.withValues(alpha: 0.2),
-                                                blurRadius: 6,
-                                                spreadRadius: 2,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        if (!isLast)
-                                          Expanded(
-                                            child: Container(
-                                              width: 2,
-                                              color: AppTheme.primaryBlue.withValues(alpha: 0.3),
-                                            ),
-                                          ),
-                                      ],
+                          ref.watch(tourScheduleProvider(widget.tour.id)).when(
+                            data: (schedule) {
+                              List<Map<String, dynamic>> finalItinerary = [];
+                              if (schedule.days.isNotEmpty) {
+                                for (var day in schedule.days) {
+                                  finalItinerary.add({
+                                    'day': 'Ngày ${day.dayNumber}',
+                                    'title': 'Hoạt động ngày ${day.dayNumber}',
+                                    'desc': '',
+                                    'milestones': day.items.map((item) => {
+                                      'time': item.startTime + (item.endTime.isNotEmpty ? ' - ${item.endTime}' : ''),
+                                      'event': item.title + (item.description.isNotEmpty ? ' - ${item.description}' : ''),
+                                    }).toList(),
+                                  });
+                                }
+                              } else {
+                                finalItinerary = fallbackItinerary;
+                              }
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Lịch trình chi tiết từng ngày',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.textBlack,
                                     ),
-                                    const SizedBox(width: 16),
-                                    // Right Column: Day details card
-                                    Expanded(
-                                      child: Container(
-                                        margin: const EdgeInsets.only(bottom: 20),
-                                        padding: const EdgeInsets.all(16),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(20),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withValues(alpha: 0.02),
-                                              blurRadius: 10,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                          ],
-                                          border: Border.all(color: Colors.grey.withValues(alpha: 0.05)),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Text(
-                                                  step['day']!,
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: AppTheme.primaryBlue,
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                                const Icon(Icons.circle_notifications_rounded, color: AppTheme.primaryBlue, size: 16),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              step['title']!,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 15,
-                                                color: AppTheme.textBlack,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              step['desc']!,
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                color: Colors.grey.shade600,
-                                                height: 1.5,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 12),
-                                            const Divider(height: 1, color: AppTheme.backgroundGray),
-                                            const SizedBox(height: 12),
-                                            // Render detailed hourly milestones
-                                            ...milestones.map((m) => Padding(
-                                              padding: const EdgeInsets.only(bottom: 10),
-                                              child: Row(
-                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                children: [
-                                                  Container(
-                                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                                    decoration: BoxDecoration(
-                                                      color: AppTheme.primaryBlue.withValues(alpha: 0.08),
-                                                      borderRadius: BorderRadius.circular(8),
-                                                    ),
-                                                    child: Text(
-                                                      m['time']!,
-                                                      style: const TextStyle(
-                                                        color: AppTheme.primaryBlue,
-                                                        fontWeight: FontWeight.bold,
-                                                        fontSize: 10,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 10),
-                                                  Expanded(
-                                                    child: Padding(
-                                                      padding: const EdgeInsets.only(top: 2),
-                                                      child: Text(
-                                                        m['event']!,
-                                                        style: TextStyle(
-                                                          fontSize: 12,
-                                                          color: Colors.grey.shade800,
-                                                          height: 1.4,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            )),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  _buildItineraryList(finalItinerary),
+                                ],
                               );
                             },
+                            loading: () => const Center(child: CircularProgressIndicator()),
+                            error: (e, st) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Lịch trình chi tiết từng ngày',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppTheme.textBlack,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                _buildItineraryList(fallbackItinerary),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 12),
 
@@ -1082,6 +979,156 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildItineraryList(List<Map<String, dynamic>> itinerary) {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.zero,
+      itemCount: itinerary.length,
+      itemBuilder: (context, index) {
+        final step = itinerary[index];
+        final isLast = index == itinerary.length - 1;
+        final milestones = (step['milestones'] as List).cast<Map<String, dynamic>>();
+
+        return IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Left Column: Dot & Connecting Line
+              Column(
+                children: [
+                  Container(
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppTheme.primaryBlue, width: 3),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+                          blurRadius: 6,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (!isLast)
+                    Expanded(
+                      child: Container(
+                        width: 2,
+                        color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(width: 16),
+              // Right Column: Day details card
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 20),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.02),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                    border: Border.all(color: Colors.grey.withValues(alpha: 0.05)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            step['day'] as String,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primaryBlue,
+                              fontSize: 12,
+                            ),
+                          ),
+                          const Icon(Icons.circle_notifications_rounded, color: AppTheme.primaryBlue, size: 16),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        step['title'] as String,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: AppTheme.textBlack,
+                        ),
+                      ),
+                      if ((step['desc'] as String).isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          step['desc'] as String,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade600,
+                            height: 1.5,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 12),
+                      const Divider(height: 1, color: AppTheme.backgroundGray),
+                      const SizedBox(height: 12),
+                      // Render detailed hourly milestones
+                      ...milestones.map((m) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryBlue.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                m['time'] as String,
+                                style: const TextStyle(
+                                  color: AppTheme.primaryBlue,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 2),
+                                child: Text(
+                                  m['event'] as String,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade800,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

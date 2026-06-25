@@ -5,7 +5,6 @@ import '../../core/theme/app_theme.dart';
 import '../../models/tour_package.dart';
 import '../../providers/tour_provider.dart';
 import '../../widgets/sort_bottom_sheet.dart';
-import '../custom_tour/custom_tour_stepper_screen.dart';
 import 'tour_detail_screen.dart';
 import '../../providers/app_state_provider.dart';
 import '../../utils/app_utils.dart';

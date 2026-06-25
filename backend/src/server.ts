@@ -3,6 +3,7 @@ import express from "express";
 import helmet from "helmet";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import { Server as SocketIOServer } from "socket.io";
 import prisma from "./config/prisma.js";
 import { routes } from "./routes/index.js";
 import { Request, Response, NextFunction } from "express";
@@ -75,6 +76,25 @@ const server = app.listen(port, async () => {
   console.log(`👉 Partner Portal: http://localhost:${port}/partner`);
   console.log(`👉 Prisma Studio:  http://localhost:5555`);
   console.log(`==============================================`);
+
+  // Initialize Socket.IO
+  const io = new SocketIOServer(server, {
+    cors: {
+      origin: allowedOrigins,
+      methods: ["GET", "POST"]
+    }
+  });
+
+  io.on("connection", (socket) => {
+    socket.on("join_trip_room", (tripId) => {
+      socket.join(`trip_${tripId}`);
+    });
+    socket.on("join_tour_room", (tourId) => {
+      socket.join(`tour_${tourId}`);
+    });
+  });
+
+  app.set("io", io);
 
   try {
     const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });

@@ -234,7 +234,7 @@ class PlaceTripDetailScreen extends ConsumerWidget {
 
                     // Action Buttons
                     const TripSectionHeader(title: 'Hành động'),
-                    const TripActionButtons(),
+                    TripActionButtons(trip: trip),
                     const SizedBox(height: 28),
 
                     // Reviews

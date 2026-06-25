@@ -351,7 +351,7 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
 
                     // Action Buttons
                     const TripSectionHeader(title: 'Hành động'),
-                    const TripActionButtons(),
+                    TripActionButtons(trip: widget.trip),
                   ],
                 ),
               );

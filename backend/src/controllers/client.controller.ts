@@ -170,6 +170,15 @@ export const clientController = {
     res.json(data);
   }),
 
+  getTourSchedule: asyncHandler(async (req: Request, res: Response) => {
+    const data = await store.getTourSchedule(req.params.id as string);
+    if (!data) {
+      res.status(404).json({ message: "Tour schedule not found" });
+      return;
+    }
+    res.json(data);
+  }),
+
   bookTour: asyncHandler(async (req: Request, res: Response) => {
     const userId = req.userId;
     const body = req.body as BookTourBody;
@@ -211,5 +220,16 @@ export const clientController = {
       return;
     }
     res.json(result.promo);
+  }),
+
+  cancelTrip: asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.userId;
+    const tripId = req.params.id as string;
+    const trip = await store.cancelTrip(userId, tripId);
+    if (!trip) {
+      res.status(404).json({ message: "Trip not found or unauthorized" });
+      return;
+    }
+    res.json(trip);
   })
 };

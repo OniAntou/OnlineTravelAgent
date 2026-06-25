@@ -216,6 +216,18 @@ export const store = {
     return items[0];
   },
 
+  async getTourSchedule(tourId: string) {
+    return prisma.scheduleTemplate.findFirst({
+      where: { tourPackageId: tourId },
+      include: {
+        days: {
+          include: { items: { orderBy: { sortOrder: 'asc' } } },
+          orderBy: { dayNumber: 'asc' }
+        }
+      }
+    });
+  },
+
   async bookTour(userId: string | undefined, tourId: string, date: string, guests: string, totalPrice?: number) {
     const tour = await prisma.tourPackage.findUnique({ where: { id: tourId } });
     if (!tour) return null;
@@ -249,6 +261,22 @@ export const store = {
 
     return trip;
   },
+
+  async cancelTrip(userId: string | undefined, tripId: string) {
+    const trip = await prisma.trip.findUnique({ where: { id: tripId } });
+    if (!trip || (userId && trip.userId !== userId)) {
+      return null;
+    }
+
+    return prisma.trip.update({
+      where: { id: tripId },
+      data: {
+        status: "Đã hủy",
+        isUpcoming: false,
+      },
+    });
+  },
+
 
   async createCustomTour(userId: string | undefined, data: { destinations: string[]; date: string; guests: string; location: string; imagePath: string; totalPrice?: number }) {
     const tripId = generateId("trip-custom");

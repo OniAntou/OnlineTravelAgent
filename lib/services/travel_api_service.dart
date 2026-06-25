@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import '../core/exceptions.dart';
 import '../core/theme/app_theme.dart';
@@ -55,6 +56,14 @@ class TravelApiService {
   late final Future<void> loadTokenFuture;
 
   static const String _tokenKey = 'auth_token';
+
+  io.Socket? _socket;
+  io.Socket get socket {
+    _socket ??= io.io(_baseUrl, io.OptionBuilder()
+        .setTransports(['websocket'])
+        .build());
+    return _socket!;
+  }
 
   Future<void> _loadToken() async {
     try {
@@ -183,6 +192,11 @@ class TravelApiService {
     return Trip.fromJson(data);
   }
 
+  Future<Trip> cancelTrip(String tripId) async {
+    final data = await _postJson('/api/trips/$tripId/cancel', {});
+    return Trip.fromJson(data);
+  }
+
   Future<List<Flight>> searchFlights(String? departure, String? arrival) async {
     await _ensureTokenLoaded();
     return _safeCall(() async {
@@ -283,6 +297,18 @@ class TravelApiService {
 
   Future<TripSchedule> fetchTripSchedule(String tripId) async {
     final data = await _getJson('/api/trips/$tripId/schedule');
+    return TripSchedule.fromJson(data);
+  }
+
+  Future<TripSchedule> fetchTourSchedule(String tourId) async {
+    final data = await _getJson('/api/tours/$tourId/schedule');
+    // Notice that ScheduleTemplate and TripSchedule have very similar structure.
+    // TripSchedule.fromJson works fine if 'days' array and 'items' array structures match.
+    // We can reuse TripSchedule for displaying the tour schedule.
+    // Wait, ScheduleTemplate from DB has `tourPackageId`, not `tripId`.
+    // The JSON from backend might not map perfectly. 
+    // Let's ensure it has tripId or we just provide a default.
+    data['tripId'] = data['tripId'] ?? tourId;
     return TripSchedule.fromJson(data);
   }
 

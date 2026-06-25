@@ -1003,7 +1003,48 @@ async function main() {
     }
   });
 
-  console.log(`  Schedule Template Seeding: Created 2 templates.`);
+  const phuquyTemplate = await prisma.scheduleTemplate.create({
+    data: {
+      name: "Tour Phú Quý 3N2Đ",
+      sourceType: "tour",
+      tourPackageId: "tour-phuquy-3n2d",
+      days: {
+        create: [
+          {
+            dayNumber: 1,
+            items: {
+              create: [
+                { sortOrder: 1, startTime: "07:00", endTime: "10:30", title: "Di chuyển bằng tàu cao tốc", description: "Lên tàu từ cảng Phan Thiết di chuyển ra đảo.", locationName: "Cảng Phan Thiết" },
+                { sortOrder: 2, startTime: "11:00", endTime: "12:00", title: "Nhận phòng và nghỉ ngơi", description: "Đến đảo Phú Quý, nhận phòng khách sạn.", locationName: "Đảo Phú Quý" },
+                { sortOrder: 3, startTime: "15:00", endTime: "18:00", title: "Khám phá quanh đảo", description: "Dạo biển, đón hoàng hôn trên đỉnh Cao Cát.", locationName: "Núi Cao Cát" }
+              ]
+            }
+          },
+          {
+            dayNumber: 2,
+            items: {
+              create: [
+                { sortOrder: 1, startTime: "08:00", endTime: "12:00", title: "Cano khám phá Hòn Tranh", description: "Thỏa sức tắm biển và lặn ngắm san hô bằng cano.", locationName: "Hòn Tranh" },
+                { sortOrder: 2, startTime: "16:00", endTime: "18:00", title: "Check-in cột cờ chủ quyền", description: "Tham quan cột cờ và chụp ảnh lưu niệm.", locationName: "Cột cờ chủ quyền Phú Quý" },
+                { sortOrder: 3, startTime: "19:00", endTime: "21:00", title: "Tiệc BBQ hải sản", description: "Thưởng thức cua Huỳnh Đế và hải sản tươi sống.", locationName: "Nhà hàng hải sản" }
+              ]
+            }
+          },
+          {
+            dayNumber: 3,
+            items: {
+              create: [
+                { sortOrder: 1, startTime: "08:00", endTime: "09:30", title: "Tham quan Vịnh Triều Dương", description: "Dạo biển, ngắm bình minh trên Vịnh Triều Dương.", locationName: "Vịnh Triều Dương" },
+                { sortOrder: 2, startTime: "11:00", endTime: "13:30", title: "Lên tàu về đất liền", description: "Lên tàu cao tốc trở về Phan Thiết, kết thúc chuyến đi.", locationName: "Cảng Phú Quý" }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  });
+
+  console.log(`  Schedule Template Seeding: Created 3 templates.`);
 
   // Create real schedule for trip-7 (Đang diễn ra)
   const d = new Date();

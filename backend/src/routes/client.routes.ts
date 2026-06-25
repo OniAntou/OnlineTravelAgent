@@ -29,6 +29,7 @@ clientRouter.get("/trips/:id/schedule", optionalAuth, clientController.getTripSc
 clientRouter.post("/trips/book", clientAuth, validate(bookTripSchema), clientController.bookTrip);
 clientRouter.post("/trips/book-flight", clientAuth, validate(bookFlightSchema), clientController.bookFlightTrip);
 clientRouter.post("/trips/custom-tour", clientAuth, validate(customTourSchema), clientController.createCustomTour);
+clientRouter.post("/trips/:id/cancel", clientAuth, clientController.cancelTrip);
 
 // Flights
 clientRouter.get("/flights/search", clientController.searchFlights);
@@ -47,6 +48,7 @@ clientRouter.post("/hotels/book", clientAuth, validate(bookHotelSchema), clientC
 // Tours
 clientRouter.get("/tours", clientController.getTours);
 clientRouter.get("/tours/:id", clientController.getTourById);
+clientRouter.get("/tours/:id/schedule", clientController.getTourSchedule);
 clientRouter.post("/tours/book", clientAuth, validate(bookTourSchema), clientController.bookTour);
 
 // Reviews
