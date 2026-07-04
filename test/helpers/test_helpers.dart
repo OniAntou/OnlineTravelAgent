@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:online_travel_agent/services/travel_api_service.dart';
 import 'package:online_travel_agent/models/destination.dart';
+import 'package:online_travel_agent/models/document_item.dart';
 import 'package:online_travel_agent/models/trip.dart';
 
 class FakeSecureStorage extends FlutterSecureStorage {
@@ -147,5 +149,28 @@ class FakeTravelApiService extends TravelApiService {
       imagePath: '',
       totalPrice: totalPrice,
     );
+  }
+
+  @override
+  Future<DocumentItem> addDocument({
+    required String title,
+    required String description,
+    String icon = 'description',
+    String color = '#176FF2',
+  }) async {
+    return DocumentItem(
+      id: 'doc_${DateTime.now().millisecondsSinceEpoch}',
+      title: title,
+      description: description,
+      icon: Icons.description,
+      color: Colors.blue,
+      iconName: icon,
+      colorHex: color,
+    );
+  }
+
+  @override
+  Future<bool> deleteDocument(String documentId) async {
+    return true;
   }
 }

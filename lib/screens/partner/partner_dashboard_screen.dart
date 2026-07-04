@@ -368,7 +368,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
               child: Text('Chưa có khách sạn nào.'),
             )
           else
-            ..._hotels.take(3).map((h) => _buildHotelCard(h)),
+            ..._hotels.take(3).map(_buildHotelCard),
           const SizedBox(height: 24),
           const Text('Tours gần đây', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
@@ -378,7 +378,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
               child: Text('Chưa có tour nào.'),
             )
           else
-            ..._tours.take(3).map((t) => _buildTourCard(t)),
+            ..._tours.take(3).map(_buildTourCard),
         ],
       ),
     );
@@ -421,7 +421,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppTheme.primaryBlue,
-        onPressed: () => _showHotelForm(),
+        onPressed: _showHotelForm,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text('Thêm Khách sạn', style: TextStyle(color: Colors.white)),
       ),
@@ -506,7 +506,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppTheme.primaryBlue,
-        onPressed: () => _showTourForm(),
+        onPressed: _showTourForm,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text('Thêm Tour', style: TextStyle(color: Colors.white)),
       ),
@@ -924,7 +924,7 @@ class _RoomManagerScreenState extends ConsumerState<_RoomManagerScreen> {
                 ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppTheme.primaryBlue,
-        onPressed: () => _showRoomForm(),
+        onPressed: _showRoomForm,
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );

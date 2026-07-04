@@ -321,7 +321,6 @@ class PlaceTripDetailScreen extends ConsumerWidget {
             options: MapOptions(
               initialCenter:
                   LatLng(destination.latitude, destination.longitude),
-              initialZoom: 13,
               interactionOptions: const InteractionOptions(
                 flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
               ),

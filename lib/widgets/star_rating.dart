@@ -75,7 +75,7 @@ class StarRatingBar extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 4),
-              Icon(Icons.star_rounded, size: 14, color: Colors.amber),
+              const Icon(Icons.star_rounded, size: 14, color: Colors.amber),
               const SizedBox(width: 6),
               Expanded(
                 child: ClipRRect(
@@ -96,7 +96,7 @@ class StarRatingBar extends StatelessWidget {
                 width: 24,
                 child: Text(
                   '$count',
-                  style: TextStyle(fontSize: 11, color: Colors.grey),
+                  style: const TextStyle(fontSize: 11, color: Colors.grey),
                 ),
               ),
             ],

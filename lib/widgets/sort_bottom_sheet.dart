@@ -86,7 +86,6 @@ class _SortOptionTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected ? AppTheme.primaryBlue : Colors.transparent,
-            width: 1,
           ),
         ),
         child: Row(

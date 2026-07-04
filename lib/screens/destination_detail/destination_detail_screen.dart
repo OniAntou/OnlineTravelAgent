@@ -165,28 +165,28 @@ class _DestinationDetailScreenState
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _infoItem(Icons.star, d.rating, "(${d.reviewsCount} Đánh giá)"),
-                      _infoItem(Icons.access_time, d.duration, "Thời lượng"),
-                      _infoItem(Icons.wb_cloudy, "24°C", "Thời tiết"),
+                      _infoItem(Icons.star, d.rating, '(${d.reviewsCount} Đánh giá)'),
+                      _infoItem(Icons.access_time, d.duration, 'Thời lượng'),
+                      _infoItem(Icons.wb_cloudy, '24°C', 'Thời tiết'),
                     ],
                   ),
                   const SizedBox(height: 32),
                   const Text(
-                    "Mô tả",
+                    'Mô tả',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 12),
                   Text(
                     d.description.isNotEmpty
                         ? d.description
-                        : "Khám phá vẻ đẹp tuyệt vời của ${d.name}. Một hành trình đáng nhớ đang chờ đợi bạn.",
+                        : 'Khám phá vẻ đẹp tuyệt vời của ${d.name}. Một hành trình đáng nhớ đang chờ đợi bạn.',
                     style: const TextStyle(
                         color: Colors.black87, fontSize: 15, height: 1.6),
                   ),
 
                   const SizedBox(height: 32),
                   const Text(
-                    "Trải nghiệm nổi bật",
+                    'Trải nghiệm nổi bật',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -197,21 +197,21 @@ class _DestinationDetailScreenState
                       physics: const BouncingScrollPhysics(),
                       clipBehavior: Clip.none,
                       children: [
-                        _highlightItem(Icons.camera_alt_outlined, "Sống ảo", "Góc check-in", const Color(0xFFE11D48)),
+                        _highlightItem(Icons.camera_alt_outlined, 'Sống ảo', 'Góc check-in', const Color(0xFFE11D48)),
                         const SizedBox(width: 16),
-                        _highlightItem(Icons.restaurant_outlined, "Đặc sản", "Khám phá ẩm thực", const Color(0xFFD97706)),
+                        _highlightItem(Icons.restaurant_outlined, 'Đặc sản', 'Khám phá ẩm thực', const Color(0xFFD97706)),
                         const SizedBox(width: 16),
-                        _highlightItem(Icons.landscape_outlined, "Ngắm cảnh", "Hòa vào thiên nhiên", const Color(0xFF059669)),
+                        _highlightItem(Icons.landscape_outlined, 'Ngắm cảnh', 'Hòa vào thiên nhiên', const Color(0xFF059669)),
                         const SizedBox(width: 16),
-                        _highlightItem(Icons.water_drop_outlined, "Thư giãn", "Nghỉ dưỡng êm ái", const Color(0xFF0284C7)),
+                        _highlightItem(Icons.water_drop_outlined, 'Thư giãn', 'Nghỉ dưỡng êm ái', const Color(0xFF0284C7)),
                         const SizedBox(width: 16),
-                        _highlightItem(Icons.local_mall_outlined, "Mua sắm", "Quà lưu niệm", const Color(0xFF7C3AED)),
+                        _highlightItem(Icons.local_mall_outlined, 'Mua sắm', 'Quà lưu niệm', const Color(0xFF7C3AED)),
                       ],
                     ),
                   ),
                   const SizedBox(height: 32),
                   const Text(
-                    "Vị trí trên bản đồ",
+                    'Vị trí trên bản đồ',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -228,7 +228,6 @@ class _DestinationDetailScreenState
                           child: FlutterMap(
                             options: MapOptions(
                               initialCenter: LatLng(d.latitude, d.longitude),
-                              initialZoom: 13,
                               interactionOptions: const InteractionOptions(
                                 flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
                               ),
@@ -265,11 +264,11 @@ class _DestinationDetailScreenState
                         color: Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Text("Chưa có thông tin toạ độ", style: TextStyle(color: Colors.grey)),
+                      child: const Text('Chưa có thông tin toạ độ', style: TextStyle(color: Colors.grey)),
                     ),
                   const SizedBox(height: 32),
                   const Text(
-                    "Hình ảnh",
+                    'Hình ảnh',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
@@ -327,7 +326,7 @@ class _DestinationDetailScreenState
                 crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text("Giá từ",
+                    const Text('Giá từ',
                         style: TextStyle(color: Colors.grey, fontSize: 12)),
                     Text(
                       formatVND(parsePrice(d.price)),
@@ -355,7 +354,7 @@ class _DestinationDetailScreenState
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "Đặt ngay",
+                          'Đặt ngay',
                           style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -402,7 +401,7 @@ class _DestinationDetailScreenState
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.2), width: 1.0),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),

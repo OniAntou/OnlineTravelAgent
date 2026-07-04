@@ -13,17 +13,17 @@ class DocumentCard extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text("Xóa giấy tờ?"),
-        content: Text("Xác nhận xóa \"${doc.title}\"?"),
+        title: const Text('Xóa giấy tờ?'),
+        content: Text('Xác nhận xóa "${doc.title}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text("Hủy"),
+            child: const Text('Hủy'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text("Xóa"),
+            child: const Text('Xóa'),
           ),
         ],
       ),
@@ -34,7 +34,7 @@ class DocumentCard extends ConsumerWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(ok ? "Đã xóa giấy tờ" : "Xóa thất bại"),
+            content: Text(ok ? 'Đã xóa giấy tờ' : 'Xóa thất bại'),
             backgroundColor: ok ? Colors.green : Colors.red,
           ),
         );
@@ -85,7 +85,7 @@ class DocumentCard extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     elevation: 0,
                   ),
-                  child: const Text("Đóng", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: const Text('Đóng', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -135,7 +135,7 @@ class DocumentCard extends ConsumerWidget {
             IconButton(
               onPressed: () => _confirmDelete(context, ref),
               icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 20),
-              tooltip: "Xóa",
+              tooltip: 'Xóa',
             ),
           ],
         ),

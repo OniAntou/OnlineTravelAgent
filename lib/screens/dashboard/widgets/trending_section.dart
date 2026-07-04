@@ -7,46 +7,55 @@ class TrendingSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: Text(
             'Xu hướng tuần này',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
-        const SizedBox(height: 12),
-        AnimationLimiter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: AnimationConfiguration.toStaggeredList(
-                duration: const Duration(milliseconds: 400),
-                childAnimationBuilder: (widget) => SlideAnimation(
-                  verticalOffset: 30.0,
-                  child: FadeInAnimation(child: widget),
+        SizedBox(height: 12),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Row(
+            children: [
+              Expanded(
+                child: AnimationConfiguration.staggeredList(
+                  position: 0,
+                  duration: Duration(milliseconds: 400),
+                  child: SlideAnimation(
+                    verticalOffset: 30.0,
+                    child: FadeInAnimation(
+                      child: _TrendCard(
+                        icon: Icons.weekend,
+                        title: 'City Break 48h',
+                        subtitle: 'Hà Nội, Đà Nẵng, Sài Gòn',
+                      ),
+                    ),
+                  ),
                 ),
-                children: [
-                  Expanded(
-                    child: _TrendCard(
-                      icon: Icons.weekend,
-                      title: 'City Break 48h',
-                      subtitle: 'Hà Nội, Đà Nẵng, Sài Gòn',
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _TrendCard(
-                      icon: Icons.spa,
-                      title: 'Nghỉ dưỡng chill',
-                      subtitle: 'Biển xanh, resort yên tĩnh',
-                    ),
-                  ),
-                ],
               ),
-            ),
+              SizedBox(width: 12),
+              Expanded(
+                child: AnimationConfiguration.staggeredList(
+                  position: 1,
+                  duration: Duration(milliseconds: 400),
+                  child: SlideAnimation(
+                    verticalOffset: 30.0,
+                    child: FadeInAnimation(
+                      child: _TrendCard(
+                        icon: Icons.spa,
+                        title: 'Nghỉ dưỡng chill',
+                        subtitle: 'Biển xanh, resort yên tĩnh',
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ],

@@ -39,7 +39,7 @@ class NotificationsScreen extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppTheme.backgroundGray,
                     shape: BoxShape.circle,
                   ),

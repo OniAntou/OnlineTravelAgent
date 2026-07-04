@@ -287,7 +287,6 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
               children: [
                 QrImageView(
                   data: qrData,
-                  version: QrVersions.auto,
                   size: 220,
                   backgroundColor: Colors.white,
                   eyeStyle: const QrEyeStyle(

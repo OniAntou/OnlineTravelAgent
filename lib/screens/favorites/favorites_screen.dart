@@ -34,23 +34,23 @@ class FavoritesScreen extends ConsumerWidget {
             children: [
               const SizedBox(height: 24),
               const Text(
-                "Địa điểm yêu thích",
+                'Địa điểm yêu thích',
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 24),
               if (!isLoggedIn)
                 const Expanded(
                   child: RequireLoginPlaceholder(
-                    subtitle: "Lưu lại các địa điểm yêu thích\nđể lên kế hoạch dễ dàng hơn",
+                    subtitle: 'Lưu lại các địa điểm yêu thích\nđể lên kế hoạch dễ dàng hơn',
                   ),
                 )
               else if (favorites.isEmpty)
                 Expanded(
                   child: AppPlaceholderCard(
                     icon: Icons.favorite_border_rounded,
-                    title: "Chưa có địa điểm yêu thích nào",
-                    subtitle: "Hãy tìm kiếm và lưu lại các địa điểm\nbạn muốn ghé thăm trong tương lai.",
-                    actionText: "Khám phá ngay",
+                    title: 'Chưa có địa điểm yêu thích nào',
+                    subtitle: 'Hãy tìm kiếm và lưu lại các địa điểm\nbạn muốn ghé thăm trong tương lai.',
+                    actionText: 'Khám phá ngay',
                     actionIcon: Icons.arrow_forward_rounded,
                     onActionTap: () => Navigator.pushReplacementNamed(context, '/main'),
                   ),

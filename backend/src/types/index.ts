@@ -7,7 +7,7 @@ export interface CreateDestinationBody {
   duration?: string;
   imagePath?: string;
   description?: string;
-  price?: string;
+  price?: number;
   reviewsCount?: string;
   isFavorite?: boolean;
   isRecommended?: boolean;

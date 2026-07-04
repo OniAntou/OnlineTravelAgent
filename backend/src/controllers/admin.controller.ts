@@ -60,7 +60,7 @@ export const adminController = {
         duration: body.duration || "2N/1Đ",
         imagePath: body.imagePath || "",
         description: body.description || "",
-        price: body.price || "0",
+        price: body.price ?? 0,
         reviewsCount: body.reviewsCount || "0",
         isFavorite: body.isFavorite ?? false,
         isRecommended: body.isRecommended ?? false,

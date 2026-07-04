@@ -5,7 +5,16 @@ import 'package:online_travel_agent/providers/destination_provider.dart';
 import 'package:online_travel_agent/providers/api_provider.dart';
 import 'package:online_travel_agent/providers/app_state_provider.dart';
 import 'package:online_travel_agent/services/travel_api_service.dart';
+import 'package:online_travel_agent/services/sync_service.dart';
 import '../helpers/test_helpers.dart';
+
+class FakeSyncService implements SyncService {
+  @override
+  Future<void> syncFavorite(String id, bool isFavorite) async {}
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
 
 ProviderContainer createContainer({FakeTravelApiService? api}) {
   final fakeStorage = FakeSecureStorage();
@@ -18,6 +27,7 @@ ProviderContainer createContainer({FakeTravelApiService? api}) {
     overrides: [
       apiProvider.overrideWithValue(fakeApi),
       bootstrapProvider.overrideWithValue(AsyncData(emptyBootstrap)),
+      syncServiceProvider.overrideWithValue(FakeSyncService()),
     ],
   );
 }
@@ -43,7 +53,6 @@ void main() {
         const Destination(
           id: '1', name: 'Da Lat', location: 'Lam Dong',
           rating: '4.5', duration: '3 ngày', imagePath: '',
-          isFavorite: false,
         ),
       ];
 
@@ -60,7 +69,6 @@ void main() {
         const Destination(
           id: '1', name: 'Da Lat', location: 'Lam Dong',
           rating: '4.5', duration: '3 ngày', imagePath: '',
-          isFavorite: false,
         ),
       ];
 
@@ -90,7 +98,6 @@ void main() {
         const Destination(
           id: '2', name: 'C', location: 'D',
           rating: '4.0', duration: '2 ngày', imagePath: '',
-          isFavorite: false,
         ),
       ];
       final favorites = container.read(favoritesProvider);
@@ -129,7 +136,6 @@ void main() {
         const Destination(
           id: '2', name: 'C', location: 'D',
           rating: '4.0', duration: '2 ngày', imagePath: '',
-          category: 'Địa điểm',
         ),
       ];
       container.read(selectedCategoryProvider.notifier).update('Ẩm thực');
@@ -150,7 +156,6 @@ void main() {
         const Destination(
           id: '2', name: 'C', location: 'D',
           rating: '4.0', duration: '2 ngày', imagePath: '',
-          category: 'Địa điểm',
         ),
       ];
       final food = container.read(foodDestinationsProvider);

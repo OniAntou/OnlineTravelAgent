@@ -362,7 +362,7 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
                   decoration: BoxDecoration(
                     gradient: _isBusinessClass ? const LinearGradient(colors: [Color(0xFF1E293B), Color(0xFF0F172A)], begin: Alignment.topLeft, end: Alignment.bottomRight) : null,
                     color: _isBusinessClass ? null : Colors.white.withValues(alpha: 0.5),
-                    border: Border.all(color: _isBusinessClass ? Colors.transparent : Colors.grey.shade300, width: 1),
+                    border: Border.all(color: _isBusinessClass ? Colors.transparent : Colors.grey.shade300),
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: _isBusinessClass ? [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 4))] : [],
                   ),

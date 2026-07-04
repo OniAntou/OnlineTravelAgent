@@ -28,7 +28,7 @@ class _FoodScreenState extends ConsumerState<FoodScreen> {
   double _parseReviewsCount(String reviewsCount) => parseReviewsCount(reviewsCount);
 
   List<Destination> _getFilteredAndSorted(List<Destination> list, String query) {
-    List<Destination> filtered = list.where((d) {
+    final List<Destination> filtered = list.where((d) {
       final nameMatches = d.name.toLowerCase().contains(query.toLowerCase());
       final locationMatches = d.location.toLowerCase().contains(query.toLowerCase());
       return nameMatches || locationMatches;

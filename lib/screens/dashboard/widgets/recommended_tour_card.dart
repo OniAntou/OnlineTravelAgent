@@ -65,7 +65,6 @@ class RecommendedTourCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: AppTheme.darkGray,
-                        shape: BoxShape.rectangle,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: Colors.white, width: 2),
                       ),

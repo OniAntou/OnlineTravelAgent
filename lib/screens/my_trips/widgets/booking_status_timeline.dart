@@ -71,7 +71,6 @@ class BookingStatusTimeline extends StatelessWidget {
             final step = index ~/ 2;
             final isActive = (step + 1) < active;
             return Expanded(
-              flex: 1,
               child: Container(
                 height: 2,
                 margin: const EdgeInsets.only(bottom: 22),

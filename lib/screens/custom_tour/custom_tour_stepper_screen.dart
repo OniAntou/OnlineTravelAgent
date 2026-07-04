@@ -230,7 +230,7 @@ class _CustomTourStepperScreenState extends ConsumerState<CustomTourStepperScree
                 iconBgColor = Colors.grey.shade100;
                 iconColor = Colors.grey.shade500;
                 textColor = Colors.grey.shade600;
-                border = Border.all(color: Colors.grey.shade300, width: 1);
+                border = Border.all(color: Colors.grey.shade300);
               }
 
               return Expanded(
@@ -531,15 +531,15 @@ class _CustomTourStepperScreenState extends ConsumerState<CustomTourStepperScree
   // --- Step 2: Flight Tickets View ---
   Widget _buildFlightStep() {
     if (_selectedDestinations.isEmpty) {
-      return Column(
+      return const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Chọn chuyến bay thích hợp',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textBlack),
           ),
-          const SizedBox(height: 12),
-          const Text('Vui lòng chọn ít nhất một điểm đến ở bước trước để lựa chọn chuyến bay.'),
+          SizedBox(height: 12),
+          Text('Vui lòng chọn ít nhất một điểm đến ở bước trước để lựa chọn chuyến bay.'),
         ],
       );
     }
@@ -711,15 +711,15 @@ class _CustomTourStepperScreenState extends ConsumerState<CustomTourStepperScree
         final hotels = ref.watch(hotelsProvider);
 
         if (_selectedDestinations.isEmpty) {
-          return Column(
+          return const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Chọn khách sạn lưu trú',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textBlack),
               ),
-              const SizedBox(height: 12),
-              const Text('Vui lòng chọn điểm đến ở bước trước để lựa chọn khách sạn cho từng nơi.'),
+              SizedBox(height: 12),
+              Text('Vui lòng chọn điểm đến ở bước trước để lựa chọn khách sạn cho từng nơi.'),
             ],
           );
         }
@@ -892,7 +892,6 @@ class _CustomTourStepperScreenState extends ConsumerState<CustomTourStepperScree
                   data: Theme.of(context).copyWith(
                     colorScheme: const ColorScheme.light(
                       primary: AppTheme.primaryBlue,
-                      onPrimary: Colors.white,
                       onSurface: AppTheme.textBlack,
                     ),
                   ),
@@ -983,7 +982,7 @@ class _CustomTourStepperScreenState extends ConsumerState<CustomTourStepperScree
                     ),
                     const SizedBox(width: 16),
                     // allow the text to wrap or ellipsize if space is constrained
-                    Expanded(
+                    const Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -991,10 +990,10 @@ class _CustomTourStepperScreenState extends ConsumerState<CustomTourStepperScree
                             'Số lượng khách',
                             style: TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold),
                           ),
-                          const SizedBox(height: 3),
+                          SizedBox(height: 3),
                           Text(
                             'Hành khách bay & lưu trú',
-                            style: const TextStyle(fontSize: 12, color: AppTheme.textBlack, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 12, color: AppTheme.textBlack, fontWeight: FontWeight.bold),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -1194,7 +1193,6 @@ class _CustomTourStepperScreenState extends ConsumerState<CustomTourStepperScree
               children: [
                 if (_currentStep > 0) ...[
                   Expanded(
-                    flex: 1,
                     child: OutlinedButton(
                       onPressed: () => setState(() => _currentStep--),
                       style: OutlinedButton.styleFrom(

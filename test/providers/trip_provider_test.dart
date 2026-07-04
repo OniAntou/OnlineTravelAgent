@@ -47,7 +47,7 @@ void main() {
         ],
       );
       final notifier = container.read(tripsProvider.notifier);
-      final trip = Trip(
+      const trip = Trip(
         id: '1',
         destination: 'Da Lat',
         location: 'Lam Dong',
@@ -70,12 +70,12 @@ void main() {
         ],
       );
       final notifier = container.read(tripsProvider.notifier);
-      final trip1 = Trip(
+      const trip1 = Trip(
         id: '1', destination: 'Da Lat', location: 'Lam Dong',
         date: '2026-07-01', guests: '2 Người', status: 'Ongoing',
         imagePath: 'assets/images/dalat_image.jpg',
       );
-      final trip2 = Trip(
+      const trip2 = Trip(
         id: '2', destination: 'Ha Noi', location: 'Ha Noi',
         date: '2026-08-01', guests: '1 Người', status: 'Upcoming',
         imagePath: 'assets/images/hanoi_image.png',
@@ -96,7 +96,7 @@ void main() {
       );
       final notifier = container.read(tripsProvider.notifier);
       expect(
-        () => notifier.bookTrip(destinationId: null),
+        notifier.bookTrip,
         throwsA(isA<ValidationException>()),
       );
     });
@@ -126,12 +126,12 @@ void main() {
         ],
       );
       final notifier = container.read(tripsProvider.notifier);
-      notifier.addTrip(Trip(
+      notifier.addTrip(const Trip(
         id: '1', destination: 'A', location: 'B',
         date: '2026-07-01', guests: '1', status: 'Ongoing',
         imagePath: '',
       ));
-      notifier.addTrip(Trip(
+      notifier.addTrip(const Trip(
         id: '2', destination: 'C', location: 'D',
         date: '2026-08-01', guests: '1', status: 'Upcoming',
         imagePath: '',
@@ -149,15 +149,15 @@ void main() {
         ],
       );
       final notifier = container.read(tripsProvider.notifier);
-      notifier.addTrip(Trip(
+      notifier.addTrip(const Trip(
         id: '1', destination: 'A', location: 'B',
         date: '2026-01-01', guests: '1', status: 'Completed',
         imagePath: '', isUpcoming: false,
       ));
-      notifier.addTrip(Trip(
+      notifier.addTrip(const Trip(
         id: '2', destination: 'C', location: 'D',
         date: '2026-08-01', guests: '1', status: 'Upcoming',
-        imagePath: '', isUpcoming: true,
+        imagePath: '',
       ));
       final history = container.read(historyTripsProvider);
       expect(history.length, 1);

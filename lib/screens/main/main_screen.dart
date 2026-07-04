@@ -25,10 +25,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   final Set<int> _visitedTabs = {0};
 
   final List<String> _titles = [
-    "Khám phá",
-    "Chuyến đi",
-    "Yêu thích",
-    "Cá nhân"
+    'Khám phá',
+    'Chuyến đi',
+    'Yêu thích',
+    'Cá nhân'
   ];
   final List<IconData> _icons = [
     Icons.home,
@@ -70,12 +70,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             children: [
               const Icon(Icons.wifi_off, size: 64, color: Colors.grey),
               const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 32),
                 child: Text(
                   'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại mạng.',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 16, color: Colors.grey),
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
               ),
               const SizedBox(height: 24),

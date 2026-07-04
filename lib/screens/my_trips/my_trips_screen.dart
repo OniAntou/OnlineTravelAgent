@@ -58,7 +58,7 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20),
                     child: Text(
-                      "Chuyến đi của tôi",
+                      'Chuyến đi của tôi',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -70,7 +70,7 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20),
                     child: RequireLoginPlaceholder(
-                      subtitle: "Bạn cần đăng nhập để xem danh sách các chuyến đi và lịch sử đặt chỗ của mình.",
+                      subtitle: 'Bạn cần đăng nhập để xem danh sách các chuyến đi và lịch sử đặt chỗ của mình.',
                     ),
                   ),
                 ],
@@ -91,7 +91,7 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
                   ),
                   const SliverToBoxAdapter(
                     child: Text(
-                      "Chuyến đi của tôi",
+                      'Chuyến đi của tôi',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -138,9 +138,9 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
                         indicatorSize: TabBarIndicatorSize.tab,
                         dividerColor: Colors.transparent,
                         tabs: const [
-                          Tab(text: "Đang diễn ra"),
-                          Tab(text: "Sắp tới"),
-                          Tab(text: "Lịch sử"),
+                          Tab(text: 'Đang diễn ra'),
+                          Tab(text: 'Sắp tới'),
+                          Tab(text: 'Lịch sử'),
                         ],
                       ),
                     ),
@@ -228,7 +228,6 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
                     color: isSelected 
                         ? AppTheme.primaryBlue
                         : Colors.grey.withValues(alpha: 0.15),
-                    width: 1,
                   ),
                 ),
                 child: Text(
@@ -292,9 +291,9 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
   Widget _buildEmptyState() {
     return AppPlaceholderCard(
       icon: Icons.explore_rounded,
-      title: "Bắt đầu hành trình mới",
-      subtitle: "Bạn chưa có chuyến đi nào được lên lịch. Hãy bắt đầu lên kế hoạch cho hành trình tiếp theo của bạn ngay hôm nay để nhận những ưu đãi hấp dẫn nhất.",
-      actionText: "Khám phá ngay",
+      title: 'Bắt đầu hành trình mới',
+      subtitle: 'Bạn chưa có chuyến đi nào được lên lịch. Hãy bắt đầu lên kế hoạch cho hành trình tiếp theo của bạn ngay hôm nay để nhận những ưu đãi hấp dẫn nhất.',
+      actionText: 'Khám phá ngay',
       actionIcon: Icons.arrow_forward_rounded,
       onActionTap: () {
         Navigator.pushReplacementNamed(context, '/main');

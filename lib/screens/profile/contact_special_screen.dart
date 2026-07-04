@@ -189,7 +189,7 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                       letterSpacing: 2.0,
-                      shadows: [Shadow(color: Colors.black, blurRadius: 4)],
+                      shadows: [Shadow(blurRadius: 4)],
                     ),
                   ),
                   SizedBox(height: 6),
@@ -486,11 +486,11 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
-              const Icon(Icons.assignment_ind_rounded, color: AppTheme.primaryBlue, size: 22),
-              const SizedBox(width: 8),
-              const Text(
+              Icon(Icons.assignment_ind_rounded, color: AppTheme.primaryBlue, size: 22),
+              SizedBox(width: 8),
+              Text(
                 'Thông tin liên hệ',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textBlack),
               ),
@@ -577,7 +577,7 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
+          borderSide: BorderSide(color: Colors.grey.shade200),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -585,7 +585,7 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+          borderSide: const BorderSide(color: Colors.redAccent),
         ),
       ),
     );
@@ -651,12 +651,12 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
               )
             ]
           ),
-          child: Column(
+          child: const Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircularProgressIndicator(color: AppTheme.primaryBlue, strokeWidth: 3),
-              const SizedBox(height: 24),
-              const Text(
+              CircularProgressIndicator(color: AppTheme.primaryBlue, strokeWidth: 3),
+              SizedBox(height: 24),
+              Text(
                 'Đang thiết lập hồ sơ VIP...',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.textBlack),
               ),

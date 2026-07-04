@@ -86,7 +86,7 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => _buildReviewFormSheet(ctx),
+      builder: _buildReviewFormSheet,
     );
   }
 
@@ -102,13 +102,13 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
-              "Đánh giá & Nhận xét",
+              'Đánh giá & Nhận xét',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             TextButton.icon(
               onPressed: _showReviewSheet,
               icon: const Icon(Icons.edit, size: 18),
-              label: const Text("Viết đánh giá"),
+              label: const Text('Viết đánh giá'),
               style: TextButton.styleFrom(
                 foregroundColor: AppTheme.primaryBlue,
                 textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
@@ -130,7 +130,7 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
                 StarRating(rating: displayRating.round(), size: 16),
                 const SizedBox(height: 4),
                 Text(
-                  "$displayCount nhận xét",
+                  '$displayCount nhận xét',
                   style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ],
@@ -156,7 +156,7 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
                 Icon(Icons.rate_review_outlined, size: 40, color: Colors.grey.shade400),
                 const SizedBox(height: 8),
                 Text(
-                  "Chưa có đánh giá nào",
+                  'Chưa có đánh giá nào',
                   style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                 ),
               ],
@@ -164,7 +164,7 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
           )
         else
           Column(
-            children: _reviews.map((review) => _buildReviewCard(review)).toList(),
+            children: _reviews.map(_buildReviewCard).toList(),
           ),
       ],
     );
@@ -252,7 +252,7 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
-                      "Viết đánh giá",
+                      'Viết đánh giá',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     IconButton(
@@ -262,7 +262,7 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                const Text("Đánh giá của bạn", style: TextStyle(fontSize: 13, color: Colors.grey)),
+                const Text('Đánh giá của bạn', style: TextStyle(fontSize: 13, color: Colors.grey)),
                 const SizedBox(height: 8),
                 StarRating(
                   rating: _selectedRating,
@@ -273,13 +273,13 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
                   },
                 ),
                 const SizedBox(height: 20),
-                const Text("Nhận xét", style: TextStyle(fontSize: 13, color: Colors.grey)),
+                const Text('Nhận xét', style: TextStyle(fontSize: 13, color: Colors.grey)),
                 const SizedBox(height: 8),
                 TextField(
                   controller: _commentController,
                   maxLines: 4,
                   decoration: InputDecoration(
-                    hintText: "Chia sẻ trải nghiệm của bạn...",
+                    hintText: 'Chia sẻ trải nghiệm của bạn...',
                     hintStyle: TextStyle(color: Colors.grey.shade400),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -339,7 +339,7 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
                             height: 20, width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                           )
-                        : const Text("Gửi đánh giá", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        : const Text('Gửi đánh giá', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],

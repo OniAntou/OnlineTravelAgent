@@ -107,12 +107,12 @@ class FlightPageRoute extends PageRouteBuilder {
                 const planeRadius = planeSize / 2;
                 
                 final travelAngle = math.atan2(-height, width); 
-                final visualRadius = planeRadius * 0.7;
+                const visualRadius = planeRadius * 0.7;
 
                 final startX = -visualRadius * math.cos(travelAngle);
                 final startY = height - visualRadius * math.sin(travelAngle);
                 
-                final safeClearance = planeRadius * 1.5; 
+                const safeClearance = planeRadius * 1.5; 
                 final distanceToEnd = safeClearance / math.max(math.cos(travelAngle), -math.sin(travelAngle));
 
                 final endX = width + distanceToEnd * math.cos(travelAngle);

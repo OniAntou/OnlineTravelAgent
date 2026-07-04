@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/destination.dart';
+import '../services/sync_service.dart';
 import '../utils/api_exception.dart';
 import 'api_provider.dart';
 import 'app_state_provider.dart';
@@ -25,6 +26,9 @@ class DestinationsNotifier extends Notifier<List<Destination>> {
         if (i == index) current.copyWith(isFavorite: newValue) else state[i]
     ];
     
+    // Sync to SQLite
+    ref.read(syncServiceProvider).syncFavorite(id, newValue);
+    
     try {
       await ref.read(apiProvider).setFavorite(id, newValue);
       ref.read(recommendedProvider.notifier).syncFavorite(id, newValue);
@@ -33,6 +37,7 @@ class DestinationsNotifier extends Notifier<List<Destination>> {
         for (int i = 0; i < state.length; i++)
           if (i == index) current else state[i]
       ];
+      ref.read(syncServiceProvider).syncFavorite(id, current.isFavorite);
       ref.read(recommendedProvider.notifier).syncFavorite(id, current.isFavorite);
       ref.read(destinationErrorProvider.notifier).setError(e.message);
       rethrow;
@@ -41,6 +46,7 @@ class DestinationsNotifier extends Notifier<List<Destination>> {
         for (int i = 0; i < state.length; i++)
           if (i == index) current else state[i]
       ];
+      ref.read(syncServiceProvider).syncFavorite(id, current.isFavorite);
       ref.read(recommendedProvider.notifier).syncFavorite(id, current.isFavorite);
       ref.read(destinationErrorProvider.notifier).setError(getErrorMessage(e));
       rethrow;

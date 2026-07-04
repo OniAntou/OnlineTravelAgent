@@ -9,7 +9,7 @@ export const adminDestinationSchema = z.object({
   duration: z.string().optional(),
   imagePath: z.string().optional(),
   description: z.string().optional(),
-  price: z.string().optional(),
+  price: z.number().optional(),
   reviewsCount: z.string().optional(),
   isFavorite: z.boolean().optional(),
   isRecommended: z.boolean().optional(),

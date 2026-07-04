@@ -40,3 +40,7 @@
 .agent/
 docs/
 brain/
+
+# Release keystore
+*.jks
+*.keystore

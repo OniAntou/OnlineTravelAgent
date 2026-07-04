@@ -140,8 +140,8 @@ class RequireLoginPlaceholder extends StatelessWidget {
 
   const RequireLoginPlaceholder({
     super.key,
-    this.title = "Đăng nhập để tiếp tục",
-    this.subtitle = "Vui lòng đăng nhập để sử dụng tính năng này.",
+    this.title = 'Đăng nhập để tiếp tục',
+    this.subtitle = 'Vui lòng đăng nhập để sử dụng tính năng này.',
   });
 
   @override
@@ -150,7 +150,7 @@ class RequireLoginPlaceholder extends StatelessWidget {
       icon: Icons.lock_person_rounded,
       title: title,
       subtitle: subtitle,
-      actionText: "Đăng nhập ngay",
+      actionText: 'Đăng nhập ngay',
       actionIcon: Icons.login_rounded,
       onActionTap: () => Navigator.pushNamed(context, '/login'),
     );

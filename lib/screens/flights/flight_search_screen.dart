@@ -44,12 +44,12 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
       backgroundColor: AppTheme.backgroundGray,
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
+          const SliverAppBar(
             pinned: true,
             centerTitle: true,
             backgroundColor: AppTheme.backgroundGray,
-            iconTheme: const IconThemeData(color: Colors.black87),
-            title: const Text(
+            iconTheme: IconThemeData(color: Colors.black87),
+            title: Text(
               'Tìm chuyến bay',
               style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w700, fontSize: 18),
             ),
@@ -101,9 +101,9 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
               ),
               data: (flights) {
                 final displayed = flights.where((f) {
-                  bool matchDep = f.departure == _departure;
-                  bool matchArr = f.arrival == _arrival;
-                  bool matchAirline = _selectedAirline == null || _selectedAirline == 'Tất cả' || f.airline == _selectedAirline;
+                  final bool matchDep = f.departure == _departure;
+                  final bool matchArr = f.arrival == _arrival;
+                  final bool matchAirline = _selectedAirline == null || _selectedAirline == 'Tất cả' || f.airline == _selectedAirline;
                   return matchDep && matchArr && matchAirline;
                 }).toList();
 
@@ -369,7 +369,7 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
                 children: [
                   Row(
                     children: [
-                      Container(width: 8, height: 16, decoration: BoxDecoration(color: AppTheme.backgroundGray, borderRadius: const BorderRadius.only(topRight: Radius.circular(8), bottomRight: Radius.circular(8)))),
+                      Container(width: 8, height: 16, decoration: const BoxDecoration(color: AppTheme.backgroundGray, borderRadius: BorderRadius.only(topRight: Radius.circular(8), bottomRight: Radius.circular(8)))),
                       Expanded(
                         child: LayoutBuilder(
                           builder: (context, constraints) {
@@ -384,7 +384,7 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
                           },
                         ),
                       ),
-                      Container(width: 8, height: 16, decoration: BoxDecoration(color: AppTheme.backgroundGray, borderRadius: const BorderRadius.only(topLeft: Radius.circular(8), bottomLeft: Radius.circular(8)))),
+                      Container(width: 8, height: 16, decoration: const BoxDecoration(color: AppTheme.backgroundGray, borderRadius: BorderRadius.only(topLeft: Radius.circular(8), bottomLeft: Radius.circular(8)))),
                     ],
                   ),
                 ],

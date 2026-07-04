@@ -81,7 +81,18 @@ class TravelApiService {
 
   static String _defaultBaseUrl() {
     const fromDefine = String.fromEnvironment('API_BASE_URL');
-    if (fromDefine.isNotEmpty) return fromDefine;
+    if (fromDefine.isNotEmpty) {
+      assert(
+        !kReleaseMode || fromDefine.startsWith('https://'),
+        'Production API URL must use HTTPS',
+      );
+      return fromDefine;
+    }
+    if (kReleaseMode) {
+      throw StateError(
+        'API_BASE_URL must be set in release mode via --dart-define=API_BASE_URL=https://...',
+      );
+    }
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       return 'http://10.0.2.2:3000';
     }

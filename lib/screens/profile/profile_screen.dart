@@ -63,14 +63,14 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 20),
                       const Text(
-                        "Chỉnh sửa hồ sơ",
+                        'Chỉnh sửa hồ sơ',
                         style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 24),
                       TextFormField(
                         controller: nameController,
                         decoration: InputDecoration(
-                          labelText: "Họ tên",
+                          labelText: 'Họ tên',
                           prefixIcon: const Icon(Icons.person_outline, size: 20),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
@@ -84,14 +84,14 @@ class ProfileScreen extends ConsumerWidget {
                             borderSide: const BorderSide(color: AppTheme.primaryBlue, width: 1.5),
                           ),
                         ),
-                        validator: (value) => value == null || value.trim().isEmpty ? "Vui lòng nhập họ tên" : null,
+                        validator: (value) => value == null || value.trim().isEmpty ? 'Vui lòng nhập họ tên' : null,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: emailController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
-                          labelText: "Email",
+                          labelText: 'Email',
                           prefixIcon: const Icon(Icons.email_outlined, size: 20),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
@@ -106,8 +106,8 @@ class ProfileScreen extends ConsumerWidget {
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.trim().isEmpty) return "Vui lòng nhập email";
-                          if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$').hasMatch(value.trim())) return "Email không hợp lệ";
+                          if (value == null || value.trim().isEmpty) return 'Vui lòng nhập email';
+                          if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$').hasMatch(value.trim())) return 'Email không hợp lệ';
                           return null;
                         },
                       ),
@@ -136,7 +136,7 @@ class ProfileScreen extends ConsumerWidget {
                                   Navigator.pop(sheetContext);
                                   ScaffoldMessenger.of(sheetContext).showSnackBar(
                                     const SnackBar(
-                                      content: Text("Cập nhật hồ sơ thành công"),
+                                      content: Text('Cập nhật hồ sơ thành công'),
                                       backgroundColor: Colors.green,
                                     ),
                                   );
@@ -147,7 +147,7 @@ class ProfileScreen extends ConsumerWidget {
                                   height: 22,
                                   child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                                 )
-                              : const Text("Lưu thay đổi", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              : const Text('Lưu thay đổi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ],
@@ -211,7 +211,7 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 20),
                       const Text(
-                        "Thêm giấy tờ",
+                        'Thêm giấy tờ',
                         style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 24),
@@ -242,7 +242,7 @@ class ProfileScreen extends ConsumerWidget {
                       TextFormField(
                         controller: descriptionController,
                         decoration: InputDecoration(
-                          labelText: "Mô tả",
+                          labelText: 'Mô tả',
                           prefixIcon: const Icon(Icons.info_outline, size: 20),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(14),
@@ -256,7 +256,7 @@ class ProfileScreen extends ConsumerWidget {
                             borderSide: const BorderSide(color: AppTheme.primaryBlue, width: 1.5),
                           ),
                         ),
-                        validator: (value) => value == null || value.trim().isEmpty ? "Vui lòng nhập mô tả" : null,
+                        validator: (value) => value == null || value.trim().isEmpty ? 'Vui lòng nhập mô tả' : null,
                       ),
                       const SizedBox(height: 28),
                       SizedBox(
@@ -286,7 +286,7 @@ class ProfileScreen extends ConsumerWidget {
                                   Navigator.pop(sheetContext);
                                   ScaffoldMessenger.of(sheetContext).showSnackBar(
                                     SnackBar(
-                                      content: Text(ok ? "Đã thêm giấy tờ" : "Thêm giấy tờ thất bại"),
+                                      content: Text(ok ? 'Đã thêm giấy tờ' : 'Thêm giấy tờ thất bại'),
                                       backgroundColor: ok ? Colors.green : Colors.red,
                                     ),
                                   );
@@ -297,7 +297,7 @@ class ProfileScreen extends ConsumerWidget {
                                   height: 22,
                                   child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                                 )
-                              : const Text("Thêm mới", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              : const Text('Thêm mới', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                         ),
                       ),
                     ],
@@ -349,7 +349,7 @@ class ProfileScreen extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
-                          "Hồ sơ của tôi",
+                          'Hồ sơ của tôi',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -417,8 +417,8 @@ class ProfileScreen extends ConsumerWidget {
                             children: [
                               Text(
                                 !isLoggedIn
-                                    ? "Chưa đăng nhập"
-                                    : (profile.name.isNotEmpty ? profile.name : "Người dùng"),
+                                    ? 'Chưa đăng nhập'
+                                    : (profile.name.isNotEmpty ? profile.name : 'Người dùng'),
                                 style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -428,8 +428,8 @@ class ProfileScreen extends ConsumerWidget {
                               const SizedBox(height: 4),
                               Text(
                                 !isLoggedIn
-                                    ? "Đăng nhập để trải nghiệm đầy đủ"
-                                    : (profile.email.isNotEmpty ? profile.email : "Chưa cập nhật email"),
+                                    ? 'Đăng nhập để trải nghiệm đầy đủ'
+                                    : (profile.email.isNotEmpty ? profile.email : 'Chưa cập nhật email'),
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: Colors.white.withValues(alpha: 0.85),
@@ -475,8 +475,8 @@ class ProfileScreen extends ConsumerWidget {
                           _buildQuickAction(
                             context,
                             icon: Icons.store_rounded,
-                            label: "Đối tác",
-                            value: "Quản lý",
+                            label: 'Đối tác',
+                            value: 'Quản lý',
                             onTap: () {
                               Navigator.pushNamed(context, '/partner-dashboard');
                             },
@@ -485,8 +485,8 @@ class ProfileScreen extends ConsumerWidget {
                           _buildQuickAction(
                             context,
                             icon: Icons.card_travel_rounded,
-                            label: "Chuyến đi",
-                            value: "${documents.length}",
+                            label: 'Chuyến đi',
+                            value: '${documents.length}',
                             onTap: () {},
                           ),
                         ],
@@ -536,7 +536,7 @@ class ProfileScreen extends ConsumerWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
-                                    "Yêu Cầu Đặc Biệt?",
+                                    'Yêu Cầu Đặc Biệt?',
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 15,
@@ -545,7 +545,7 @@ class ProfileScreen extends ConsumerWidget {
                                   ),
                                   const SizedBox(height: 3),
                                   Text(
-                                    "Đặt đoàn lớn hoặc sự kiện VIP",
+                                    'Đặt đoàn lớn hoặc sự kiện VIP',
                                     style: TextStyle(
                                       color: Colors.white.withValues(alpha: 0.85),
                                       fontSize: 12,
@@ -569,7 +569,7 @@ class ProfileScreen extends ConsumerWidget {
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
                               child: const Text(
-                                "Liên hệ",
+                                'Liên hệ',
                                 style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                               ),
                             ),
@@ -580,11 +580,11 @@ class ProfileScreen extends ConsumerWidget {
                     ],
 
                     // Documents Section Header
-                    Row(
+                    const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          "Giấy tờ của tôi",
+                        Text(
+                          'Giấy tờ của tôi',
                           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                         ),
                       ],
@@ -631,7 +631,7 @@ class ProfileScreen extends ConsumerWidget {
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(color: Colors.grey.withValues(alpha: 0.2), style: BorderStyle.solid),
+                                    border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
                                     boxShadow: [
                                       BoxShadow(
                                         color: Colors.black.withValues(alpha: 0.02),
@@ -665,7 +665,7 @@ class ProfileScreen extends ConsumerWidget {
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
-                                              "Chưa cập nhật",
+                                              'Chưa cập nhật',
                                               style: TextStyle(
                                                 fontSize: 13,
                                                 color: Colors.grey.withValues(alpha: 0.8),
@@ -684,7 +684,7 @@ class ProfileScreen extends ConsumerWidget {
                                         ),
                                         icon: const Icon(Icons.add_circle_outline, size: 16, color: AppTheme.primaryBlue),
                                         label: const Text(
-                                          "Thêm",
+                                          'Thêm',
                                           style: TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.bold),
                                         ),
                                         style: TextButton.styleFrom(
@@ -777,8 +777,7 @@ class ProfileScreen extends ConsumerWidget {
 
   Widget _buildLoginPrompt(BuildContext context) {
     return const RequireLoginPlaceholder(
-      title: "Đăng nhập để tiếp tục",
-      subtitle: "Quản lý giấy tờ cá nhân và\nđặt vé nhanh chóng hơn",
+      subtitle: 'Quản lý giấy tờ cá nhân và\nđặt vé nhanh chóng hơn',
     );
   }
 }

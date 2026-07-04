@@ -50,7 +50,6 @@ class _HotelDetailScreenState extends ConsumerState<HotelDetailScreen> {
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
               primary: AppTheme.primaryBlue,
-              onPrimary: Colors.white,
               onSurface: AppTheme.textBlack,
             ),
           ),
@@ -80,7 +79,6 @@ class _HotelDetailScreenState extends ConsumerState<HotelDetailScreen> {
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
               primary: AppTheme.primaryBlue,
-              onPrimary: Colors.white,
               onSurface: AppTheme.textBlack,
             ),
           ),
@@ -217,7 +215,6 @@ class _HotelDetailScreenState extends ConsumerState<HotelDetailScreen> {
                     targetType: 'hotel',
                     targetId: h.id,
                     fallbackRating: double.tryParse(h.rating) ?? 0.0,
-                    fallbackCount: 0,
                     onReviewSubmitted: () {
                       ref.invalidate(bootstrapProvider);
                     },
@@ -256,7 +253,7 @@ class _HotelDetailScreenState extends ConsumerState<HotelDetailScreen> {
                   if (h.rooms.isEmpty)
                     const Text('Hiện không có phòng nào trống.')
                   else
-                    ...h.rooms.map((room) => _buildRoomCard(room)),
+                    ...h.rooms.map(_buildRoomCard),
                   const SizedBox(height: 80),
                 ],
               ),

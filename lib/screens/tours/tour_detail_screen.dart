@@ -393,9 +393,8 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                                       builder: (context, child) {
                                         return Theme(
                                           data: Theme.of(context).copyWith(
-                                            colorScheme: ColorScheme.light(
+                                            colorScheme: const ColorScheme.light(
                                               primary: AppTheme.primaryBlue,
-                                              onPrimary: Colors.white,
                                               onSurface: AppTheme.textBlack,
                                             ),
                                           ),
@@ -463,7 +462,7 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                                         },
                                         child: Container(
                                           padding: const EdgeInsets.all(6),
-                                          decoration: BoxDecoration(
+                                          decoration: const BoxDecoration(
                                             color: AppTheme.backgroundGray,
                                             shape: BoxShape.circle,
                                           ),
@@ -489,7 +488,7 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                                         },
                                         child: Container(
                                           padding: const EdgeInsets.all(6),
-                                          decoration: BoxDecoration(
+                                          decoration: const BoxDecoration(
                                             color: AppTheme.backgroundGray,
                                             shape: BoxShape.circle,
                                           ),
@@ -794,7 +793,6 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                             targetType: 'tour',
                             targetId: t.id,
                             fallbackRating: 0.0,
-                            fallbackCount: 0,
                             onReviewSubmitted: () {
                               ref.invalidate(bootstrapProvider);
                             },

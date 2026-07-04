@@ -429,7 +429,6 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
   void _showSuccessDialog(String tripId) {
     showGeneralDialog(
       context: context,
-      barrierDismissible: false,
       barrierLabel: '',
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, anim1, anim2) => Container(),
@@ -550,7 +549,7 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
                   child: ListView(
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                     children: [
-                      ..._methods.map((method) => _buildMethodItem(method)),
+                      ..._methods.map(_buildMethodItem),
                       const SizedBox(height: 40),
                     ],
                   ),

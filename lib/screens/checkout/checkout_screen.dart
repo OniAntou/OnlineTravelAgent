@@ -85,8 +85,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   int get _totalGuests => _adults + _children;
 
   double get _subtotal {
-    double adultPrice = _basePrice.toDouble() * _adults;
-    double childPrice = _basePrice.toDouble() * 0.5 * _children;
+    final double adultPrice = _basePrice.toDouble() * _adults;
+    final double childPrice = _basePrice.toDouble() * 0.5 * _children;
     double sub = adultPrice + childPrice;
     if (_isVip) sub += 50 * _totalGuests;
     sub += _transportPrices[_selectedTransport]! * _totalGuests;
@@ -152,7 +152,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
     final dateString = '${_dateFormat.format(_selectedDate!)} - ${_dateFormat.format(endDate)}';
     
-    List<String> guestParts = [];
+    final List<String> guestParts = [];
     if (_adults > 0) guestParts.add('$_adults Người lớn');
     if (_children > 0) guestParts.add('$_children Trẻ em');
     final guestString = '${guestParts.join(', ')} ($_selectedTransport)';
