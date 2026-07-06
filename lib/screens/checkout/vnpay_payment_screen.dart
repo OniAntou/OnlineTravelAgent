@@ -87,7 +87,13 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
       Navigator.of(context).pop(true);
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_status == 'failed' ? 'Thanh toán thất bại' : 'Chưa ghi nhận thanh toán. Vui lòng kiểm tra lại.')),
+        SnackBar(
+          content: Text(
+            _status == 'failed'
+                ? 'Thanh toán thất bại'
+                : 'Chưa ghi nhận thanh toán. Vui lòng kiểm tra lại.',
+          ),
+        ),
       );
     }
   }
@@ -104,12 +110,20 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 18),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.black,
+            size: 18,
+          ),
           onPressed: () => Navigator.pop(context, false),
         ),
         title: const Text(
           'Thanh toán VNPAY',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
         centerTitle: true,
       ),
@@ -118,7 +132,10 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
           children: [
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 children: [
                   if (isPaid)
                     _buildSuccessBanner()
@@ -154,8 +171,7 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
               ),
             ),
 
-            if (!isPaid && !isFailed)
-              _buildBottomCheckBar(),
+            if (!isPaid && !isFailed) _buildBottomCheckBar(),
           ],
         ),
       ),
@@ -177,7 +193,11 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
           Expanded(
             child: Text(
               'Đang chờ thanh toán. Vui lòng quét mã QR hoặc mở cổng VNPAY để thanh toán.',
-              style: TextStyle(color: Color(0xFF795548), fontSize: 13, height: 1.3),
+              style: TextStyle(
+                color: Color(0xFF795548),
+                fontSize: 13,
+                height: 1.3,
+              ),
             ),
           ),
         ],
@@ -200,7 +220,12 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
           Expanded(
             child: Text(
               'Thanh toán thành công! Chuyến đi của bạn đã được xác nhận.',
-              style: TextStyle(color: Color(0xFF2E7D32), fontSize: 13, height: 1.3, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                color: Color(0xFF2E7D32),
+                fontSize: 13,
+                height: 1.3,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -223,7 +248,12 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
           Expanded(
             child: Text(
               'Thanh toán thất bại. Vui lòng thử lại hoặc chọn phương thức khác.',
-              style: TextStyle(color: Color(0xFFC53030), fontSize: 13, height: 1.3, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                color: Color(0xFFC53030),
+                fontSize: 13,
+                height: 1.3,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -241,11 +271,18 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
       ),
       child: Column(
         children: [
-          const Text('Số tiền thanh toán', style: TextStyle(color: Colors.grey, fontSize: 14)),
+          const Text(
+            'Số tiền thanh toán',
+            style: TextStyle(color: Colors.grey, fontSize: 14),
+          ),
           const SizedBox(height: 8),
           Text(
             formatVND(widget.amount),
-            style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: AppTheme.primaryBlue),
+            style: const TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryBlue,
+            ),
           ),
           const SizedBox(height: 12),
           Container(
@@ -256,7 +293,11 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
             ),
             child: Text(
               'Mã GD: ${widget.txnRef}',
-              style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 12, fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                color: AppTheme.primaryBlue,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -322,11 +363,23 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Hướng dẫn:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Text(
+            'Hướng dẫn:',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
           SizedBox(height: 8),
-          _InstructionStep(step: '1', text: 'Quét mã QR bằng app ngân hàng hỗ trợ VNPAY'),
-          _InstructionStep(step: '2', text: 'Hoặc nhấn "Mở cổng VNPAY" để thanh toán online'),
-          _InstructionStep(step: '3', text: 'Sau khi thanh toán, nhấn "Đã thanh toán" để kiểm tra'),
+          _InstructionStep(
+            step: '1',
+            text: 'Quét mã QR bằng app ngân hàng hỗ trợ VNPAY',
+          ),
+          _InstructionStep(
+            step: '2',
+            text: 'Hoặc nhấn "Mở cổng VNPAY" để thanh toán online',
+          ),
+          _InstructionStep(
+            step: '3',
+            text: 'Sau khi thanh toán, nhấn "Đã thanh toán" để kiểm tra',
+          ),
         ],
       ),
     );
@@ -341,11 +394,16 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF176FF2),
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           elevation: 0,
         ),
         icon: const Icon(Icons.open_in_new),
-        label: const Text('Mở cổng VNPAY', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        label: const Text(
+          'Mở cổng VNPAY',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -359,10 +417,15 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppTheme.primaryBlue,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           elevation: 0,
         ),
-        child: const Text('Quay lại ứng dụng', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        child: const Text(
+          'Quay lại ứng dụng',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -379,10 +442,15 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppTheme.primaryBlue,
           side: const BorderSide(color: AppTheme.primaryBlue),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
         icon: const Icon(Icons.refresh),
-        label: const Text('Thử lại', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        label: const Text(
+          'Thử lại',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -408,14 +476,19 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.primaryBlue,
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             elevation: 0,
           ),
           child: _isChecking
               ? const SizedBox(
                   width: 24,
                   height: 24,
-                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2.5,
+                  ),
                 )
               : const Text(
                   'Đã thanh toán xong',
@@ -447,11 +520,25 @@ class _InstructionStep extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: Text(step, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+            child: Text(
+              step,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(text, style: const TextStyle(color: Color(0xFF475569), fontSize: 13, height: 1.3)),
+            child: Text(
+              text,
+              style: const TextStyle(
+                color: Color(0xFF475569),
+                fontSize: 13,
+                height: 1.3,
+              ),
+            ),
           ),
         ],
       ),

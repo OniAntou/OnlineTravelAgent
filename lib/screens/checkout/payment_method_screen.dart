@@ -38,7 +38,8 @@ class PaymentMethodScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<PaymentMethodScreen> createState() => _PaymentMethodScreenState();
+  ConsumerState<PaymentMethodScreen> createState() =>
+      _PaymentMethodScreenState();
 }
 
 class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
@@ -161,11 +162,7 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
         borderRadius: BorderRadius.circular(4),
       ),
       alignment: Alignment.center,
-      child: const Icon(
-        Icons.account_balance,
-        color: Colors.white,
-        size: 16,
-      ),
+      child: const Icon(Icons.account_balance, color: Colors.white, size: 16),
     );
   }
 
@@ -238,10 +235,20 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
       alignment: Alignment.center,
       child: RichText(
         text: const TextSpan(
-          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic),
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            fontStyle: FontStyle.italic,
+          ),
           children: [
-            TextSpan(text: 'Pay', style: TextStyle(color: Color(0xFF003087))),
-            TextSpan(text: 'Pal', style: TextStyle(color: Color(0xFF0079C1))),
+            TextSpan(
+              text: 'Pay',
+              style: TextStyle(color: Color(0xFF003087)),
+            ),
+            TextSpan(
+              text: 'Pal',
+              style: TextStyle(color: Color(0xFF0079C1)),
+            ),
           ],
         ),
       ),
@@ -262,7 +269,14 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
         children: [
           Icon(Icons.apple, color: Colors.white, size: 14),
           SizedBox(width: 1),
-          Text('Pay', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10)),
+          Text(
+            'Pay',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 10,
+            ),
+          ),
         ],
       ),
     );
@@ -278,11 +292,13 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
         border: Border.all(color: const Color(0xFFC8E6C9)),
       ),
       alignment: Alignment.center,
-      child: const Icon(Icons.payments_rounded, color: Color(0xFF4CAF50), size: 16),
+      child: const Icon(
+        Icons.payments_rounded,
+        color: Color(0xFF4CAF50),
+        size: 16,
+      ),
     );
   }
-
-
 
   // --- ACTIONS ---
 
@@ -290,7 +306,9 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
     setState(() => _isProcessing = true);
 
     try {
-      final selectedMethod = _methods.firstWhere((m) => m.id == _selectedMethodId);
+      final selectedMethod = _methods.firstWhere(
+        (m) => m.id == _selectedMethodId,
+      );
 
       if (selectedMethod.type == 'vnpay' || selectedMethod.type == 'momo') {
         await _handleDigitalPayment(selectedMethod.type);
@@ -303,43 +321,45 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
         _showSuccessDialog(tripId);
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Thanh toán thất bại, vui lòng thử lại')),
+          const SnackBar(
+            content: Text('Thanh toán thất bại, vui lòng thử lại'),
+          ),
         );
       }
     } on AuthException catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
       }
     } on ApiException catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
       }
     } on NetworkException catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
       }
     } on TimeoutApiException catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(getErrorMessage(e))),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(getErrorMessage(e))));
       }
     }
   }
@@ -405,7 +425,11 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
           await launchUrl(uri, mode: LaunchMode.externalApplication);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Vui lòng thanh toán qua MoMo, sau đó quay lại kiểm tra')),
+              const SnackBar(
+                content: Text(
+                  'Vui lòng thanh toán qua MoMo, sau đó quay lại kiểm tra',
+                ),
+              ),
             );
           }
         } else {
@@ -419,9 +443,9 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
       }
     }
   }
@@ -433,19 +457,23 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, anim1, anim2) => Container(),
       transitionBuilder: (context, anim1, anim2, child) {
-        final scale = Tween<double>(begin: 0.8, end: 1.0).animate(
-          CurvedAnimation(parent: anim1, curve: Curves.easeOutBack),
-        );
-        final opacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-          CurvedAnimation(parent: anim1, curve: Curves.easeIn),
-        );
+        final scale = Tween<double>(
+          begin: 0.8,
+          end: 1.0,
+        ).animate(CurvedAnimation(parent: anim1, curve: Curves.easeOutBack));
+        final opacity = Tween<double>(
+          begin: 0.0,
+          end: 1.0,
+        ).animate(CurvedAnimation(parent: anim1, curve: Curves.easeIn));
 
         return ScaleTransition(
           scale: scale,
           child: FadeTransition(
             opacity: opacity,
             child: AlertDialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
               contentPadding: const EdgeInsets.all(28),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -456,15 +484,26 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
                     decoration: BoxDecoration(
                       color: const Color(0xFFE8F8EE),
                       shape: BoxShape.circle,
-                      border: Border.all(color: const Color(0xFFC2EED7), width: 2),
+                      border: Border.all(
+                        color: const Color(0xFFC2EED7),
+                        width: 2,
+                      ),
                     ),
                     alignment: Alignment.center,
-                    child: const Icon(Icons.check_circle_rounded, color: Color(0xFF07D95A), size: 64),
+                    child: const Icon(
+                      Icons.check_circle_rounded,
+                      color: Color(0xFF07D95A),
+                      size: 64,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   const Text(
                     'Đặt tour thành công!',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppTheme.textBlack),
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textBlack,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 12),
@@ -472,7 +511,11 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
                     _selectedMethodId == 'cash'
                         ? 'Yêu cầu đặt tour của bạn đã được ghi nhận. Quý khách vui lòng chuẩn bị thanh toán bằng tiền mặt khi khởi hành chuyến đi.'
                         : 'Yêu cầu dịch vụ của bạn đã được xác nhận thành công. Bạn có thể kiểm tra chi tiết trong mục Chuyến đi.',
-                    style: const TextStyle(color: Colors.grey, fontSize: 14, height: 1.4),
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                      height: 1.4,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
@@ -484,12 +527,22 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
                             foregroundColor: AppTheme.primaryBlue,
                             side: const BorderSide(color: AppTheme.primaryBlue),
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
                           onPressed: () {
-                            Navigator.of(context).popUntil((route) => route.isFirst);
+                            Navigator.of(
+                              context,
+                            ).popUntil((route) => route.isFirst);
                           },
-                          child: const Text('Về Trang Chủ', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                          child: const Text(
+                            'Về Trang Chủ',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -499,14 +552,24 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
                             backgroundColor: AppTheme.primaryBlue,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                             elevation: 0,
                           ),
                           onPressed: () {
-                            Navigator.of(context).popUntil((route) => route.isFirst);
+                            Navigator.of(
+                              context,
+                            ).popUntil((route) => route.isFirst);
                             Navigator.pushNamed(context, '/main');
                           },
-                          child: const Text('Xem Chuyến Đi', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                          child: const Text(
+                            'Xem Chuyến Đi',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -531,12 +594,20 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 18),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.black,
+            size: 18,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Phương thức thanh toán',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
         centerTitle: true,
       ),
@@ -547,7 +618,10 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
               children: [
                 Expanded(
                   child: ListView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
                     children: [
                       ..._methods.map(_buildMethodItem),
                       const SizedBox(height: 40),
@@ -582,7 +656,11 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
                     SizedBox(height: 16),
                     Text(
                       'Đang xử lý thanh toán...',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.textBlack),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: AppTheme.textBlack,
+                      ),
                     ),
                   ],
                 ),
@@ -598,8 +676,8 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
     final selectedColor = method.type == 'vnpay'
         ? const Color(0xFFDA251D)
         : method.type == 'momo'
-            ? const Color(0xFFA50064)
-            : AppTheme.primaryBlue;
+        ? const Color(0xFFA50064)
+        : AppTheme.primaryBlue;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -620,7 +698,13 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
                 width: isSelected ? 1.5 : 1.0,
               ),
               boxShadow: isSelected
-                  ? [BoxShadow(color: selectedColor.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 4))]
+                  ? [
+                      BoxShadow(
+                        color: selectedColor.withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ]
                   : null,
             ),
             child: Row(
@@ -633,13 +717,20 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
                     children: [
                       Text(
                         method.name,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppTheme.textBlack),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textBlack,
+                        ),
                       ),
                       if (method.description != null) ...[
                         const SizedBox(height: 2),
                         Text(
                           method.description!,
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade500,
+                          ),
                         ),
                       ],
                     ],
@@ -654,7 +745,11 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
                       shape: BoxShape.circle,
                     ),
                     alignment: Alignment.center,
-                    child: const Icon(Icons.check, color: Colors.white, size: 14),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 14,
+                    ),
                   )
                 else
                   const SizedBox(width: 20),
@@ -685,10 +780,21 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Tổng thanh toán', style: TextStyle(color: Color(0xFF64748B), fontSize: 15, fontWeight: FontWeight.w500)),
+              const Text(
+                'Tổng thanh toán',
+                style: TextStyle(
+                  color: Color(0xFF64748B),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
               Text(
                 formatVND(widget.totalPrice),
-                style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  color: AppTheme.primaryBlue,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -700,11 +806,16 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryBlue,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 elevation: 0,
               ),
               onPressed: _handlePay,
-              child: const Text('Xác nhận & Thanh toán', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              child: const Text(
+                'Xác nhận & Thanh toán',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
             ),
           ),
         ],
