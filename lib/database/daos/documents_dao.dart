@@ -23,6 +23,6 @@ class DocumentsDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<void> deleteById(String id) async {
-    (delete(documentsTable)..where((t) => t.id.equals(id))).go();
+    await (delete(documentsTable)..where((t) => t.id.equals(id))).go();
   }
 }

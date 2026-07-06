@@ -12,7 +12,9 @@ class ProfileNotifier extends Notifier<UserProfile> {
   }
 }
 
-final profileProvider = NotifierProvider<ProfileNotifier, UserProfile>(ProfileNotifier.new);
+final profileProvider = NotifierProvider<ProfileNotifier, UserProfile>(
+  ProfileNotifier.new,
+);
 
 class DocumentsNotifier extends Notifier<List<DocumentItem>> {
   @override
@@ -25,9 +27,14 @@ class DocumentsNotifier extends Notifier<List<DocumentItem>> {
     String color = '#176FF2',
   }) async {
     try {
-      final doc = await ref.read(apiProvider).addDocument(
-        title: title, description: description, icon: icon, color: color,
-      );
+      final doc = await ref
+          .read(apiProvider)
+          .addDocument(
+            title: title,
+            description: description,
+            icon: icon,
+            color: color,
+          );
       state = [doc, ...state];
       return true;
     } catch (_) {
@@ -50,4 +57,7 @@ class DocumentsNotifier extends Notifier<List<DocumentItem>> {
   }
 }
 
-final documentsProvider = NotifierProvider<DocumentsNotifier, List<DocumentItem>>(DocumentsNotifier.new);
+final documentsProvider =
+    NotifierProvider<DocumentsNotifier, List<DocumentItem>>(
+      DocumentsNotifier.new,
+    );

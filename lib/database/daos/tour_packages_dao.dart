@@ -13,14 +13,14 @@ class TourPackagesDao extends DatabaseAccessor<AppDatabase>
   Future<List<TourPackagesTableData>> getAll() =>
       select(tourPackagesTable).get();
 
-  Future<TourPackagesTableData?> getById(String id) =>
-      (select(tourPackagesTable)..where((t) => t.id.equals(id)))
-          .getSingleOrNull();
+  Future<TourPackagesTableData?> getById(String id) => (select(
+    tourPackagesTable,
+  )..where((t) => t.id.equals(id))).getSingleOrNull();
 
   Future<List<TourPackagesTableData>> search(String query) =>
-      (select(tourPackagesTable)
-            ..where((t) =>
-                t.name.like('%$query%') | t.departure.like('%$query%')))
+      (select(tourPackagesTable)..where(
+            (t) => t.name.like('%$query%') | t.departure.like('%$query%'),
+          ))
           .get();
 
   Future<void> insertAll(List<TourPackagesTableCompanion> items) async {

@@ -49,8 +49,12 @@ class TripScheduleItem {
       startTime: json['startTime'] as String,
       endTime: json['endTime'] as String? ?? '',
       location: (json['location'] ?? json['locationName']) as String? ?? '',
-      latitude: json['latitude'] != null ? (json['latitude'] as num).toDouble() : null,
-      longitude: json['longitude'] != null ? (json['longitude'] as num).toDouble() : null,
+      latitude: json['latitude'] != null
+          ? (json['latitude'] as num).toDouble()
+          : null,
+      longitude: json['longitude'] != null
+          ? (json['longitude'] as num).toDouble()
+          : null,
       statusOverride: json['statusOverride'] as String?,
     );
   }
@@ -74,8 +78,12 @@ class TripScheduleDay {
       id: json['id'] as String,
       dayNumber: json['dayNumber'] as int,
       date: json['date'] as String?,
-      items: (json['items'] as List?)
-              ?.map((item) => TripScheduleItem.fromJson(item as Map<String, dynamic>))
+      items:
+          (json['items'] as List?)
+              ?.map(
+                (item) =>
+                    TripScheduleItem.fromJson(item as Map<String, dynamic>),
+              )
               .toList() ??
           [],
     );
@@ -96,12 +104,19 @@ class TripSchedule {
   factory TripSchedule.fromJson(Map<String, dynamic> json) {
     return TripSchedule(
       tripId: json['tripId'] as String,
-      days: (json['days'] as List?)
-              ?.map((day) => TripScheduleDay.fromJson(day as Map<String, dynamic>))
+      days:
+          (json['days'] as List?)
+              ?.map(
+                (day) => TripScheduleDay.fromJson(day as Map<String, dynamic>),
+              )
               .toList() ??
           [],
-      updates: (json['updates'] as List?)
-              ?.map((update) => TripScheduleUpdate.fromJson(update as Map<String, dynamic>))
+      updates:
+          (json['updates'] as List?)
+              ?.map(
+                (update) =>
+                    TripScheduleUpdate.fromJson(update as Map<String, dynamic>),
+              )
               .toList() ??
           [],
     );

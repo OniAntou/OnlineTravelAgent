@@ -25,7 +25,7 @@ clientRouter.get("/promo-codes/check", clientAuth, clientController.checkPromoCo
 
 // Trips
 clientRouter.get("/trips", clientAuth, clientController.getTrips);
-clientRouter.get("/trips/:id/schedule", optionalAuth, clientController.getTripSchedule);
+clientRouter.get("/trips/:id/schedule", clientAuth, clientController.getTripSchedule);
 clientRouter.post("/trips/book", clientAuth, validate(bookTripSchema), clientController.bookTrip);
 clientRouter.post("/trips/book-flight", clientAuth, validate(bookFlightSchema), clientController.bookFlightTrip);
 clientRouter.post("/trips/custom-tour", clientAuth, validate(customTourSchema), clientController.createCustomTour);
@@ -35,9 +35,9 @@ clientRouter.post("/trips/:id/cancel", clientAuth, clientController.cancelTrip);
 clientRouter.get("/flights/search", clientController.searchFlights);
 
 // Documents
-clientRouter.get("/documents", clientController.getDocuments);
-clientRouter.post("/documents", validate(documentSchema), clientController.createDocument);
-clientRouter.delete("/documents/:id", clientController.deleteDocument);
+clientRouter.get("/documents", clientAuth, clientController.getDocuments);
+clientRouter.post("/documents", clientAuth, validate(documentSchema), clientController.createDocument);
+clientRouter.delete("/documents/:id", clientAuth, clientController.deleteDocument);
 
 // Hotels
 clientRouter.get("/hotels", clientController.getHotels);

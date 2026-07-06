@@ -1,7 +1,8 @@
 /// Shared utility functions used across the app.
 library;
 
-const String kOpenStreetMapTileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+const String kOpenStreetMapTileUrl =
+    'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 
 /// Formats a [DateTime] into a human-readable relative time string in Vietnamese.
 String getTimeAgo(DateTime dateTime) {

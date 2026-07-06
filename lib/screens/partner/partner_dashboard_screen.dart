@@ -5,18 +5,23 @@ import '../../core/theme/app_theme.dart';
 import '../../providers/api_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/hotel.dart';
+import 'widgets/partner_form_field.dart';
 import '../../models/tour_package.dart';
 import '../../models/room.dart';
 import '../../utils/api_exception.dart';
+import '../../utils/dialog_utils.dart';
+import '../../widgets/shimmer_loading.dart';
 
 class PartnerDashboardScreen extends ConsumerStatefulWidget {
   const PartnerDashboardScreen({super.key});
 
   @override
-  ConsumerState<PartnerDashboardScreen> createState() => _PartnerDashboardScreenState();
+  ConsumerState<PartnerDashboardScreen> createState() =>
+      _PartnerDashboardScreenState();
 }
 
-class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen> with SingleTickerProviderStateMixin {
+class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool _isLoading = true;
   bool _isPartner = false;
@@ -138,19 +143,12 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
   }
 
   Future<void> _deleteHotel(Hotel hotel) async {
-    final confirm = await showDialog<bool>(
+    final confirm = await showConfirmDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Xóa khách sạn'),
-        content: Text('Bạn chắc chắn muốn xóa "${hotel.name}"?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Hủy')),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Xóa', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+      title: 'Xóa khách sạn',
+      content: 'Bạn chắc chắn muốn xóa "${hotel.name}"?',
+      confirmText: 'Xóa',
+      isDestructive: true,
     );
     if (confirm != true) return;
     setState(() => _isLoading = true);
@@ -199,19 +197,12 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
   }
 
   Future<void> _deleteTour(TourPackage tour) async {
-    final confirm = await showDialog<bool>(
+    final confirm = await showConfirmDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Xóa tour'),
-        content: Text('Bạn chắc chắn muốn xóa "${tour.name}"?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Hủy')),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Xóa', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+      title: 'Xóa tour',
+      content: 'Bạn chắc chắn muốn xóa "${tour.name}"?',
+      confirmText: 'Xóa',
+      isDestructive: true,
     );
     if (confirm != true) return;
     setState(() => _isLoading = true);
@@ -243,9 +234,14 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    if (_isLoading && !_isPartner && _hotels.isEmpty) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: TimelineShimmer(),
+          ),
+        ),
       );
     }
 
@@ -266,20 +262,32 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                _errorMessage != null ? Icons.error_outline : Icons.handshake_rounded,
+                _errorMessage != null
+                    ? Icons.error_outline
+                    : Icons.handshake_rounded,
                 size: 80,
-                color: _errorMessage != null ? Colors.red : AppTheme.primaryBlue,
+                color: _errorMessage != null
+                    ? Colors.red
+                    : AppTheme.primaryBlue,
               ),
               const SizedBox(height: 16),
               Text(
-                _errorMessage != null ? 'Đã xảy ra lỗi' : 'Bạn chưa phải là đối tác',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                _errorMessage != null
+                    ? 'Đã xảy ra lỗi'
+                    : 'Bạn chưa phải là đối tác',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
-                _errorMessage ?? 'Đăng ký để đăng bán khách sạn & tour của bạn trên OTA!',
+                _errorMessage ??
+                    'Đăng ký để đăng bán khách sạn & tour của bạn trên OTA!',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: _errorMessage != null ? Colors.red : null),
+                style: TextStyle(
+                  color: _errorMessage != null ? Colors.red : null,
+                ),
               ),
               const SizedBox(height: 24),
               if (_errorMessage != null)
@@ -287,23 +295,39 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryBlue,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   onPressed: _loadData,
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Thử lại', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  label: const Text(
+                    'Thử lại',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 )
               else
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryBlue,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 32,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   onPressed: _becomePartner,
-                  child: const Text('Đăng ký ngay', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Đăng ký ngay',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
             ],
           ),
@@ -315,7 +339,10 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
   Widget _buildDashboard() {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Partner Dashboard', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Partner Dashboard',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -333,11 +360,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildStatsTab(),
-          _buildHotelTab(),
-          _buildTourTab(),
-        ],
+        children: [_buildStatsTab(), _buildHotelTab(), _buildTourTab()],
       ),
     );
   }
@@ -350,17 +373,33 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const Text('Thống kê', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          const Text(
+            'Thống kê',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 16),
           Row(
             children: [
-              _statCard(Icons.hotel, 'Khách sạn', '${_stats?['hotels'] ?? 0}', AppTheme.primaryBlue),
+              _statCard(
+                Icons.hotel,
+                'Khách sạn',
+                '${_stats?['hotels'] ?? 0}',
+                AppTheme.primaryBlue,
+              ),
               const SizedBox(width: 12),
-              _statCard(Icons.tour, 'Tours', '${_stats?['tours'] ?? 0}', Colors.orange),
+              _statCard(
+                Icons.tour,
+                'Tours',
+                '${_stats?['tours'] ?? 0}',
+                Colors.orange,
+              ),
             ],
           ),
           const SizedBox(height: 24),
-          const Text('Khách sạn gần đây', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text(
+            'Khách sạn gần đây',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           if (_hotels.isEmpty)
             const Padding(
@@ -370,7 +409,10 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
           else
             ..._hotels.take(3).map(_buildHotelCard),
           const SizedBox(height: 24),
-          const Text('Tours gần đây', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          const Text(
+            'Tours gần đây',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           if (_tours.isEmpty)
             const Padding(
@@ -397,8 +439,18 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
           children: [
             Icon(icon, color: color, size: 28),
             const SizedBox(height: 8),
-            Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color)),
-            Text(label, style: const TextStyle(fontSize: 13, color: AppTheme.darkGray)),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 13, color: AppTheme.darkGray),
+            ),
           ],
         ),
       ),
@@ -412,18 +464,27 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
       body: RefreshIndicator(
         onRefresh: _loadData,
         child: _hotels.isEmpty
-            ? const Center(child: Text('Chưa có khách sạn nào.\nNhấn + để thêm mới.', textAlign: TextAlign.center))
+            ? const Center(
+                child: Text(
+                  'Chưa có khách sạn nào.\nNhấn + để thêm mới.',
+                  textAlign: TextAlign.center,
+                ),
+              )
             : ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: _hotels.length,
-                itemBuilder: (context, index) => _buildHotelCard(_hotels[index]),
+                itemBuilder: (context, index) =>
+                    _buildHotelCard(_hotels[index]),
               ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppTheme.primaryBlue,
         onPressed: _showHotelForm,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Thêm Khách sạn', style: TextStyle(color: Colors.white)),
+        label: const Text(
+          'Thêm Khách sạn',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
@@ -459,15 +520,29 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(hotel.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                    Text(
+                      hotel.name,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text('${hotel.location} • ${hotel.address}',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis),
+                    Text(
+                      '${hotel.location} • ${hotel.address}',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     const SizedBox(height: 4),
-                    Text('${hotel.priceFrom.toInt()} VND/đêm',
-                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.primaryBlue)),
+                    Text(
+                      '${hotel.priceFrom.toInt()} VND/đêm',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primaryBlue,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -479,8 +554,14 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
                 },
                 itemBuilder: (_) => [
                   const PopupMenuItem(value: 'edit', child: Text('Chỉnh sửa')),
-                  const PopupMenuItem(value: 'rooms', child: Text('Quản lý phòng')),
-                  const PopupMenuItem(value: 'delete', child: Text('Xóa', style: TextStyle(color: Colors.red))),
+                  const PopupMenuItem(
+                    value: 'rooms',
+                    child: Text('Quản lý phòng'),
+                  ),
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Text('Xóa', style: TextStyle(color: Colors.red)),
+                  ),
                 ],
               ),
             ],
@@ -497,7 +578,12 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
       body: RefreshIndicator(
         onRefresh: _loadData,
         child: _tours.isEmpty
-            ? const Center(child: Text('Chưa có tour nào.\nNhấn + để thêm mới.', textAlign: TextAlign.center))
+            ? const Center(
+                child: Text(
+                  'Chưa có tour nào.\nNhấn + để thêm mới.',
+                  textAlign: TextAlign.center,
+                ),
+              )
             : ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: _tours.length,
@@ -529,11 +615,11 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
                 height: 60,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) => Container(
-                    width: 60,
-                    height: 60,
-                    color: Colors.grey[200],
-                    child: const Icon(Icons.tour, size: 30),
-                  ),
+                  width: 60,
+                  height: 60,
+                  color: Colors.grey[200],
+                  child: const Icon(Icons.tour, size: 30),
+                ),
               ),
             ),
             const SizedBox(width: 12),
@@ -541,13 +627,27 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(tour.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                  Text(
+                    tour.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text('${tour.duration} • ${tour.departure}',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text(
+                    '${tour.duration} • ${tour.departure}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
                   const SizedBox(height: 4),
-                  Text('${tour.price.toInt()} VND',
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppTheme.primaryBlue)),
+                  Text(
+                    '${tour.price.toInt()} VND',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.primaryBlue,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -558,7 +658,10 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
               },
               itemBuilder: (_) => [
                 const PopupMenuItem(value: 'edit', child: Text('Chỉnh sửa')),
-                const PopupMenuItem(value: 'delete', child: Text('Xóa', style: TextStyle(color: Colors.red))),
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Text('Xóa', style: TextStyle(color: Colors.red)),
+                ),
               ],
             ),
           ],
@@ -596,7 +699,9 @@ class _HotelFormDialogState extends State<_HotelFormDialog> {
     _nameCtrl = TextEditingController(text: h?.name ?? '');
     _locationCtrl = TextEditingController(text: h?.location ?? '');
     _addressCtrl = TextEditingController(text: h?.address ?? '');
-    _priceCtrl = TextEditingController(text: h != null ? h.priceFrom.toInt().toString() : '');
+    _priceCtrl = TextEditingController(
+      text: h != null ? h.priceFrom.toInt().toString() : '',
+    );
     _descCtrl = TextEditingController(text: h?.description ?? '');
     _amenitiesCtrl = TextEditingController(text: h?.amenities.join(', ') ?? '');
   }
@@ -622,18 +727,43 @@ class _HotelFormDialogState extends State<_HotelFormDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _field(_nameCtrl, 'Tên khách sạn', required: true),
-              _field(_locationCtrl, 'Địa điểm (VD: Hà Nội)', required: true),
-              _field(_addressCtrl, 'Địa chỉ chi tiết'),
-              _field(_priceCtrl, 'Giá từ (VND/đêm)', keyboard: TextInputType.number),
-              _field(_descCtrl, 'Mô tả', maxLines: 3),
-              _field(_amenitiesCtrl, 'Tiện nghi (phân cách bằng dấu phẩy)'),
+              PartnerFormField(
+                controller: _nameCtrl,
+                label: 'Tên khách sạn',
+                isRequired: true,
+              ),
+              PartnerFormField(
+                controller: _locationCtrl,
+                label: 'Địa điểm (VD: Hà Nội)',
+                isRequired: true,
+              ),
+              PartnerFormField(
+                controller: _addressCtrl,
+                label: 'Địa chỉ chi tiết',
+              ),
+              PartnerFormField(
+                controller: _priceCtrl,
+                label: 'Giá từ (VND/đêm)',
+                keyboard: TextInputType.number,
+              ),
+              PartnerFormField(
+                controller: _descCtrl,
+                label: 'Mô tả',
+                maxLines: 3,
+              ),
+              PartnerFormField(
+                controller: _amenitiesCtrl,
+                label: 'Tiện nghi (phân cách bằng dấu phẩy)',
+              ),
             ],
           ),
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Hủy')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Hủy'),
+        ),
         FilledButton(
           style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryBlue),
           onPressed: () {
@@ -644,31 +774,17 @@ class _HotelFormDialogState extends State<_HotelFormDialog> {
               'address': _addressCtrl.text.trim(),
               'priceFrom': double.tryParse(_priceCtrl.text.trim()) ?? 0,
               'description': _descCtrl.text.trim(),
-              'amenities': _amenitiesCtrl.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              'amenities': _amenitiesCtrl.text
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
             };
             Navigator.pop(context, data);
           },
           child: Text(isEditing ? 'Cập nhật' : 'Thêm'),
         ),
       ],
-    );
-  }
-
-  Widget _field(TextEditingController ctrl, String label,
-      {bool required = false, TextInputType? keyboard, int maxLines = 1}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextFormField(
-        controller: ctrl,
-        keyboardType: keyboard,
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-          isDense: true,
-        ),
-        validator: required ? (v) => (v == null || v.trim().isEmpty) ? 'Bắt buộc' : null : null,
-      ),
     );
   }
 }
@@ -701,10 +817,14 @@ class _TourFormDialogState extends State<_TourFormDialog> {
     final t = widget.tour;
     _nameCtrl = TextEditingController(text: t?.name ?? '');
     _descCtrl = TextEditingController(text: t?.description ?? '');
-    _priceCtrl = TextEditingController(text: t != null ? t.price.toInt().toString() : '');
+    _priceCtrl = TextEditingController(
+      text: t != null ? t.price.toInt().toString() : '',
+    );
     _durationCtrl = TextEditingController(text: t?.duration ?? '');
     _departureCtrl = TextEditingController(text: t?.departure ?? '');
-    _destinationsCtrl = TextEditingController(text: t?.destinations.join(', ') ?? '');
+    _destinationsCtrl = TextEditingController(
+      text: t?.destinations.join(', ') ?? '',
+    );
     _includesCtrl = TextEditingController(text: t?.includes.join(', ') ?? '');
   }
 
@@ -730,19 +850,47 @@ class _TourFormDialogState extends State<_TourFormDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _field(_nameCtrl, 'Tên tour', required: true),
-              _field(_descCtrl, 'Mô tả', maxLines: 3),
-              _field(_priceCtrl, 'Giá (VND)', keyboard: TextInputType.number, required: true),
-              _field(_durationCtrl, 'Thời lượng (VD: 3N2Đ)'),
-              _field(_departureCtrl, 'Điểm khởi hành (VD: TP.HCM)'),
-              _field(_destinationsCtrl, 'Điểm đến (phân cách bằng dấu phẩy)'),
-              _field(_includesCtrl, 'Bao gồm (phân cách bằng dấu phẩy)'),
+              PartnerFormField(
+                controller: _nameCtrl,
+                label: 'Tên tour',
+                isRequired: true,
+              ),
+              PartnerFormField(
+                controller: _descCtrl,
+                label: 'Mô tả',
+                maxLines: 3,
+              ),
+              PartnerFormField(
+                controller: _priceCtrl,
+                label: 'Giá (VND)',
+                keyboard: TextInputType.number,
+                isRequired: true,
+              ),
+              PartnerFormField(
+                controller: _durationCtrl,
+                label: 'Thời lượng (VD: 3N2Đ)',
+              ),
+              PartnerFormField(
+                controller: _departureCtrl,
+                label: 'Điểm khởi hành (VD: TP.HCM)',
+              ),
+              PartnerFormField(
+                controller: _destinationsCtrl,
+                label: 'Điểm đến (phân cách bằng dấu phẩy)',
+              ),
+              PartnerFormField(
+                controller: _includesCtrl,
+                label: 'Bao gồm (phân cách bằng dấu phẩy)',
+              ),
             ],
           ),
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Hủy')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Hủy'),
+        ),
         FilledButton(
           style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryBlue),
           onPressed: () {
@@ -753,32 +901,22 @@ class _TourFormDialogState extends State<_TourFormDialog> {
               'price': double.tryParse(_priceCtrl.text.trim()) ?? 0,
               'duration': _durationCtrl.text.trim(),
               'departure': _departureCtrl.text.trim(),
-              'destinations': _destinationsCtrl.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
-              'includes': _includesCtrl.text.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList(),
+              'destinations': _destinationsCtrl.text
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
+              'includes': _includesCtrl.text
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
             };
             Navigator.pop(context, data);
           },
           child: Text(isEditing ? 'Cập nhật' : 'Thêm'),
         ),
       ],
-    );
-  }
-
-  Widget _field(TextEditingController ctrl, String label,
-      {bool required = false, TextInputType? keyboard, int maxLines = 1}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextFormField(
-        controller: ctrl,
-        keyboardType: keyboard,
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-          isDense: true,
-        ),
-        validator: required ? (v) => (v == null || v.trim().isEmpty) ? 'Bắt buộc' : null : null,
-      ),
     );
   }
 }
@@ -806,7 +944,9 @@ class _RoomManagerScreenState extends ConsumerState<_RoomManagerScreen> {
   Future<void> _loadRooms() async {
     setState(() => _isLoading = true);
     try {
-      final rooms = await ref.read(apiProvider).getPartnerHotelRooms(widget.hotel.id);
+      final rooms = await ref
+          .read(apiProvider)
+          .getPartnerHotelRooms(widget.hotel.id);
       setState(() => _rooms = rooms);
     } catch (e) {
       if (mounted) {
@@ -847,19 +987,12 @@ class _RoomManagerScreenState extends ConsumerState<_RoomManagerScreen> {
   }
 
   Future<void> _deleteRoom(Room room) async {
-    final confirm = await showDialog<bool>(
+    final confirm = await showConfirmDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Xóa phòng'),
-        content: Text('Bạn chắc chắn muốn xóa "${room.name}"?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Hủy')),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Xóa', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
+      title: 'Xóa phòng',
+      content: 'Bạn chắc chắn muốn xóa "${room.name}"?',
+      confirmText: 'Xóa',
+      isDestructive: true,
     );
     if (confirm != true) return;
     setState(() => _isLoading = true);
@@ -880,48 +1013,67 @@ class _RoomManagerScreenState extends ConsumerState<_RoomManagerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Phòng - ${widget.hotel.name}'),
-      ),
+      appBar: AppBar(title: Text('Phòng - ${widget.hotel.name}')),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: ReviewCardShimmer(),
+            )
           : _rooms.isEmpty
-              ? const Center(child: Text('Chưa có phòng nào.\nNhấn + để thêm phòng.'))
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _rooms.length,
-                  itemBuilder: (context, index) {
-                    final room = _rooms[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(12),
-                        leading: Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Icon(Icons.bed, color: AppTheme.primaryBlue),
-                        ),
-                        title: Text(room.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text('${room.capacity} khách • ${room.price.toInt()} VND/đêm'),
-                        trailing: PopupMenuButton<String>(
-                          onSelected: (value) {
-                            if (value == 'edit') _showRoomForm(room: room);
-                            if (value == 'delete') _deleteRoom(room);
-                          },
-                          itemBuilder: (_) => [
-                            const PopupMenuItem(value: 'edit', child: Text('Chỉnh sửa')),
-                            const PopupMenuItem(value: 'delete', child: Text('Xóa', style: TextStyle(color: Colors.red))),
-                          ],
-                        ),
+          ? const Center(
+              child: Text('Chưa có phòng nào.\nNhấn + để thêm phòng.'),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _rooms.length,
+              itemBuilder: (context, index) {
+                final room = _rooms[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(12),
+                    leading: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    );
-                  },
-                ),
+                      child: const Icon(Icons.bed, color: AppTheme.primaryBlue),
+                    ),
+                    title: Text(
+                      room.name,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      '${room.capacity} khách • ${room.price.toInt()} VND/đêm',
+                    ),
+                    trailing: PopupMenuButton<String>(
+                      onSelected: (value) {
+                        if (value == 'edit') _showRoomForm(room: room);
+                        if (value == 'delete') _deleteRoom(room);
+                      },
+                      itemBuilder: (_) => [
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: Text('Chỉnh sửa'),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: Text(
+                            'Xóa',
+                            style: TextStyle(color: Colors.red),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppTheme.primaryBlue,
         onPressed: _showRoomForm,
@@ -956,8 +1108,12 @@ class _RoomFormDialogState extends State<_RoomFormDialog> {
     final r = widget.room;
     _nameCtrl = TextEditingController(text: r?.name ?? '');
     _descCtrl = TextEditingController(text: r?.description ?? '');
-    _priceCtrl = TextEditingController(text: r != null ? r.price.toInt().toString() : '');
-    _capacityCtrl = TextEditingController(text: r != null ? r.capacity.toString() : '');
+    _priceCtrl = TextEditingController(
+      text: r != null ? r.price.toInt().toString() : '',
+    );
+    _capacityCtrl = TextEditingController(
+      text: r != null ? r.capacity.toString() : '',
+    );
   }
 
   @override
@@ -979,16 +1135,32 @@ class _RoomFormDialogState extends State<_RoomFormDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _field(_nameCtrl, 'Tên phòng', required: true),
-              _field(_descCtrl, 'Mô tả'),
-              _field(_priceCtrl, 'Giá (VND/đêm)', keyboard: TextInputType.number, required: true),
-              _field(_capacityCtrl, 'Số khách tối đa', keyboard: TextInputType.number),
+              PartnerFormField(
+                controller: _nameCtrl,
+                label: 'Tên phòng',
+                isRequired: true,
+              ),
+              PartnerFormField(controller: _descCtrl, label: 'Mô tả'),
+              PartnerFormField(
+                controller: _priceCtrl,
+                label: 'Giá (VND/đêm)',
+                keyboard: TextInputType.number,
+                isRequired: true,
+              ),
+              PartnerFormField(
+                controller: _capacityCtrl,
+                label: 'Số khách tối đa',
+                keyboard: TextInputType.number,
+              ),
             ],
           ),
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Hủy')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Hủy'),
+        ),
         FilledButton(
           style: FilledButton.styleFrom(backgroundColor: AppTheme.primaryBlue),
           onPressed: () {
@@ -1003,24 +1175,6 @@ class _RoomFormDialogState extends State<_RoomFormDialog> {
           child: Text(isEditing ? 'Cập nhật' : 'Thêm'),
         ),
       ],
-    );
-  }
-
-  Widget _field(TextEditingController ctrl, String label,
-      {bool required = false, TextInputType? keyboard, int maxLines = 1}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextFormField(
-        controller: ctrl,
-        keyboardType: keyboard,
-        maxLines: maxLines,
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-          isDense: true,
-        ),
-        validator: required ? (v) => (v == null || v.trim().isEmpty) ? 'Bắt buộc' : null : null,
-      ),
     );
   }
 }

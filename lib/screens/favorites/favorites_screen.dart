@@ -15,7 +15,9 @@ class FavoritesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final favorites = ref.watch(favoritesProvider);
-    final isLoggedIn = ref.watch(authProvider.select((state) => state.isLoggedIn));
+    final isLoggedIn = ref.watch(
+      authProvider.select((state) => state.isLoggedIn),
+    );
 
     Future<void> onRefresh() async {
       ref.invalidate(bootstrapProvider);
@@ -28,52 +30,56 @@ class FavoritesScreen extends ConsumerWidget {
         child: RefreshIndicator(
           onRefresh: onRefresh,
           child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              const Text(
-                'Địa điểm yêu thích',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 24),
-              if (!isLoggedIn)
-                const Expanded(
-                  child: RequireLoginPlaceholder(
-                    subtitle: 'Lưu lại các địa điểm yêu thích\nđể lên kế hoạch dễ dàng hơn',
-                  ),
-                )
-              else if (favorites.isEmpty)
-                Expanded(
-                  child: AppPlaceholderCard(
-                    icon: Icons.favorite_border_rounded,
-                    title: 'Chưa có địa điểm yêu thích nào',
-                    subtitle: 'Hãy tìm kiếm và lưu lại các địa điểm\nbạn muốn ghé thăm trong tương lai.',
-                    actionText: 'Khám phá ngay',
-                    actionIcon: Icons.arrow_forward_rounded,
-                    onActionTap: () => Navigator.pushReplacementNamed(context, '/main'),
-                  ),
-                )
-              else
-                Expanded(
-                  child: ListView.separated(
-                    itemCount: favorites.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 16),
-                    padding: const EdgeInsets.only(bottom: 24),
-                    itemBuilder: (context, index) {
-                      return FavoriteDestinationCard(
-                        destination: favorites[index],
-                        onFavoriteClick: () => ref.read(destinationsProvider.notifier)
-                            .toggleFavorite(favorites[index].id),
-                        onClick: () => onDestinationClick(favorites[index]),
-                      );
-                    },
-                  ),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 24),
+                const Text(
+                  'Địa điểm yêu thích',
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
                 ),
-            ],
+                const SizedBox(height: 24),
+                if (!isLoggedIn)
+                  const Expanded(
+                    child: RequireLoginPlaceholder(
+                      subtitle:
+                          'Lưu lại các địa điểm yêu thích\nđể lên kế hoạch dễ dàng hơn',
+                    ),
+                  )
+                else if (favorites.isEmpty)
+                  Expanded(
+                    child: AppPlaceholderCard(
+                      icon: Icons.favorite_border_rounded,
+                      title: 'Chưa có địa điểm yêu thích nào',
+                      subtitle:
+                          'Hãy tìm kiếm và lưu lại các địa điểm\nbạn muốn ghé thăm trong tương lai.',
+                      actionText: 'Khám phá ngay',
+                      actionIcon: Icons.arrow_forward_rounded,
+                      onActionTap: () =>
+                          Navigator.pushReplacementNamed(context, '/main'),
+                    ),
+                  )
+                else
+                  Expanded(
+                    child: ListView.separated(
+                      itemCount: favorites.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 16),
+                      padding: const EdgeInsets.only(bottom: 24),
+                      itemBuilder: (context, index) {
+                        return FavoriteDestinationCard(
+                          destination: favorites[index],
+                          onFavoriteClick: () => ref
+                              .read(destinationsProvider.notifier)
+                              .toggleFavorite(favorites[index].id),
+                          onClick: () => onDestinationClick(favorites[index]),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );

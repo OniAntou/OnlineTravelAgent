@@ -98,7 +98,12 @@ class _HotelDetailScreenState extends ConsumerState<HotelDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final bootstrap = ref.watch(bootstrapProvider).value;
-    final h = bootstrap?.hotels.firstWhere((e) => e.id == widget.hotel.id, orElse: () => widget.hotel) ?? widget.hotel;
+    final h =
+        bootstrap?.hotels.firstWhere(
+          (e) => e.id == widget.hotel.id,
+          orElse: () => widget.hotel,
+        ) ??
+        widget.hotel;
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.surface,
@@ -107,21 +112,28 @@ class _HotelDetailScreenState extends ConsumerState<HotelDetailScreen> {
           SliverAppBar(
             expandedHeight: 250,
             pinned: true,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Hero(
-                  // Use hotel id in hero tag to avoid collisions when names are identical
-                  tag: 'hotel_image_${h.id}',
-                  child: Image.asset(
-                    h.imagePath,
-                    fit: BoxFit.cover,
-                    cacheWidth: (MediaQuery.sizeOf(context).width * MediaQuery.devicePixelRatioOf(context)).round(),
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.image, size: 50, color: Colors.grey),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Hero(
+                // Use hotel id in hero tag to avoid collisions when names are identical
+                tag: 'hotel_image_${h.id}',
+                child: Image.asset(
+                  h.imagePath,
+                  fit: BoxFit.cover,
+                  cacheWidth:
+                      (MediaQuery.sizeOf(context).width *
+                              MediaQuery.devicePixelRatioOf(context))
+                          .round(),
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: Colors.grey[300],
+                    child: const Icon(
+                      Icons.image,
+                      size: 50,
+                      color: Colors.grey,
                     ),
                   ),
                 ),
               ),
+            ),
             leading: Padding(
               padding: const EdgeInsets.all(8.0),
               child: CircleAvatar(
@@ -173,7 +185,11 @@ class _HotelDetailScreenState extends ConsumerState<HotelDetailScreen> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.location_on, color: Colors.grey, size: 16),
+                      const Icon(
+                        Icons.location_on,
+                        color: Colors.grey,
+                        size: 16,
+                      ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
@@ -194,7 +210,10 @@ class _HotelDetailScreenState extends ConsumerState<HotelDetailScreen> {
                     runSpacing: 8,
                     children: h.amenities.map((amenity) {
                       return Chip(
-                        label: Text(amenity, style: const TextStyle(fontSize: 12)),
+                        label: Text(
+                          amenity,
+                          style: const TextStyle(fontSize: 12),
+                        ),
                         backgroundColor: AppTheme.backgroundGray,
                         side: BorderSide.none,
                       );
@@ -303,7 +322,10 @@ class _HotelDetailScreenState extends ConsumerState<HotelDetailScreen> {
                 onPressed: _selectedRoom == null ? null : _bookHotel,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryBlue,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
@@ -347,7 +369,11 @@ class _HotelDetailScreenState extends ConsumerState<HotelDetailScreen> {
             const SizedBox(height: 4),
             Row(
               children: [
-                const Icon(Icons.calendar_month, color: AppTheme.primaryBlue, size: 18),
+                const Icon(
+                  Icons.calendar_month,
+                  color: AppTheme.primaryBlue,
+                  size: 18,
+                ),
                 const SizedBox(width: 8),
                 Text(
                   date,
@@ -377,9 +403,13 @@ class _HotelDetailScreenState extends ConsumerState<HotelDetailScreen> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryBlue.withValues(alpha: 0.05) : Colors.white,
+          color: isSelected
+              ? AppTheme.primaryBlue.withValues(alpha: 0.05)
+              : Colors.white,
           border: Border.all(
-            color: isSelected ? AppTheme.primaryBlue : Colors.grey.withValues(alpha: 0.2),
+            color: isSelected
+                ? AppTheme.primaryBlue
+                : Colors.grey.withValues(alpha: 0.2),
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(16),
@@ -455,7 +485,9 @@ class _HotelDetailScreenState extends ConsumerState<HotelDetailScreen> {
           totalPrice: _selectedRoom!.price,
           onPaymentSuccess: () async {
             if (!mounted) return null;
-            return await ref.read(tripsProvider.notifier).bookHotel(
+            return await ref
+                .read(tripsProvider.notifier)
+                .bookHotel(
                   roomId: _selectedRoom!.id,
                   checkIn: _formatDate(_checkInDate),
                   checkOut: _formatDate(_checkOutDate),

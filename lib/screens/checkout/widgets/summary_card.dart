@@ -48,15 +48,32 @@ class SummaryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Chi tiết thanh toán', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text(
+            'Chi tiết thanh toán',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 16),
-          _buildSummaryRow('Giá vé người lớn (x$adults)', formatVND((basePrice * adults).toDouble())),
+          _buildSummaryRow(
+            'Giá vé người lớn (x$adults)',
+            formatVND((basePrice * adults).toDouble()),
+          ),
           if (children > 0)
-            _buildSummaryRow('Giá vé trẻ em (x$children)', formatVND(basePrice * 0.5 * children)),
+            _buildSummaryRow(
+              'Giá vé trẻ em (x$children)',
+              formatVND(basePrice * 0.5 * children),
+            ),
           if (isVip)
-            _buildSummaryRow('Phí VIP (x$totalGuests)', formatVND((50 * totalGuests).toDouble())),
+            _buildSummaryRow(
+              'Phí VIP (x$totalGuests)',
+              formatVND((50 * totalGuests).toDouble()),
+            ),
           if (transportPrices[selectedTransport]! > 0)
-            _buildSummaryRow('$selectedTransport (x$totalGuests)', formatVND((transportPrices[selectedTransport]! * totalGuests).toDouble())),
+            _buildSummaryRow(
+              '$selectedTransport (x$totalGuests)',
+              formatVND(
+                (transportPrices[selectedTransport]! * totalGuests).toDouble(),
+              ),
+            ),
           const Divider(height: 24),
           _buildSummaryRow('Tạm tính', formatVND(subtotal)),
           _buildSummaryRow('Thuế (10%)', formatVND(tax)),
@@ -66,10 +83,17 @@ class SummaryCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Tổng cộng', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const Text(
+                'Tổng cộng',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
               Text(
                 formatVND(total),
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primaryBlue),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryBlue,
+                ),
               ),
             ],
           ),
@@ -85,7 +109,10 @@ class SummaryCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Flexible(
-            child: Text(title, style: const TextStyle(color: Colors.grey, fontSize: 14)),
+            child: Text(
+              title,
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
+            ),
           ),
           const SizedBox(width: 8),
           Flexible(

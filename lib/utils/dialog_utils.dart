@@ -18,7 +18,11 @@ void showErrorDialog(BuildContext context, String message) {
               color: Colors.red.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.error_outline_rounded, color: Colors.red, size: 32),
+            child: const Icon(
+              Icons.error_outline_rounded,
+              color: Colors.red,
+              size: 32,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
@@ -31,7 +35,10 @@ void showErrorDialog(BuildContext context, String message) {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx),
-          child: const Text('Đóng', style: TextStyle(color: AppTheme.primaryBlue)),
+          child: const Text(
+            'Đóng',
+            style: TextStyle(color: AppTheme.primaryBlue),
+          ),
         ),
       ],
     ),
@@ -58,6 +65,38 @@ void showErrorSnackBar(BuildContext context, String message) {
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       margin: const EdgeInsets.all(16),
+    ),
+  );
+}
+
+Future<bool?> showConfirmDialog({
+  required BuildContext context,
+  required String title,
+  required String content,
+  String confirmText = 'Xác nhận',
+  String cancelText = 'Hủy',
+  bool isDestructive = false,
+}) {
+  return showDialog<bool>(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: Text(title),
+      content: Text(content),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: Text(cancelText),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, true),
+          child: Text(
+            confirmText,
+            style: TextStyle(
+              color: isDestructive ? Colors.red : AppTheme.primaryBlue,
+            ),
+          ),
+        ),
+      ],
     ),
   );
 }

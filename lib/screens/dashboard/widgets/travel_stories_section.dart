@@ -88,19 +88,28 @@ class TravelStoriesSection extends StatelessWidget {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(16),
-                                child: Image.asset(
-                                  story['image']!,
-                                  width: 90,
-                                  height: 166,
-                                  fit: BoxFit.cover,
-                                  cacheWidth: (90 * MediaQuery.devicePixelRatioOf(context)).round(),
-                                  filterQuality: FilterQuality.low,
-                                  errorBuilder: (context, error, stackTrace) => Container(
-                                    width: 90,
-                                    color: Colors.grey[200],
-                                    child: const Icon(Icons.image, color: Colors.grey),
-                                  ),
-                                ),
+                              child: Image.asset(
+                                story['image']!,
+                                width: 90,
+                                height: 166,
+                                fit: BoxFit.cover,
+                                cacheWidth:
+                                    (90 *
+                                            MediaQuery.devicePixelRatioOf(
+                                              context,
+                                            ))
+                                        .round(),
+                                filterQuality: FilterQuality.low,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                      width: 90,
+                                      color: Colors.grey[200],
+                                      child: const Icon(
+                                        Icons.image,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -111,7 +120,9 @@ class TravelStoriesSection extends StatelessWidget {
                                     children: [
                                       CircleAvatar(
                                         radius: 12,
-                                        backgroundImage: NetworkImage(story['avatar']!),
+                                        backgroundImage: NetworkImage(
+                                          story['avatar']!,
+                                        ),
                                       ),
                                       const SizedBox(width: 6),
                                       Expanded(

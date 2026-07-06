@@ -19,7 +19,10 @@ class GuideOption extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Hướng dẫn viên', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Hướng dẫn viên',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -31,7 +34,10 @@ class GuideOption extends StatelessWidget {
           child: Row(
             children: [
               const Expanded(
-                child: Text('Bao gồm hướng dẫn viên (phí cố định)', style: TextStyle(fontSize: 14)),
+                child: Text(
+                  'Bao gồm hướng dẫn viên (phí cố định)',
+                  style: TextStyle(fontSize: 14),
+                ),
               ),
               Switch(
                 value: includeGuide,
@@ -39,7 +45,13 @@ class GuideOption extends StatelessWidget {
                 activeThumbColor: AppTheme.primaryBlue,
               ),
               const SizedBox(width: 8),
-              Text(formatVND(guideFee), style: const TextStyle(fontWeight: FontWeight.bold, color: AppTheme.primaryBlue)),
+              Text(
+                formatVND(guideFee),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.primaryBlue,
+                ),
+              ),
             ],
           ),
         ),

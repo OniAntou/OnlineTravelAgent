@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../models/destination.dart';
@@ -46,37 +47,37 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         onTap: () => FocusScope.of(context).unfocus(),
         child: SafeArea(
           child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-              _buildHeader(),
-              const SizedBox(height: 24),
-              _buildSearchBar(),
-              const SizedBox(height: 32),
-              const CategoryTabs(),
-              const SizedBox(height: 24),
-              const FlightBanner(),
-              const SizedBox(height: 32),
-              _buildPopularDestinationsHeader(),
-              const SizedBox(height: 8),
-              _buildPopularDestinationsList(),
-              const SizedBox(height: 32),
-              _buildRecommendedToursHeader(),
-              const SizedBox(height: 16),
-              _buildRecommendedToursList(),
-              const SizedBox(height: 32),
-              _buildUpcomingTrip(),
-              const DailyTip(),
-              const SizedBox(height: 24),
-              const TrendingSection(),
-              const SizedBox(height: 32),
-              const TravelStoriesSection(),
-              const SizedBox(height: 64),
-            ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 24),
+                _buildHeader(),
+                const SizedBox(height: 24),
+                _buildSearchBar(),
+                const SizedBox(height: 32),
+                const CategoryTabs(),
+                const SizedBox(height: 24),
+                const FlightBanner(),
+                const SizedBox(height: 32),
+                _buildPopularDestinationsHeader(),
+                const SizedBox(height: 8),
+                _buildPopularDestinationsList(),
+                const SizedBox(height: 32),
+                _buildRecommendedToursHeader(),
+                const SizedBox(height: 16),
+                _buildRecommendedToursList(),
+                const SizedBox(height: 32),
+                _buildUpcomingTrip(),
+                const DailyTip(),
+                const SizedBox(height: 24),
+                const TrendingSection(),
+                const SizedBox(height: 32),
+                const TravelStoriesSection(),
+                const SizedBox(height: 64),
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -92,15 +93,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Xin chào, User!',
+                  tr('home.hello'),
                   style: TextStyle(
                     fontSize: 14,
                     color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
                 ),
                 Text(
-                  'Bạn muốn đi đâu?',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 32),
+                  tr('home.search_hint'),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontSize: 32),
                 ),
               ],
             ),
@@ -145,12 +148,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               onChanged: (text) =>
                   ref.read(searchQueryProvider.notifier).update(text),
               decoration: InputDecoration(
-                icon: const Icon(
-                  Icons.search,
-                  color: Colors.grey,
-                  size: 20,
-                ),
-                hintText: 'Tìm kiếm hoạt động',
+                icon: const Icon(Icons.search, color: Colors.grey, size: 20),
+                hintText: tr('home.search_placeholder'),
                 hintStyle: TextStyle(
                   color: Colors.grey.withValues(alpha: 0.6),
                   fontSize: 14,
@@ -179,27 +178,23 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'Địa điểm phổ biến',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+          Text(
+            tr('home.popular_destinations'),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           TextButton(
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const DestinationsScreen(
-                    initialCategory: 'Địa điểm',
-                  ),
+                  builder: (context) =>
+                      const DestinationsScreen(initialCategory: 'Địa điểm'),
                 ),
               );
             },
-            child: const Text(
-              'Xem tất cả',
-              style: TextStyle(
+            child: Text(
+              tr('home.view_all'),
+              style: const TextStyle(
                 color: AppTheme.primaryBlue,
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
@@ -212,36 +207,43 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildPopularDestinationsList() {
-    return Consumer(builder: (context, ref, child) {
-      if (ref.watch(filteredDestinationsProvider).isEmpty) {
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(20.0),
-            child: Text('Không tìm thấy địa điểm phù hợp'),
+    return Consumer(
+      builder: (context, ref, child) {
+        if (ref.watch(filteredDestinationsProvider).isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Text(tr('home.no_destinations')),
+            ),
+          );
+        }
+        final displayList = ref
+            .watch(filteredDestinationsProvider)
+            .take(5)
+            .toList();
+        return SizedBox(
+          height: 240,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            scrollDirection: Axis.horizontal,
+            itemCount: displayList.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 20),
+            itemBuilder: (context, index) {
+              if (index >= displayList.length) {
+                return const SizedBox.shrink();
+              }
+              return PopularDestinationCard(
+                destination: displayList[index],
+                onFavoriteClick: () => ref
+                    .read(destinationsProvider.notifier)
+                    .toggleFavorite(displayList[index].id),
+                onClick: () => widget.onDestinationClick(displayList[index]),
+              );
+            },
           ),
         );
-      }
-      final displayList = ref.watch(filteredDestinationsProvider).take(5).toList();
-      return SizedBox(
-        height: 240,
-        child: ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          scrollDirection: Axis.horizontal,
-          itemCount: displayList.length,
-          separatorBuilder: (_, _) => const SizedBox(width: 20),
-          itemBuilder: (context, index) {
-            if (index >= displayList.length) {
-              return const SizedBox.shrink();
-            }
-            return PopularDestinationCard(
-              destination: displayList[index],
-              onFavoriteClick: () => ref.read(destinationsProvider.notifier).toggleFavorite(displayList[index].id),
-              onClick: () => widget.onDestinationClick(displayList[index]),
-            );
-          },
-        ),
-      );
-    });
+      },
+    );
   }
 
   Widget _buildRecommendedToursHeader() {
@@ -250,25 +252,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            'Đề xuất tour',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+          Text(
+            tr('home.recommended_tours'),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           TextButton(
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const ToursScreen(),
-                ),
+                MaterialPageRoute(builder: (context) => const ToursScreen()),
               );
             },
-            child: const Text(
-              'Xem tất cả',
-              style: TextStyle(
+            child: Text(
+              tr('home.view_all'),
+              style: const TextStyle(
                 color: AppTheme.primaryBlue,
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
@@ -281,43 +278,45 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildRecommendedToursList() {
-    return Consumer(builder: (context, ref, child) {
-      if (ref.watch(toursProvider).isEmpty) {
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(20.0),
-            child: Text('Không có đề xuất tour nào'),
+    return Consumer(
+      builder: (context, ref, child) {
+        if (ref.watch(toursProvider).isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Text(tr('home.no_tours')),
+            ),
+          );
+        }
+        final displayList = ref.watch(toursProvider).take(5).toList();
+        return SizedBox(
+          height: 200,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            scrollDirection: Axis.horizontal,
+            itemCount: displayList.length,
+            separatorBuilder: (_, _) => const SizedBox(width: 20),
+            itemBuilder: (context, index) {
+              if (index >= displayList.length) {
+                return const SizedBox.shrink();
+              }
+              final tour = displayList[index];
+              return RecommendedTourCard(
+                tour: tour,
+                onClick: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TourDetailScreen(tour: tour),
+                    ),
+                  );
+                },
+              );
+            },
           ),
         );
-      }
-      final displayList = ref.watch(toursProvider).take(5).toList();
-      return SizedBox(
-        height: 200,
-        child: ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          scrollDirection: Axis.horizontal,
-          itemCount: displayList.length,
-          separatorBuilder: (_, _) => const SizedBox(width: 20),
-          itemBuilder: (context, index) {
-            if (index >= displayList.length) {
-              return const SizedBox.shrink();
-            }
-            final tour = displayList[index];
-            return RecommendedTourCard(
-              tour: tour,
-              onClick: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TourDetailScreen(tour: tour),
-                  ),
-                );
-              },
-            );
-          },
-        ),
-      );
-    });
+      },
+    );
   }
 
   Widget _buildUpcomingTrip() {
@@ -346,17 +345,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             ),
             child: Row(
               children: [
-                const Icon(
-                  Icons.calendar_month,
-                  color: AppTheme.primaryBlue,
-                ),
+                const Icon(Icons.calendar_month, color: AppTheme.primaryBlue),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Kế hoạch gần nhất: ${upcomingTrip.destination}',
+                        '${tr('home.upcoming_trip')} ${upcomingTrip.destination}',
                         style: const TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
@@ -380,5 +376,4 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       },
     );
   }
-
 }

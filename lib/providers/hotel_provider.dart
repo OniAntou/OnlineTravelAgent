@@ -7,7 +7,6 @@ final hotelsProvider = Provider<List<Hotel>>((ref) {
   return bootstrap?.hotels ?? [];
 });
 
-
 class HotelSearchQueryNotifier extends Notifier<String> {
   @override
   String build() => '';
@@ -17,4 +16,7 @@ class HotelSearchQueryNotifier extends Notifier<String> {
   }
 }
 
-final hotelSearchQueryProvider = NotifierProvider<HotelSearchQueryNotifier, String>(HotelSearchQueryNotifier.new);
+final hotelSearchQueryProvider =
+    NotifierProvider<HotelSearchQueryNotifier, String>(
+      HotelSearchQueryNotifier.new,
+    );

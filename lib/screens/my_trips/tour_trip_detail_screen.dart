@@ -14,6 +14,7 @@ import 'widgets/booking_status_timeline.dart';
 import 'widgets/trip_action_buttons.dart';
 import 'widgets/trip_section_header.dart';
 import 'widgets/trip_schedule_timeline.dart';
+import 'widgets/shared_trip_ui.dart';
 
 class TourTripDetailScreen extends ConsumerStatefulWidget {
   final Trip trip;
@@ -21,7 +22,8 @@ class TourTripDetailScreen extends ConsumerStatefulWidget {
   const TourTripDetailScreen({super.key, required this.trip});
 
   @override
-  ConsumerState<TourTripDetailScreen> createState() => _TourTripDetailScreenState();
+  ConsumerState<TourTripDetailScreen> createState() =>
+      _TourTripDetailScreenState();
 }
 
 class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
@@ -61,7 +63,9 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
     final destinations = ref.watch(destinationsProvider);
     final screenHeight = MediaQuery.sizeOf(context).height;
     final heroCacheWidth =
-        (MediaQuery.sizeOf(context).width * MediaQuery.devicePixelRatioOf(context)).round();
+        (MediaQuery.sizeOf(context).width *
+                MediaQuery.devicePixelRatioOf(context))
+            .round();
 
     // Map Route Processing
     final List<LatLng> points = [];
@@ -70,8 +74,13 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
       for (final destName in tourPackage.destinations) {
         try {
           final d = destinations.firstWhere(
-            (dest) => dest.name.toLowerCase().trim().contains(destName.toLowerCase().trim()) ||
-                destName.toLowerCase().trim().contains(dest.name.toLowerCase().trim())
+            (dest) =>
+                dest.name.toLowerCase().trim().contains(
+                  destName.toLowerCase().trim(),
+                ) ||
+                destName.toLowerCase().trim().contains(
+                  dest.name.toLowerCase().trim(),
+                ),
           );
           if (d.latitude != 0.0 && d.longitude != 0.0) {
             final latLng = LatLng(d.latitude, d.longitude);
@@ -81,7 +90,11 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
                 point: latLng,
                 width: 40,
                 height: 40,
-                child: const Icon(Icons.location_on, color: Colors.red, size: 36),
+                child: const Icon(
+                  Icons.location_on,
+                  color: Colors.red,
+                  size: 36,
+                ),
               ),
             );
           }
@@ -92,7 +105,9 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
     } else {
       try {
         final d = destinations.firstWhere(
-          (dest) => dest.name.toLowerCase().trim() == widget.trip.destination.toLowerCase().trim()
+          (dest) =>
+              dest.name.toLowerCase().trim() ==
+              widget.trip.destination.toLowerCase().trim(),
         );
         if (d.latitude != 0.0 && d.longitude != 0.0) {
           final latLng = LatLng(d.latitude, d.longitude);
@@ -178,19 +193,20 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _floatingButton(
+                      SharedTripUI.floatingButton(
                         icon: Icons.chevron_left,
                         onTap: () => Navigator.pop(context),
                       ),
                       Row(
                         children: [
-
-                          _floatingButton(
+                          SharedTripUI.floatingButton(
                             icon: Icons.share_outlined,
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Chia sẻ — Tính năng đang phát triển'),
+                                  content: Text(
+                                    'Chia sẻ — Tính năng đang phát triển',
+                                  ),
                                   behavior: SnackBarBehavior.floating,
                                 ),
                               );
@@ -257,8 +273,11 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  const Icon(Icons.flight_takeoff_rounded,
-                                      size: 16, color: AppTheme.primaryBlue),
+                                  const Icon(
+                                    Icons.flight_takeoff_rounded,
+                                    size: 16,
+                                    color: AppTheme.primaryBlue,
+                                  ),
                                   const SizedBox(width: 4),
                                   Expanded(
                                     child: Text(
@@ -279,7 +298,10 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
                         ),
                         const SizedBox(width: 12),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: _statusBgColor(),
                             borderRadius: BorderRadius.circular(12),
@@ -301,17 +323,17 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _infoItem(
+                        SharedTripUI.infoItem(
                           Icons.access_time_rounded,
                           tourPackage?.duration ?? '3N/2Đ',
                           'Thời lượng',
                         ),
-                        _infoItem(
+                        SharedTripUI.infoItem(
                           Icons.flight_takeoff_rounded,
                           tourPackage?.departure ?? 'SGN',
                           'Khởi hành',
                         ),
-                        _infoItem(
+                        SharedTripUI.infoItem(
                           Icons.map_rounded,
                           '${tourPackage?.destinations.length ?? 1} Điểm đến',
                           'Lộ trình',
@@ -362,54 +384,11 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
     );
   }
 
-  Widget _floatingButton({required IconData icon, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.9),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Icon(icon, color: Colors.black87),
-      ),
-    );
-  }
-
-  Widget _infoItem(IconData icon, String value, String label) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: AppTheme.backgroundGray,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, size: 20, color: AppTheme.primaryBlue),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          value,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-        ),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.grey, fontSize: 11),
-        ),
-      ],
-    );
-  }
-
-
-
-  Widget _buildRouteMap(List<LatLng> points, List<Marker> markers, LatLng centerPoint) {
+  Widget _buildRouteMap(
+    List<LatLng> points,
+    List<Marker> markers,
+    LatLng centerPoint,
+  ) {
     if (points.isEmpty) {
       return Container(
         height: 200,
@@ -418,8 +397,10 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
           color: Colors.grey.shade100,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Text('Chưa có thông tin toạ độ lộ trình',
-            style: TextStyle(color: Colors.grey)),
+        child: const Text(
+          'Chưa có thông tin toạ độ lộ trình',
+          style: TextStyle(color: Colors.grey),
+        ),
       );
     }
 
@@ -440,23 +421,23 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
                 flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
               ),
             ),
-          children: [
-            TileLayer(
-              urlTemplate: kOpenStreetMapTileUrl,
-              userAgentPackageName: 'com.example.onlinetravelagent',
-            ),
-            if (points.length >= 2)
-              PolylineLayer(
-                polylines: [
-                  Polyline(
-                    points: points,
-                    color: AppTheme.primaryBlue,
-                    strokeWidth: 4,
-                  ),
-                ],
+            children: [
+              TileLayer(
+                urlTemplate: kOpenStreetMapTileUrl,
+                userAgentPackageName: 'com.example.onlinetravelagent',
               ),
-            MarkerLayer(markers: markers),
-          ],
+              if (points.length >= 2)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: points,
+                      color: AppTheme.primaryBlue,
+                      strokeWidth: 4,
+                    ),
+                  ],
+                ),
+              MarkerLayer(markers: markers),
+            ],
           ),
         ),
       ),
@@ -464,13 +445,15 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
   }
 
   Widget _buildInclusionsGrid(TourPackage? tourPackage) {
-    final List<String> inclusions = tourPackage?.includes ?? [
-      'Khách sạn 4 sao',
-      'Ăn uống trọn gói',
-      'Xe đưa đón hiện đại',
-      'Vé tham quan các điểm',
-      'Bảo hiểm du lịch',
-    ];
+    final List<String> inclusions =
+        tourPackage?.includes ??
+        [
+          'Khách sạn 4 sao',
+          'Ăn uống trọn gói',
+          'Xe đưa đón hiện đại',
+          'Vé tham quan các điểm',
+          'Bảo hiểm du lịch',
+        ];
 
     return GridView.builder(
       shrinkWrap: true,
@@ -487,15 +470,30 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
         final item = inclusions[index];
         IconData icon = Icons.check_circle_outline_rounded;
         final lower = item.toLowerCase();
-        if (lower.contains('khách sạn') || lower.contains('resort') || lower.contains('bungalow') || lower.contains('cabin') || lower.contains('ks')) {
+        if (lower.contains('khách sạn') ||
+            lower.contains('resort') ||
+            lower.contains('bungalow') ||
+            lower.contains('cabin') ||
+            lower.contains('ks')) {
           icon = Icons.hotel_rounded;
-        } else if (lower.contains('ăn') || lower.contains('bữa') || lower.contains('buffet') || lower.contains('uống')) {
+        } else if (lower.contains('ăn') ||
+            lower.contains('bữa') ||
+            lower.contains('buffet') ||
+            lower.contains('uống')) {
           icon = Icons.restaurant_rounded;
-        } else if (lower.contains('xe') || lower.contains('bus') || lower.contains('limousine') || lower.contains('cano') || lower.contains('đưa đón')) {
+        } else if (lower.contains('xe') ||
+            lower.contains('bus') ||
+            lower.contains('limousine') ||
+            lower.contains('cano') ||
+            lower.contains('đưa đón')) {
           icon = Icons.directions_bus_rounded;
-        } else if (lower.contains('vé') || lower.contains('đò') || lower.contains('cáp treo')) {
+        } else if (lower.contains('vé') ||
+            lower.contains('đò') ||
+            lower.contains('cáp treo')) {
           icon = Icons.confirmation_num_rounded;
-        } else if (lower.contains('bảo hiểm') || lower.contains('tắm') || lower.contains('y tế')) {
+        } else if (lower.contains('bảo hiểm') ||
+            lower.contains('tắm') ||
+            lower.contains('y tế')) {
           icon = Icons.health_and_safety_rounded;
         }
 
@@ -537,7 +535,8 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
   }
 
   Widget _buildPriceCard(TourPackage? tourPackage) {
-    final double price = tourPackage?.price ?? (widget.trip.totalPrice ?? 150.0);
+    final double price =
+        tourPackage?.price ?? (widget.trip.totalPrice ?? 150.0);
     final double? originalPrice = tourPackage?.originalPrice;
 
     return Container(
@@ -565,7 +564,10 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
@@ -677,7 +679,9 @@ class _PulsingIndicatorState extends State<PulsingIndicator>
             color: const Color(0xFFFF9800),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFF9800).withValues(alpha: 0.6 - (_controller.value * 0.4)),
+                color: const Color(
+                  0xFFFF9800,
+                ).withValues(alpha: 0.6 - (_controller.value * 0.4)),
                 blurRadius: 8 * scale,
                 spreadRadius: 3 * _controller.value,
               ),

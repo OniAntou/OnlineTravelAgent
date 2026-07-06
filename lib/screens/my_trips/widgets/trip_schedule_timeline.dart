@@ -14,12 +14,13 @@ class TripScheduleTimeline extends ConsumerStatefulWidget {
   const TripScheduleTimeline({super.key, required this.trip});
 
   @override
-  ConsumerState<TripScheduleTimeline> createState() => _TripScheduleTimelineState();
+  ConsumerState<TripScheduleTimeline> createState() =>
+      _TripScheduleTimelineState();
 }
 
 class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
   int _selectedDayIndex = 0;
-  
+
   // Custom Time simulation for testing
   int? _simulatedHour;
   int? _simulatedMinute;
@@ -69,10 +70,13 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
     }
 
     final statusLower = widget.trip.status.toLowerCase();
-    if (statusLower == 'đã đi' || statusLower == 'hoàn thành' || statusLower == 'completed') {
+    if (statusLower == 'đã đi' ||
+        statusLower == 'hoàn thành' ||
+        statusLower == 'completed') {
       return 'completed';
     }
-    if (statusLower == 'sắp tới' && (_simulatedHour == null || _simulatedMinute == null)) {
+    if (statusLower == 'sắp tới' &&
+        (_simulatedHour == null || _simulatedMinute == null)) {
       return 'upcoming';
     }
 
@@ -113,7 +117,9 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
           return const SizedBox.shrink();
         }
 
-        final isOngoingTrip = widget.trip.status.toLowerCase() == 'đang diễn ra' || widget.trip.status.toLowerCase() == 'ongoing';
+        final isOngoingTrip =
+            widget.trip.status.toLowerCase() == 'đang diễn ra' ||
+            widget.trip.status.toLowerCase() == 'ongoing';
         final totalDays = schedule.days.length;
 
         // Auto-select today if not specified
@@ -144,22 +150,39 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                     });
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: _showSimulatePanel ? AppTheme.primaryBlue.withValues(alpha: 0.08) : Colors.white,
-                      border: Border.all(color: _showSimulatePanel ? AppTheme.primaryBlue : Colors.grey.shade300),
+                      color: _showSimulatePanel
+                          ? AppTheme.primaryBlue.withValues(alpha: 0.08)
+                          : Colors.white,
+                      border: Border.all(
+                        color: _showSimulatePanel
+                            ? AppTheme.primaryBlue
+                            : Colors.grey.shade300,
+                      ),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.tune_rounded, size: 14, color: _showSimulatePanel ? AppTheme.primaryBlue : Colors.grey.shade600),
+                        Icon(
+                          Icons.tune_rounded,
+                          size: 14,
+                          color: _showSimulatePanel
+                              ? AppTheme.primaryBlue
+                              : Colors.grey.shade600,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           'Giả lập',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            color: _showSimulatePanel ? AppTheme.primaryBlue : Colors.grey.shade600,
+                            color: _showSimulatePanel
+                                ? AppTheme.primaryBlue
+                                : Colors.grey.shade600,
                           ),
                         ),
                       ],
@@ -183,7 +206,11 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.campaign_rounded, color: Colors.orange, size: 20),
+                    const Icon(
+                      Icons.campaign_rounded,
+                      color: Colors.orange,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Column(
@@ -191,12 +218,19 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                         children: [
                           const Text(
                             'Thông báo từ HDV / Ban quản lý',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.orange),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
                             schedule.updates.first.message,
-                            style: const TextStyle(fontSize: 13, color: Colors.black87),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.black87,
+                            ),
                           ),
                         ],
                       ),
@@ -209,7 +243,10 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
             // Real-time tracking status banner if ongoing or simulated
             if (isOngoingTrip || _simulatedHour != null) ...[
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
                   color: const Color(0xFFE8F5E9),
@@ -218,7 +255,11 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.flash_on_rounded, color: Colors.green, size: 18),
+                    const Icon(
+                      Icons.flash_on_rounded,
+                      color: Colors.green,
+                      size: 18,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -258,20 +299,29 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                       },
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppTheme.primaryBlue : Colors.white,
+                          color: isSelected
+                              ? AppTheme.primaryBlue
+                              : Colors.white,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: isSelected ? AppTheme.primaryBlue : Colors.grey.shade300,
+                            color: isSelected
+                                ? AppTheme.primaryBlue
+                                : Colors.grey.shade300,
                           ),
                           boxShadow: isSelected
                               ? [
                                   BoxShadow(
-                                    color: AppTheme.primaryBlue.withValues(alpha: 0.25),
+                                    color: AppTheme.primaryBlue.withValues(
+                                      alpha: 0.25,
+                                    ),
                                     blurRadius: 6,
                                     offset: const Offset(0, 3),
-                                  )
+                                  ),
                                 ]
                               : null,
                         ),
@@ -280,7 +330,9 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: isSelected ? Colors.white : Colors.grey.shade600,
+                            color: isSelected
+                                ? Colors.white
+                                : Colors.grey.shade600,
                           ),
                         ),
                       ),
@@ -326,16 +378,28 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
         children: [
           const Text(
             'Chọn mốc giờ để thử nghiệm Real-Time Tracking:',
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppTheme.textBlack),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.textBlack,
+            ),
           ),
           const SizedBox(height: 10),
           Wrap(
             spacing: 8,
             runSpacing: 8,
             children: selectOptions.map((opt) {
-              final isCurrent = _simulatedHour == opt['hour'] && _simulatedMinute == opt['min'];
+              final isCurrent =
+                  _simulatedHour == opt['hour'] &&
+                  _simulatedMinute == opt['min'];
               return ChoiceChip(
-                label: Text(opt['label'] as String, style: TextStyle(fontSize: 11, color: isCurrent ? Colors.white : Colors.black87)),
+                label: Text(
+                  opt['label'] as String,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: isCurrent ? Colors.white : Colors.black87,
+                  ),
+                ),
                 selected: isCurrent,
                 selectedColor: AppTheme.primaryBlue,
                 backgroundColor: Colors.white,
@@ -364,11 +428,18 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                     _simulatedMinute = null;
                   });
                 },
-                icon: const Icon(Icons.refresh_rounded, size: 14, color: Colors.red),
-                label: const Text('Về thực tế', style: TextStyle(fontSize: 12, color: Colors.red)),
+                icon: const Icon(
+                  Icons.refresh_rounded,
+                  size: 14,
+                  color: Colors.red,
+                ),
+                label: const Text(
+                  'Về thực tế',
+                  style: TextStyle(fontSize: 12, color: Colors.red),
+                ),
               ),
-            )
-          ]
+            ),
+          ],
         ],
       ),
     );
@@ -381,9 +452,16 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
         alignment: Alignment.center,
         child: Column(
           children: [
-            Icon(Icons.event_busy_rounded, size: 48, color: Colors.grey.shade300),
+            Icon(
+              Icons.event_busy_rounded,
+              size: 48,
+              color: Colors.grey.shade300,
+            ),
             const SizedBox(height: 16),
-            Text('Chưa có dữ liệu lịch trình cho ngày này', style: TextStyle(color: Colors.grey.shade500, fontSize: 14)),
+            Text(
+              'Chưa có dữ liệu lịch trình cho ngày này',
+              style: TextStyle(color: Colors.grey.shade500, fontSize: 14),
+            ),
           ],
         ),
       );
@@ -394,7 +472,7 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
         final item = items[index];
         final isLast = index == items.length - 1;
         final status = _getMilestoneStatus(items, index);
-        
+
         Color dotColor;
         Color lineColor;
         double lineOpacity;
@@ -439,14 +517,20 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                         boxShadow: status == 'ongoing'
                             ? [
                                 BoxShadow(
-                                  color: const Color(0xFFFF9800).withValues(alpha: 0.3),
+                                  color: const Color(
+                                    0xFFFF9800,
+                                  ).withValues(alpha: 0.3),
                                   blurRadius: 8,
                                   spreadRadius: 2,
-                                )
+                                ),
                               ]
                             : null,
                       ),
-                      child: Icon(iconData, color: dotColor, size: status == 'ongoing' ? 24 : 20),
+                      child: Icon(
+                        iconData,
+                        color: dotColor,
+                        size: status == 'ongoing' ? 24 : 20,
+                      ),
                     ),
                     if (!isLast)
                       Expanded(
@@ -461,7 +545,7 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                 ),
               ),
               const SizedBox(width: 12),
-              
+
               // Content Column
               Expanded(
                 child: Padding(
@@ -481,10 +565,12 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                       boxShadow: status == 'ongoing'
                           ? [
                               BoxShadow(
-                                color: const Color(0xFFFF9800).withValues(alpha: 0.1),
+                                color: const Color(
+                                  0xFFFF9800,
+                                ).withValues(alpha: 0.1),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
-                              )
+                              ),
                             ]
                           : [],
                     ),
@@ -495,39 +581,58 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              item.startTime + (item.endTime.isNotEmpty ? ' - ${item.endTime}' : ''),
+                              item.startTime +
+                                  (item.endTime.isNotEmpty
+                                      ? ' - ${item.endTime}'
+                                      : ''),
                               style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                                 color: status == 'completed'
                                     ? AppTheme.primaryBlue
-                                    : (status == 'ongoing' ? const Color(0xFFE65100) : Colors.grey.shade500),
+                                    : (status == 'ongoing'
+                                          ? const Color(0xFFE65100)
+                                          : Colors.grey.shade500),
                               ),
                             ),
                             if (status == 'ongoing')
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFFF9800),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: const Text(
                                   'Đang diễn ra',
-                                  style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             if (status == 'cancelled')
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
                                   color: Colors.red,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: const Text(
                                   'Đã huỷ',
-                                  style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              )
+                              ),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -536,8 +641,12 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: status == 'cancelled' ? Colors.grey : AppTheme.textBlack,
-                            decoration: status == 'cancelled' ? TextDecoration.lineThrough : null,
+                            color: status == 'cancelled'
+                                ? Colors.grey
+                                : AppTheme.textBlack,
+                            decoration: status == 'cancelled'
+                                ? TextDecoration.lineThrough
+                                : null,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -545,7 +654,9 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                           item.description,
                           style: TextStyle(
                             fontSize: 13,
-                            color: status == 'cancelled' ? Colors.grey : Colors.grey.shade700,
+                            color: status == 'cancelled'
+                                ? Colors.grey
+                                : Colors.grey.shade700,
                             height: 1.4,
                           ),
                         ),
@@ -553,7 +664,11 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                           const SizedBox(height: 12),
                           Row(
                             children: [
-                              Icon(Icons.location_on_rounded, size: 14, color: Colors.grey.shade500),
+                              Icon(
+                                Icons.location_on_rounded,
+                                size: 14,
+                                color: Colors.grey.shade500,
+                              ),
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
@@ -567,7 +682,7 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                               ),
                             ],
                           ),
-                        ]
+                        ],
                       ],
                     ),
                   ),

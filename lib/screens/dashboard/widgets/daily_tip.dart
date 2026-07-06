@@ -32,10 +32,7 @@ class DailyTip extends StatelessWidget {
                 Expanded(
                   child: Text(
                     'Mẹo hôm nay: Đặt chuyến trước 2-3 tuần để có giá tốt hơn và nhiều khung giờ đẹp.',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF3B4A66),
-                    ),
+                    style: TextStyle(fontSize: 13, color: Color(0xFF3B4A66)),
                   ),
                 ),
               ],

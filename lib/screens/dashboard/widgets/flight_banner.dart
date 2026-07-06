@@ -62,10 +62,7 @@ class FlightBanner extends StatelessWidget {
                     SizedBox(height: 4),
                     Text(
                       'Tìm chuyến bay giá rẻ nhất',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: Colors.white70, fontSize: 13),
                     ),
                   ],
                 ),
@@ -87,63 +84,64 @@ class FlightPageRoute extends PageRouteBuilder {
   final Widget page;
 
   FlightPageRoute({required this.page})
-      : super(
-          pageBuilder: (context, animation, secondaryAnimation) => page,
-          transitionDuration: const Duration(milliseconds: 3500), 
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            
-            if (animation.status == AnimationStatus.reverse) {
-              return FadeTransition(opacity: animation, child: child);
-            }
+    : super(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionDuration: const Duration(milliseconds: 3500),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          if (animation.status == AnimationStatus.reverse) {
+            return FadeTransition(opacity: animation, child: child);
+          }
 
-            final planeVal = Curves.easeOutCubic.transform(animation.value);
+          final planeVal = Curves.easeOutCubic.transform(animation.value);
 
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                final width = constraints.maxWidth;
-                final height = constraints.maxHeight;
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final height = constraints.maxHeight;
 
-                const planeSize = 800.0;
-                const planeRadius = planeSize / 2;
-                
-                final travelAngle = math.atan2(-height, width); 
-                const visualRadius = planeRadius * 0.7;
+              const planeSize = 800.0;
+              const planeRadius = planeSize / 2;
 
-                final startX = -visualRadius * math.cos(travelAngle);
-                final startY = height - visualRadius * math.sin(travelAngle);
-                
-                const safeClearance = planeRadius * 1.5; 
-                final distanceToEnd = safeClearance / math.max(math.cos(travelAngle), -math.sin(travelAngle));
+              final travelAngle = math.atan2(-height, width);
+              const visualRadius = planeRadius * 0.7;
 
-                final endX = width + distanceToEnd * math.cos(travelAngle);
-                final endY = distanceToEnd * math.sin(travelAngle);
+              final startX = -visualRadius * math.cos(travelAngle);
+              final startY = height - visualRadius * math.sin(travelAngle);
 
-                final currentX = startX + (endX - startX) * planeVal;
-                final currentY = startY + (endY - startY) * planeVal;
+              const safeClearance = planeRadius * 1.5;
+              final distanceToEnd =
+                  safeClearance /
+                  math.max(math.cos(travelAngle), -math.sin(travelAngle));
 
-                const nativeAngle = -math.pi / 2;
-                final rotation = travelAngle - nativeAngle;
+              final endX = width + distanceToEnd * math.cos(travelAngle);
+              final endY = distanceToEnd * math.sin(travelAngle);
 
-                return Stack(
-                  children: [
-                    ClipPath(
-                      clipper: _WipeClipper(currentX, currentY, travelAngle),
-                      child: child,
+              final currentX = startX + (endX - startX) * planeVal;
+              final currentY = startY + (endY - startY) * planeVal;
+
+              const nativeAngle = -math.pi / 2;
+              final rotation = travelAngle - nativeAngle;
+
+              return Stack(
+                children: [
+                  ClipPath(
+                    clipper: _WipeClipper(currentX, currentY, travelAngle),
+                    child: child,
+                  ),
+                  Positioned(
+                    left: currentX - planeRadius,
+                    top: currentY - planeRadius,
+                    child: Transform.rotate(
+                      angle: rotation,
+                      child: const _AirplaneWithTrails(planeSize: planeSize),
                     ),
-                    Positioned(
-                      left: currentX - planeRadius,
-                      top: currentY - planeRadius,
-                      child: Transform.rotate(
-                        angle: rotation,
-                        child: const _AirplaneWithTrails(planeSize: planeSize),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
-        );
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
 }
 
 class _AirplaneWithTrails extends StatelessWidget {
@@ -151,7 +149,12 @@ class _AirplaneWithTrails extends StatelessWidget {
 
   const _AirplaneWithTrails({required this.planeSize});
 
-  Widget _buildSubtleTrail(double left, double top, double width, double length) {
+  Widget _buildSubtleTrail(
+    double left,
+    double top,
+    double width,
+    double length,
+  ) {
     return Positioned(
       left: left,
       top: top,
@@ -184,8 +187,8 @@ class _AirplaneWithTrails extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           _buildSubtleTrail(315, 650, 150, 300), // Đuôi máy bay to hơn
-          _buildSubtleTrail(88, 480, 24, 150),   // Cánh trái to hơn
-          _buildSubtleTrail(688, 480, 24, 150),  // Cánh phải to hơn
+          _buildSubtleTrail(88, 480, 24, 150), // Cánh trái to hơn
+          _buildSubtleTrail(688, 480, 24, 150), // Cánh phải to hơn
           Icon(
             Icons.flight,
             size: planeSize,
@@ -195,7 +198,7 @@ class _AirplaneWithTrails extends StatelessWidget {
                 color: Colors.black.withValues(alpha: 0.3),
                 blurRadius: 30,
                 offset: const Offset(15, 15),
-              )
+              ),
             ],
           ),
         ],
@@ -218,13 +221,13 @@ class _WipeClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     final matrix = Matrix4.translationValues(currentX, currentY, 0.0)
       ..rotateZ(travelAngle);
-      
+
     return _rectPath.transform(matrix.storage);
   }
 
   @override
-  bool shouldReclip(covariant _WipeClipper oldClipper) => 
-      currentX != oldClipper.currentX || 
-      currentY != oldClipper.currentY || 
+  bool shouldReclip(covariant _WipeClipper oldClipper) =>
+      currentX != oldClipper.currentX ||
+      currentY != oldClipper.currentY ||
       travelAngle != oldClipper.travelAngle;
 }

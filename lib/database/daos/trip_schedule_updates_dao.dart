@@ -19,13 +19,16 @@ class TripScheduleUpdatesDao extends DatabaseAccessor<AppDatabase>
   Future<void> insertAll(List<TripScheduleUpdatesTableCompanion> items) async {
     await batch((batch) {
       batch.insertAll(
-          tripScheduleUpdatesTable, items, mode: InsertMode.replace);
+        tripScheduleUpdatesTable,
+        items,
+        mode: InsertMode.replace,
+      );
     });
   }
 
   Future<void> deleteByTripId(String tripId) async {
-    (delete(tripScheduleUpdatesTable)
-          ..where((t) => t.tripId.equals(tripId)))
-        .go();
+    await (delete(
+      tripScheduleUpdatesTable,
+    )..where((t) => t.tripId.equals(tripId))).go();
   }
 }

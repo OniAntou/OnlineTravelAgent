@@ -22,19 +22,23 @@ class TripScheduleItemsDao extends DatabaseAccessor<AppDatabase>
     });
   }
 
-  Future<void> updateItem(String id,
-      {String? statusOverride, String? note}) async {
+  Future<void> updateItem(
+    String id, {
+    String? statusOverride,
+    String? note,
+  }) async {
     final companion = TripScheduleItemsTableCompanion(
       statusOverride: Value(statusOverride),
       note: Value(note),
       updatedAt: Value(DateTime.now().toIso8601String()),
     );
-    (update(tripScheduleItemsTable)..where((t) => t.id.equals(id)))
-        .write(companion);
+    await (update(
+      tripScheduleItemsTable,
+    )..where((t) => t.id.equals(id))).write(companion);
   }
 
   Future<void> deleteByDayId(String dayId) async {
-    (delete(tripScheduleItemsTable)..where((t) => t.dayId.equals(dayId)))
+    await (delete(tripScheduleItemsTable)..where((t) => t.dayId.equals(dayId)))
         .go();
   }
 }

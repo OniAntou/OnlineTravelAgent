@@ -6,6 +6,7 @@ import { authRouter } from "./auth.routes.js";
 import { partnerRouter } from "./partner.routes.js";
 import { paymentRouter } from "./payment.routes.js";
 import { adminAuth, partnerAuth } from "../middlewares/auth.js";
+import { invalidateBootstrapCacheOnMutation } from "../config/cache.js";
 
 export const routes = Router();
 
@@ -27,7 +28,7 @@ const generalLimiter = rateLimit({
   message: { message: "Too many requests, please try again later" },
 });
 
-routes.use("/", generalLimiter, clientRouter);
+routes.use("/", generalLimiter, invalidateBootstrapCacheOnMutation, clientRouter);
 routes.use("/payment", paymentRouter);
 routes.use("/admin", adminAuth, adminRouter);
 routes.use("/partner", partnerAuth, partnerRouter);

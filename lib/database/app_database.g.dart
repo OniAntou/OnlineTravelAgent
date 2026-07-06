@@ -6055,6 +6055,356 @@ class DocumentsTableCompanion extends UpdateCompanion<DocumentsTableData> {
   }
 }
 
+class $OfflineQueueTableTable extends OfflineQueueTable
+    with TableInfo<$OfflineQueueTableTable, OfflineQueueItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $OfflineQueueTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _endpointMeta = const VerificationMeta(
+    'endpoint',
+  );
+  @override
+  late final GeneratedColumn<String> endpoint = GeneratedColumn<String>(
+    'endpoint',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _methodMeta = const VerificationMeta('method');
+  @override
+  late final GeneratedColumn<String> method = GeneratedColumn<String>(
+    'method',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bodyJsonMeta = const VerificationMeta(
+    'bodyJson',
+  );
+  @override
+  late final GeneratedColumn<String> bodyJson = GeneratedColumn<String>(
+    'body_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    endpoint,
+    method,
+    bodyJson,
+    createdAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'offline_queue_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<OfflineQueueItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('endpoint')) {
+      context.handle(
+        _endpointMeta,
+        endpoint.isAcceptableOrUnknown(data['endpoint']!, _endpointMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_endpointMeta);
+    }
+    if (data.containsKey('method')) {
+      context.handle(
+        _methodMeta,
+        method.isAcceptableOrUnknown(data['method']!, _methodMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_methodMeta);
+    }
+    if (data.containsKey('body_json')) {
+      context.handle(
+        _bodyJsonMeta,
+        bodyJson.isAcceptableOrUnknown(data['body_json']!, _bodyJsonMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  OfflineQueueItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return OfflineQueueItem(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      endpoint: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}endpoint'],
+      )!,
+      method: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}method'],
+      )!,
+      bodyJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}body_json'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+    );
+  }
+
+  @override
+  $OfflineQueueTableTable createAlias(String alias) {
+    return $OfflineQueueTableTable(attachedDatabase, alias);
+  }
+}
+
+class OfflineQueueItem extends DataClass
+    implements Insertable<OfflineQueueItem> {
+  final int id;
+  final String endpoint;
+  final String method;
+  final String? bodyJson;
+  final DateTime createdAt;
+  const OfflineQueueItem({
+    required this.id,
+    required this.endpoint,
+    required this.method,
+    this.bodyJson,
+    required this.createdAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['endpoint'] = Variable<String>(endpoint);
+    map['method'] = Variable<String>(method);
+    if (!nullToAbsent || bodyJson != null) {
+      map['body_json'] = Variable<String>(bodyJson);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  OfflineQueueTableCompanion toCompanion(bool nullToAbsent) {
+    return OfflineQueueTableCompanion(
+      id: Value(id),
+      endpoint: Value(endpoint),
+      method: Value(method),
+      bodyJson: bodyJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bodyJson),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory OfflineQueueItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return OfflineQueueItem(
+      id: serializer.fromJson<int>(json['id']),
+      endpoint: serializer.fromJson<String>(json['endpoint']),
+      method: serializer.fromJson<String>(json['method']),
+      bodyJson: serializer.fromJson<String?>(json['bodyJson']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'endpoint': serializer.toJson<String>(endpoint),
+      'method': serializer.toJson<String>(method),
+      'bodyJson': serializer.toJson<String?>(bodyJson),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  OfflineQueueItem copyWith({
+    int? id,
+    String? endpoint,
+    String? method,
+    Value<String?> bodyJson = const Value.absent(),
+    DateTime? createdAt,
+  }) => OfflineQueueItem(
+    id: id ?? this.id,
+    endpoint: endpoint ?? this.endpoint,
+    method: method ?? this.method,
+    bodyJson: bodyJson.present ? bodyJson.value : this.bodyJson,
+    createdAt: createdAt ?? this.createdAt,
+  );
+  OfflineQueueItem copyWithCompanion(OfflineQueueTableCompanion data) {
+    return OfflineQueueItem(
+      id: data.id.present ? data.id.value : this.id,
+      endpoint: data.endpoint.present ? data.endpoint.value : this.endpoint,
+      method: data.method.present ? data.method.value : this.method,
+      bodyJson: data.bodyJson.present ? data.bodyJson.value : this.bodyJson,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OfflineQueueItem(')
+          ..write('id: $id, ')
+          ..write('endpoint: $endpoint, ')
+          ..write('method: $method, ')
+          ..write('bodyJson: $bodyJson, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, endpoint, method, bodyJson, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is OfflineQueueItem &&
+          other.id == this.id &&
+          other.endpoint == this.endpoint &&
+          other.method == this.method &&
+          other.bodyJson == this.bodyJson &&
+          other.createdAt == this.createdAt);
+}
+
+class OfflineQueueTableCompanion extends UpdateCompanion<OfflineQueueItem> {
+  final Value<int> id;
+  final Value<String> endpoint;
+  final Value<String> method;
+  final Value<String?> bodyJson;
+  final Value<DateTime> createdAt;
+  const OfflineQueueTableCompanion({
+    this.id = const Value.absent(),
+    this.endpoint = const Value.absent(),
+    this.method = const Value.absent(),
+    this.bodyJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  OfflineQueueTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String endpoint,
+    required String method,
+    this.bodyJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  }) : endpoint = Value(endpoint),
+       method = Value(method);
+  static Insertable<OfflineQueueItem> custom({
+    Expression<int>? id,
+    Expression<String>? endpoint,
+    Expression<String>? method,
+    Expression<String>? bodyJson,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (endpoint != null) 'endpoint': endpoint,
+      if (method != null) 'method': method,
+      if (bodyJson != null) 'body_json': bodyJson,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  OfflineQueueTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? endpoint,
+    Value<String>? method,
+    Value<String?>? bodyJson,
+    Value<DateTime>? createdAt,
+  }) {
+    return OfflineQueueTableCompanion(
+      id: id ?? this.id,
+      endpoint: endpoint ?? this.endpoint,
+      method: method ?? this.method,
+      bodyJson: bodyJson ?? this.bodyJson,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (endpoint.present) {
+      map['endpoint'] = Variable<String>(endpoint.value);
+    }
+    if (method.present) {
+      map['method'] = Variable<String>(method.value);
+    }
+    if (bodyJson.present) {
+      map['body_json'] = Variable<String>(bodyJson.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OfflineQueueTableCompanion(')
+          ..write('id: $id, ')
+          ..write('endpoint: $endpoint, ')
+          ..write('method: $method, ')
+          ..write('bodyJson: $bodyJson, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6076,6 +6426,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $TripScheduleUpdatesTableTable(this);
   late final $ReviewsTableTable reviewsTable = $ReviewsTableTable(this);
   late final $DocumentsTableTable documentsTable = $DocumentsTableTable(this);
+  late final $OfflineQueueTableTable offlineQueueTable =
+      $OfflineQueueTableTable(this);
   late final DestinationsDao destinationsDao = DestinationsDao(
     this as AppDatabase,
   );
@@ -6096,6 +6448,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       TripScheduleUpdatesDao(this as AppDatabase);
   late final ReviewsDao reviewsDao = ReviewsDao(this as AppDatabase);
   late final DocumentsDao documentsDao = DocumentsDao(this as AppDatabase);
+  late final OfflineQueueDao offlineQueueDao = OfflineQueueDao(
+    this as AppDatabase,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6112,6 +6467,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     tripScheduleUpdatesTable,
     reviewsTable,
     documentsTable,
+    offlineQueueTable,
   ];
 }
 
@@ -9265,6 +9621,213 @@ typedef $$DocumentsTableTableProcessedTableManager =
       DocumentsTableData,
       PrefetchHooks Function()
     >;
+typedef $$OfflineQueueTableTableCreateCompanionBuilder =
+    OfflineQueueTableCompanion Function({
+      Value<int> id,
+      required String endpoint,
+      required String method,
+      Value<String?> bodyJson,
+      Value<DateTime> createdAt,
+    });
+typedef $$OfflineQueueTableTableUpdateCompanionBuilder =
+    OfflineQueueTableCompanion Function({
+      Value<int> id,
+      Value<String> endpoint,
+      Value<String> method,
+      Value<String?> bodyJson,
+      Value<DateTime> createdAt,
+    });
+
+class $$OfflineQueueTableTableFilterComposer
+    extends Composer<_$AppDatabase, $OfflineQueueTableTable> {
+  $$OfflineQueueTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get endpoint => $composableBuilder(
+    column: $table.endpoint,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get method => $composableBuilder(
+    column: $table.method,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bodyJson => $composableBuilder(
+    column: $table.bodyJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$OfflineQueueTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $OfflineQueueTableTable> {
+  $$OfflineQueueTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get endpoint => $composableBuilder(
+    column: $table.endpoint,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get method => $composableBuilder(
+    column: $table.method,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bodyJson => $composableBuilder(
+    column: $table.bodyJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$OfflineQueueTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $OfflineQueueTableTable> {
+  $$OfflineQueueTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get endpoint =>
+      $composableBuilder(column: $table.endpoint, builder: (column) => column);
+
+  GeneratedColumn<String> get method =>
+      $composableBuilder(column: $table.method, builder: (column) => column);
+
+  GeneratedColumn<String> get bodyJson =>
+      $composableBuilder(column: $table.bodyJson, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$OfflineQueueTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $OfflineQueueTableTable,
+          OfflineQueueItem,
+          $$OfflineQueueTableTableFilterComposer,
+          $$OfflineQueueTableTableOrderingComposer,
+          $$OfflineQueueTableTableAnnotationComposer,
+          $$OfflineQueueTableTableCreateCompanionBuilder,
+          $$OfflineQueueTableTableUpdateCompanionBuilder,
+          (
+            OfflineQueueItem,
+            BaseReferences<
+              _$AppDatabase,
+              $OfflineQueueTableTable,
+              OfflineQueueItem
+            >,
+          ),
+          OfflineQueueItem,
+          PrefetchHooks Function()
+        > {
+  $$OfflineQueueTableTableTableManager(
+    _$AppDatabase db,
+    $OfflineQueueTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$OfflineQueueTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$OfflineQueueTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$OfflineQueueTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> endpoint = const Value.absent(),
+                Value<String> method = const Value.absent(),
+                Value<String?> bodyJson = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => OfflineQueueTableCompanion(
+                id: id,
+                endpoint: endpoint,
+                method: method,
+                bodyJson: bodyJson,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String endpoint,
+                required String method,
+                Value<String?> bodyJson = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+              }) => OfflineQueueTableCompanion.insert(
+                id: id,
+                endpoint: endpoint,
+                method: method,
+                bodyJson: bodyJson,
+                createdAt: createdAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$OfflineQueueTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $OfflineQueueTableTable,
+      OfflineQueueItem,
+      $$OfflineQueueTableTableFilterComposer,
+      $$OfflineQueueTableTableOrderingComposer,
+      $$OfflineQueueTableTableAnnotationComposer,
+      $$OfflineQueueTableTableCreateCompanionBuilder,
+      $$OfflineQueueTableTableUpdateCompanionBuilder,
+      (
+        OfflineQueueItem,
+        BaseReferences<
+          _$AppDatabase,
+          $OfflineQueueTableTable,
+          OfflineQueueItem
+        >,
+      ),
+      OfflineQueueItem,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -9297,4 +9860,6 @@ class $AppDatabaseManager {
       $$ReviewsTableTableTableManager(_db, _db.reviewsTable);
   $$DocumentsTableTableTableManager get documentsTable =>
       $$DocumentsTableTableTableManager(_db, _db.documentsTable);
+  $$OfflineQueueTableTableTableManager get offlineQueueTable =>
+      $$OfflineQueueTableTableTableManager(_db, _db.offlineQueueTable);
 }

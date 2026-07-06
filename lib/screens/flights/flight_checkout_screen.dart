@@ -20,7 +20,8 @@ class FlightCheckoutScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<FlightCheckoutScreen> createState() => _FlightCheckoutScreenState();
+  ConsumerState<FlightCheckoutScreen> createState() =>
+      _FlightCheckoutScreenState();
 }
 
 class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
@@ -35,7 +36,7 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
     final adultPrice = basePrice * _adults;
     final childPrice = basePrice * 0.75 * _children; // Children are 75%
     final classMultiplier = _isBusinessClass ? 2.0 : 1.0;
-    
+
     double baggagePrice = 0;
     if (_extraBaggage == 15) baggagePrice = 20;
     if (_extraBaggage == 20) baggagePrice = 30;
@@ -56,7 +57,8 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
 
     setState(() => _isProcessing = true);
 
-    final String guestsStr = '$_adults Người lớn, $_children Trẻ em'
+    final String guestsStr =
+        '$_adults Người lớn, $_children Trẻ em'
         '${_isBusinessClass ? ' (Thương gia)' : ' (Phổ thông)'}';
 
     try {
@@ -87,7 +89,10 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
     return Scaffold(
       backgroundColor: AppTheme.backgroundGray,
       appBar: AppBar(
-        title: const Text('Thanh toán vé máy bay', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+        title: const Text(
+          'Thanh toán vé máy bay',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -113,9 +118,7 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
             bottom: 0,
             left: 0,
             right: 0,
-            child: SafeArea(
-              child: _buildBottomBar(),
-            ),
+            child: SafeArea(child: _buildBottomBar()),
           ),
         ],
       ),
@@ -150,22 +153,40 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
                   children: [
                     Container(
                       padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(4),
-                        child: Image.asset(widget.flight.airlineLogo, width: 24, height: 24, fit: BoxFit.contain, errorBuilder: (context, error, stackTrace) => const Icon(Icons.flight, size: 24)),
+                        child: Image.asset(
+                          widget.flight.airlineLogo,
+                          width: 24,
+                          height: 24,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.flight, size: 24),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Text(
                       widget.flight.airline,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),
                 Text(
                   widget.date,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -175,7 +196,17 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
               Container(height: 1, color: Colors.transparent), // Layout dummy
               Row(
                 children: [
-                  Container(width: 12, height: 24, decoration: const BoxDecoration(color: AppTheme.backgroundGray, borderRadius: BorderRadius.only(topRight: Radius.circular(12), bottomRight: Radius.circular(12)))),
+                  Container(
+                    width: 12,
+                    height: 24,
+                    decoration: const BoxDecoration(
+                      color: AppTheme.backgroundGray,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(12),
+                        bottomRight: Radius.circular(12),
+                      ),
+                    ),
+                  ),
                   Expanded(
                     child: LayoutBuilder(
                       builder: (context, constraints) {
@@ -184,13 +215,29 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: List.generate(
                             (constraints.constrainWidth() / 8).floor(),
-                            (index) => const SizedBox(width: 4, height: 1.5, child: DecoratedBox(decoration: BoxDecoration(color: Colors.grey))),
+                            (index) => const SizedBox(
+                              width: 4,
+                              height: 1.5,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(color: Colors.grey),
+                              ),
+                            ),
                           ),
                         );
                       },
                     ),
                   ),
-                  Container(width: 12, height: 24, decoration: const BoxDecoration(color: AppTheme.backgroundGray, borderRadius: BorderRadius.only(topLeft: Radius.circular(12), bottomLeft: Radius.circular(12)))),
+                  Container(
+                    width: 12,
+                    height: 24,
+                    decoration: const BoxDecoration(
+                      color: AppTheme.backgroundGray,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        bottomLeft: Radius.circular(12),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -200,15 +247,34 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildTimeLocation(widget.flight.departureTime, widget.flight.departure, CrossAxisAlignment.start),
+                _buildTimeLocation(
+                  widget.flight.departureTime,
+                  widget.flight.departure,
+                  CrossAxisAlignment.start,
+                ),
                 Column(
                   children: [
-                    const Icon(Icons.flight_takeoff_rounded, color: AppTheme.primaryBlue, size: 28),
+                    const Icon(
+                      Icons.flight_takeoff_rounded,
+                      color: AppTheme.primaryBlue,
+                      size: 28,
+                    ),
                     const SizedBox(height: 8),
-                    Text(widget.flight.duration, style: const TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.w600)),
+                    Text(
+                      widget.flight.duration,
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ],
                 ),
-                _buildTimeLocation(widget.flight.arrivalTime, widget.flight.arrival, CrossAxisAlignment.end),
+                _buildTimeLocation(
+                  widget.flight.arrivalTime,
+                  widget.flight.arrival,
+                  CrossAxisAlignment.end,
+                ),
               ],
             ),
           ),
@@ -217,13 +283,27 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
     );
   }
 
-  Widget _buildTimeLocation(String time, String location, CrossAxisAlignment alignment) {
+  Widget _buildTimeLocation(
+    String time,
+    String location,
+    CrossAxisAlignment alignment,
+  ) {
     return Column(
       crossAxisAlignment: alignment,
       children: [
-        Text(time, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 24)),
+        Text(
+          time,
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 24),
+        ),
         const SizedBox(height: 4),
-        Text(location, style: TextStyle(color: Colors.grey.shade600, fontSize: 15, fontWeight: FontWeight.w500)),
+        Text(
+          location,
+          style: TextStyle(
+            color: Colors.grey.shade600,
+            fontSize: 15,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ],
     );
   }
@@ -285,9 +365,15 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 2),
-            Text(subtitle, style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+            Text(
+              subtitle,
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+            ),
           ],
         ),
         Row(
@@ -296,20 +382,43 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
               onTap: () => onChanged(value - 1),
               child: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: value > 0 ? AppTheme.primaryBlue.withValues(alpha: 0.1) : Colors.grey.shade100, borderRadius: BorderRadius.circular(8)),
-                child: Icon(Icons.remove, size: 16, color: value > 0 ? AppTheme.primaryBlue : Colors.grey),
+                decoration: BoxDecoration(
+                  color: value > 0
+                      ? AppTheme.primaryBlue.withValues(alpha: 0.1)
+                      : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.remove,
+                  size: 16,
+                  color: value > 0 ? AppTheme.primaryBlue : Colors.grey,
+                ),
               ),
             ),
             SizedBox(
               width: 36,
-              child: Text('$value', textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+              child: Text(
+                '$value',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ),
             GestureDetector(
               onTap: () => onChanged(value + 1),
               child: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: AppTheme.primaryBlue.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
-                child: const Icon(Icons.add, size: 16, color: AppTheme.primaryBlue),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.add,
+                  size: 16,
+                  color: AppTheme.primaryBlue,
+                ),
               ),
             ),
           ],
@@ -336,17 +445,54 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: !_isBusinessClass ? Colors.white : Colors.white.withValues(alpha: 0.5),
-                    border: Border.all(color: !_isBusinessClass ? AppTheme.primaryBlue : Colors.grey.shade300, width: !_isBusinessClass ? 2 : 1),
+                    color: !_isBusinessClass
+                        ? Colors.white
+                        : Colors.white.withValues(alpha: 0.5),
+                    border: Border.all(
+                      color: !_isBusinessClass
+                          ? AppTheme.primaryBlue
+                          : Colors.grey.shade300,
+                      width: !_isBusinessClass ? 2 : 1,
+                    ),
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: !_isBusinessClass ? [BoxShadow(color: AppTheme.primaryBlue.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))] : [],
+                    boxShadow: !_isBusinessClass
+                        ? [
+                            BoxShadow(
+                              color: AppTheme.primaryBlue.withValues(
+                                alpha: 0.1,
+                              ),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ]
+                        : [],
                   ),
                   child: Column(
                     children: [
-                      Icon(Icons.event_seat_rounded, color: !_isBusinessClass ? AppTheme.primaryBlue : Colors.grey),
+                      Icon(
+                        Icons.event_seat_rounded,
+                        color: !_isBusinessClass
+                            ? AppTheme.primaryBlue
+                            : Colors.grey,
+                      ),
                       const SizedBox(height: 8),
-                      Text('Phổ thông', style: TextStyle(color: !_isBusinessClass ? AppTheme.primaryBlue : Colors.grey.shade600, fontWeight: FontWeight.bold, fontSize: 14)),
-                      Text('Tiêu chuẩn', style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
+                      Text(
+                        'Phổ thông',
+                        style: TextStyle(
+                          color: !_isBusinessClass
+                              ? AppTheme.primaryBlue
+                              : Colors.grey.shade600,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        'Tiêu chuẩn',
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 11,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -360,18 +506,60 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    gradient: _isBusinessClass ? const LinearGradient(colors: [Color(0xFF1E293B), Color(0xFF0F172A)], begin: Alignment.topLeft, end: Alignment.bottomRight) : null,
-                    color: _isBusinessClass ? null : Colors.white.withValues(alpha: 0.5),
-                    border: Border.all(color: _isBusinessClass ? Colors.transparent : Colors.grey.shade300),
+                    gradient: _isBusinessClass
+                        ? const LinearGradient(
+                            colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                        : null,
+                    color: _isBusinessClass
+                        ? null
+                        : Colors.white.withValues(alpha: 0.5),
+                    border: Border.all(
+                      color: _isBusinessClass
+                          ? Colors.transparent
+                          : Colors.grey.shade300,
+                    ),
                     borderRadius: BorderRadius.circular(16),
-                    boxShadow: _isBusinessClass ? [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 4))] : [],
+                    boxShadow: _isBusinessClass
+                        ? [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.2),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ]
+                        : [],
                   ),
                   child: Column(
                     children: [
-                      Icon(Icons.airline_seat_recline_extra_rounded, color: _isBusinessClass ? const Color(0xFFFBBF24) : Colors.grey),
+                      Icon(
+                        Icons.airline_seat_recline_extra_rounded,
+                        color: _isBusinessClass
+                            ? const Color(0xFFFBBF24)
+                            : Colors.grey,
+                      ),
                       const SizedBox(height: 8),
-                      Text('Thương gia', style: TextStyle(color: _isBusinessClass ? const Color(0xFFFBBF24) : Colors.grey.shade600, fontWeight: FontWeight.bold, fontSize: 14)),
-                      Text('Giá x2', style: TextStyle(color: _isBusinessClass ? Colors.grey.shade400 : Colors.grey.shade500, fontSize: 11)),
+                      Text(
+                        'Thương gia',
+                        style: TextStyle(
+                          color: _isBusinessClass
+                              ? const Color(0xFFFBBF24)
+                              : Colors.grey.shade600,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        'Giá x2',
+                        style: TextStyle(
+                          color: _isBusinessClass
+                              ? Colors.grey.shade400
+                              : Colors.grey.shade500,
+                          fontSize: 11,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -394,14 +582,24 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
         const SizedBox(height: 16),
         _buildBaggageOption('7kg Xách tay', 'Không ký gửi', 0, 0),
         const SizedBox(height: 12),
-        _buildBaggageOption('Mua thêm 15kg', 'Phù hợp du lịch ngắn ngày', 15, 20),
+        _buildBaggageOption(
+          'Mua thêm 15kg',
+          'Phù hợp du lịch ngắn ngày',
+          15,
+          20,
+        ),
         const SizedBox(height: 12),
         _buildBaggageOption('Mua thêm 20kg', 'Phù hợp chuyến đi xa', 20, 30),
       ],
     );
   }
 
-  Widget _buildBaggageOption(String title, String subtitle, int value, int price) {
+  Widget _buildBaggageOption(
+    String title,
+    String subtitle,
+    int value,
+    int price,
+  ) {
     final isSelected = _extraBaggage == value;
     return GestureDetector(
       onTap: () => setState(() => _extraBaggage = value),
@@ -410,30 +608,66 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: isSelected ? AppTheme.primaryBlue : Colors.grey.shade200, width: isSelected ? 2 : 1),
+          border: Border.all(
+            color: isSelected ? AppTheme.primaryBlue : Colors.grey.shade200,
+            width: isSelected ? 2 : 1,
+          ),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: isSelected ? [BoxShadow(color: AppTheme.primaryBlue.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4))] : [],
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : [],
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: isSelected ? AppTheme.primaryBlue.withValues(alpha: 0.1) : Colors.grey.shade50, borderRadius: BorderRadius.circular(12)),
-              child: Icon(Icons.luggage_rounded, color: isSelected ? AppTheme.primaryBlue : Colors.grey.shade400),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppTheme.primaryBlue.withValues(alpha: 0.1)
+                    : Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.luggage_rounded,
+                color: isSelected ? AppTheme.primaryBlue : Colors.grey.shade400,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: isSelected ? AppTheme.primaryBlue : Colors.black87)),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      color: isSelected ? AppTheme.primaryBlue : Colors.black87,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text(subtitle, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                  Text(
+                    subtitle,
+                    style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                  ),
                 ],
               ),
             ),
             if (price > 0)
-              Text('+${formatVND(price * 1000.0)}', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppTheme.primaryBlue)),
+              Text(
+                '+${formatVND(price * 1000.0)}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                  color: AppTheme.primaryBlue,
+                ),
+              ),
           ],
         ),
       ),

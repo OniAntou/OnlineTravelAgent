@@ -10,11 +10,14 @@ class ReviewsDao extends DatabaseAccessor<AppDatabase> with _$ReviewsDaoMixin {
   ReviewsDao(super.db);
 
   Future<List<ReviewsTableData>> getByTarget(
-      String targetType, String targetId) =>
+    String targetType,
+    String targetId,
+  ) =>
       (select(reviewsTable)
-            ..where((t) =>
-                t.targetType.equals(targetType) &
-                t.targetId.equals(targetId))
+            ..where(
+              (t) =>
+                  t.targetType.equals(targetType) & t.targetId.equals(targetId),
+            )
             ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
           .get();
 
@@ -23,6 +26,6 @@ class ReviewsDao extends DatabaseAccessor<AppDatabase> with _$ReviewsDaoMixin {
   }
 
   Future<void> deleteById(String id) async {
-    (delete(reviewsTable)..where((t) => t.id.equals(id))).go();
+    await (delete(reviewsTable)..where((t) => t.id.equals(id))).go();
   }
 }

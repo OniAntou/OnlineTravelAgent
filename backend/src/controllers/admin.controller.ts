@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import prisma from "../config/prisma.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { scheduleService } from "../services/schedule.service.js";
+import { passwordService } from "../services/password.service.js";
 import {
   CreateDestinationBody,
   UpdateDestinationBody,
@@ -407,7 +408,8 @@ export const adminController = {
 
   createUser: asyncHandler(async (req: Request, res: Response) => {
     const body = req.body as CreateUserBody;
-    const user = await prisma.user.create({ data: { name: body.name, email: body.email, password: body.password } });
+    const password = await passwordService.hash(body.password);
+    const user = await prisma.user.create({ data: { name: body.name, email: body.email, password } });
     res.status(201).json({ id: user.id, name: user.name, email: user.email });
   }),
 

@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { appCache } from "../config/cache.js";
 import { store } from "../store.js";
 import { scheduleService } from "../services/schedule.service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -14,19 +15,26 @@ import {
 export const clientController = {
   getBootstrap: asyncHandler(async (req: Request, res: Response) => {
     const userId = req.userId;
+    const cacheKey = `bootstrap_${userId || 'public'}`;
+    const cached = appCache.get(cacheKey);
+    if (cached) {
+      res.json(cached);
+      return;
+    }
     const data = await store.getBootstrap(userId);
+    appCache.set(cacheKey, data);
     res.json(data);
   }),
 
   getFavorites: asyncHandler(async (req: Request, res: Response) => {
-    const data = await store.getFavorites();
+    const data = await store.getFavorites(req.userId);
     res.json(data);
   }),
 
   updateFavorite: asyncHandler(async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const isFavorite = req.body?.isFavorite;
-    const updated = await store.updateFavorite(id, isFavorite);
+    const updated = await store.updateFavorite(req.userId, id, isFavorite);
     if (!updated) {
       res.status(404).json({ message: "Destination not found" });
       return;
@@ -42,7 +50,7 @@ export const clientController = {
   }),
 
   getTripSchedule: asyncHandler(async (req: Request, res: Response) => {
-    const data = await scheduleService.getTripSchedule(req.params.id as string);
+    const data = await scheduleService.getTripSchedule(req.params.id as string, req.userId);
     if (!data) {
       res.status(404).json({ message: "Trip schedule not found" });
       return;
@@ -80,18 +88,28 @@ export const clientController = {
   }),
 
   getDocuments: asyncHandler(async (req: Request, res: Response) => {
-    const data = await store.getDocuments();
+    const data = await store.getDocuments(req.userId);
     res.json(data);
   }),
 
   createDocument: asyncHandler(async (req: Request, res: Response) => {
     const body = req.body as CreateDocumentBody;
-    const doc = await store.createDocument(body.title, body.description || "", body.icon || "fa-file", body.color || "text-gray-500");
+    const doc = await store.createDocument(
+      req.userId,
+      body.title,
+      body.description || "",
+      body.icon || "fa-file",
+      body.color || "text-gray-500",
+    );
     res.status(201).json(doc);
   }),
 
   deleteDocument: asyncHandler(async (req: Request, res: Response) => {
-    await store.deleteDocument(req.params.id as string);
+    const deleted = await store.deleteDocument(req.userId, req.params.id as string);
+    if (!deleted) {
+      res.status(404).json({ message: "Document not found" });
+      return;
+    }
     res.json({ ok: true });
   }),
 

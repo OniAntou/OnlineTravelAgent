@@ -45,8 +45,9 @@ final categoriesProvider = Provider<List<String>>((ref) {
   }
 
   // Replicate the filtering logic from the old travel_provider
-  final remaining =
-      bootstrap.categories.where((c) => !AppConstants.hiddenCategories.contains(c)).toSet();
+  final remaining = bootstrap.categories
+      .where((c) => !AppConstants.hiddenCategories.contains(c))
+      .toSet();
 
   final result = <String>[];
   for (final category in AppConstants.defaultCategories) {

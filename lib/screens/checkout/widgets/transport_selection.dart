@@ -17,7 +17,10 @@ class TransportSelection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Phương tiện di chuyển', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Phương tiện di chuyển',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 12),
         _buildTransportOption('Tự túc', Icons.directions_walk, 0),
         const SizedBox(height: 8),
@@ -38,8 +41,12 @@ class TransportSelection extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryBlue.withValues(alpha: 0.05) : Colors.white,
-          border: Border.all(color: isSelected ? AppTheme.primaryBlue : Colors.grey.shade300),
+          color: isSelected
+              ? AppTheme.primaryBlue.withValues(alpha: 0.05)
+              : Colors.white,
+          border: Border.all(
+            color: isSelected ? AppTheme.primaryBlue : Colors.grey.shade300,
+          ),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -49,11 +56,19 @@ class TransportSelection extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
               ),
             ),
             if (price > 0)
-              Text('+${formatVND(price * 1000.0)}/người', style: const TextStyle(color: AppTheme.primaryBlue, fontWeight: FontWeight.bold)),
+              Text(
+                '+${formatVND(price * 1000.0)}/người',
+                style: const TextStyle(
+                  color: AppTheme.primaryBlue,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
           ],
         ),
       ),

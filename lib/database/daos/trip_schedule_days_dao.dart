@@ -23,7 +23,7 @@ class TripScheduleDaysDao extends DatabaseAccessor<AppDatabase>
   }
 
   Future<void> deleteByTripId(String tripId) async {
-    (delete(tripScheduleDaysTable)..where((t) => t.tripId.equals(tripId)))
+    await (delete(tripScheduleDaysTable)..where((t) => t.tripId.equals(tripId)))
         .go();
   }
 }

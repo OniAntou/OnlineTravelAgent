@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import 'screens/welcome/welcome_screen.dart';
 import 'screens/main/main_screen.dart';
@@ -11,9 +12,19 @@ import 'providers/app_state_provider.dart';
 import 'services/sync_service.dart';
 import 'services/connectivity_service.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: OnlineTravelAgentApp()));
+  await EasyLocalization.ensureInitialized();
+
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('vi'), Locale('en')],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('vi'),
+      startLocale: const Locale('vi'), // Force default to Vietnamese
+      child: const ProviderScope(child: OnlineTravelAgentApp()),
+    ),
+  );
 }
 
 class OnlineTravelAgentApp extends ConsumerStatefulWidget {
@@ -82,6 +93,9 @@ class _OnlineTravelAgentAppState extends ConsumerState<OnlineTravelAgentApp>
       title: 'Online Travel Agent',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       initialRoute: '/',
       routes: {
         '/': (context) => const WelcomeScreen(),

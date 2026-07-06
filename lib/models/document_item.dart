@@ -35,10 +35,14 @@ class DocumentItem {
 
   static IconData _iconFromName(String name) {
     switch (name) {
-      case 'assignment': return Icons.assignment;
-      case 'verified_user': return Icons.verified_user;
-      case 'flight_takeoff': return Icons.flight_takeoff;
-      default: return Icons.description;
+      case 'assignment':
+        return Icons.assignment;
+      case 'verified_user':
+        return Icons.verified_user;
+      case 'flight_takeoff':
+        return Icons.flight_takeoff;
+      default:
+        return Icons.description;
     }
   }
 

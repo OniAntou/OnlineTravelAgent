@@ -80,7 +80,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     }
   }
 
-  int get _basePrice => int.tryParse(widget.destination.price.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+  int get _basePrice =>
+      int.tryParse(
+        widget.destination.price.replaceAll(RegExp(r'[^0-9]'), ''),
+      ) ??
+      0;
 
   int get _totalGuests => _adults + _children;
 
@@ -90,7 +94,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     double sub = adultPrice + childPrice;
     if (_isVip) sub += 50 * _totalGuests;
     sub += _transportPrices[_selectedTransport]! * _totalGuests;
-    if (_includeGuide) sub += _guideFee; // fixed guide fee for single-destination bookings
+    if (_includeGuide) {
+      sub += _guideFee; // fixed guide fee for single-destination bookings
+    }
     return sub;
   }
 
@@ -101,7 +107,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Future<void> _checkPromo() async {
     final code = _promoController.text.trim();
     if (code.isEmpty) return;
-    setState(() { _promoError = null; });
+    setState(() {
+      _promoError = null;
+    });
     try {
       final api = ref.read(apiProvider);
       final result = await api.checkPromoCode(code);
@@ -113,16 +121,34 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         _recalcPromo();
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Áp dụng mã thành công!')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Áp dụng mã thành công!')));
       }
     } on ApiException catch (e) {
-      if (mounted) setState(() { _promoError = e.message; });
+      if (mounted) {
+        setState(() {
+          _promoError = e.message;
+        });
+      }
     } on NetworkException catch (e) {
-      if (mounted) setState(() { _promoError = e.message; });
+      if (mounted) {
+        setState(() {
+          _promoError = e.message;
+        });
+      }
     } on TimeoutApiException catch (e) {
-      if (mounted) setState(() { _promoError = e.message; });
+      if (mounted) {
+        setState(() {
+          _promoError = e.message;
+        });
+      }
     } catch (e) {
-      if (mounted) setState(() { _promoError = getErrorMessage(e); });
+      if (mounted) {
+        setState(() {
+          _promoError = getErrorMessage(e);
+        });
+      }
     }
   }
 
@@ -150,8 +176,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     }
     final endDate = _selectedDate!.add(Duration(days: days));
 
-    final dateString = '${_dateFormat.format(_selectedDate!)} - ${_dateFormat.format(endDate)}';
-    
+    final dateString =
+        '${_dateFormat.format(_selectedDate!)} - ${_dateFormat.format(endDate)}';
+
     final List<String> guestParts = [];
     if (_adults > 0) guestParts.add('$_adults Người lớn');
     if (_children > 0) guestParts.add('$_children Trẻ em');
@@ -165,12 +192,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             totalPrice: _total,
             onPaymentSuccess: () async {
               if (!mounted) return null;
-              return await ref.read(tripsProvider.notifier).bookTrip(
-                destinationId: widget.destination.id,
-                date: dateString,
-                guests: guestString,
-                totalPrice: _includeGuide ? _total : null,
-              );
+              return await ref
+                  .read(tripsProvider.notifier)
+                  .bookTrip(
+                    destinationId: widget.destination.id,
+                    date: dateString,
+                    guests: guestString,
+                    totalPrice: _includeGuide ? _total : null,
+                  );
             },
           ),
         ),
@@ -191,7 +220,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text('Thanh toán', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Thanh toán',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
       ),
       body: ListView(
@@ -207,7 +239,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           const SizedBox(height: 24),
           TransportSelection(
             selectedTransport: _selectedTransport,
-            onTransportSelected: (value) => setState(() => _selectedTransport = value),
+            onTransportSelected: (value) =>
+                setState(() => _selectedTransport = value),
           ),
           const SizedBox(height: 16),
           GuideOption(
@@ -277,7 +310,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               children: [
                 Text(
                   widget.destination.name,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -287,7 +323,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     Expanded(
                       child: Text(
                         widget.destination.location,
-                        style: const TextStyle(color: Colors.grey, fontSize: 13),
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 13,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -296,14 +335,21 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 ),
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: AppTheme.primaryBlue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     widget.destination.duration,
-                    style: const TextStyle(color: AppTheme.primaryBlue, fontSize: 12, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: AppTheme.primaryBlue,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -318,7 +364,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Ngày khởi hành', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Ngày khởi hành',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 12),
         InkWell(
           onTap: _pickDate,
@@ -335,11 +384,15 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 const Icon(Icons.calendar_month, color: AppTheme.primaryBlue),
                 const SizedBox(width: 12),
                 Text(
-                  _selectedDate == null ? 'Chọn ngày đi' : _dateFormat.format(_selectedDate!),
+                  _selectedDate == null
+                      ? 'Chọn ngày đi'
+                      : _dateFormat.format(_selectedDate!),
                   style: TextStyle(
                     fontSize: 16,
                     color: _selectedDate == null ? Colors.grey : Colors.black,
-                    fontWeight: _selectedDate == null ? FontWeight.normal : FontWeight.bold,
+                    fontWeight: _selectedDate == null
+                        ? FontWeight.normal
+                        : FontWeight.bold,
                   ),
                 ),
                 const Spacer(),
@@ -356,7 +409,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Hành khách', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Hành khách',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(16),
@@ -381,15 +437,27 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     );
   }
 
-  Widget _buildGuestRow(String title, String subtitle, int count, int min, Function(int) onChanged) {
+  Widget _buildGuestRow(
+    String title,
+    String subtitle,
+    int count,
+    int min,
+    Function(int) onChanged,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            Text(subtitle, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              subtitle,
+              style: const TextStyle(color: Colors.grey, fontSize: 13),
+            ),
           ],
         ),
         GuestCounter(value: count, min: min, onChanged: onChanged),
@@ -401,13 +469,14 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Loại dịch vụ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Loại dịch vụ',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(
-              child: _buildServiceOption('Standard', false),
-            ),
+            Expanded(child: _buildServiceOption('Standard', false)),
             const SizedBox(width: 16),
             Expanded(
               child: _buildServiceOption('VIP (+${formatVND(50)}/người)', true),
@@ -428,7 +497,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         decoration: BoxDecoration(
           color: isSelected ? AppTheme.primaryBlue : Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: isSelected ? AppTheme.primaryBlue : Colors.grey.shade300),
+          border: Border.all(
+            color: isSelected ? AppTheme.primaryBlue : Colors.grey.shade300,
+          ),
         ),
         alignment: Alignment.center,
         child: Text(
@@ -446,7 +517,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Mã giảm giá', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Mã giảm giá',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         const SizedBox(height: 12),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -457,7 +531,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 decoration: InputDecoration(
                   hintText: 'Nhập mã giảm giá...',
                   errorText: _promoError,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                 ),
               ),
@@ -469,10 +545,18 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                 onPressed: _checkPromo,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryBlue,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                 ),
-                child: const Text('Áp dụng', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                child: const Text(
+                  'Áp dụng',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],
@@ -488,7 +572,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         onPressed: _isProcessing ? null : _onConfirm,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppTheme.primaryBlue,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           elevation: 4,
         ),
         child: _isProcessing
@@ -502,7 +588,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               )
             : const Text(
                 'Xác nhận & Thanh toán',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
       ),
     );

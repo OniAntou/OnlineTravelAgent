@@ -38,8 +38,10 @@ model Destination {
   category      String
   isFavorite    Boolean @default(false) @map("is_favorite")
   isRecommended Boolean @default(false) @map("is_recommended")
+  updatedAt     DateTime @updatedAt @default(now()) @map("updated_at")
 
   scheduleTemplates ScheduleTemplate[]
+  favoritedBy       UserFavoriteDestination[]
 
   @@index([category])
   @@index([isRecommended])
@@ -74,6 +76,7 @@ model Trip {
   paymentTxnNumber String? @map("payment_txn_number")
 
   createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @default(now()) @map("updated_at")
 
   scheduleDays    TripScheduleDay[]
   scheduleUpdates TripScheduleUpdate[]
@@ -94,6 +97,7 @@ model Flight {
   arrivalTime   String @map("arrival_time")
   price         Float
   duration      String
+  updatedAt     DateTime @updatedAt @default(now()) @map("updated_at")
 
   @@map("flights")
 }
@@ -105,8 +109,13 @@ model DocumentItem {
   icon        String
   color       String
 
-  createdAt DateTime @default(now()) @map("created_at")
+  userId String? @map("user_id")
+  user   User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @default(now()) @map("updated_at")
+
+  @@index([userId])
   @@map("document_items")
 }
 
@@ -125,6 +134,7 @@ model Hotel {
   
   partnerId   String? @map("partner_id")
   partner     User?   @relation("PartnerHotels", fields: [partnerId], references: [id])
+  updatedAt   DateTime @updatedAt @default(now()) @map("updated_at")
 
   rooms       Room[]
   
@@ -144,6 +154,7 @@ model Room {
   amenities   String[]
   
   hotel       Hotel  @relation(fields: [hotelId], references: [id])
+  updatedAt   DateTime @updatedAt @default(now()) @map("updated_at")
   
   @@index([hotelId])
   @@map("rooms")
@@ -169,6 +180,7 @@ model TourPackage {
   partner       User?    @relation("PartnerTours", fields: [partnerId], references: [id])
 
   createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @default(now()) @map("updated_at")
 
   scheduleTemplates ScheduleTemplate[]
   
@@ -184,13 +196,29 @@ model User {
   password  String
   role      Role     @default(USER)
   createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @default(now()) @map("updated_at")
 
   trips     Trip[]
   reviews   Review[]
   hotels    Hotel[]       @relation("PartnerHotels")
   tours     TourPackage[] @relation("PartnerTours")
+  documents DocumentItem[]
+  favoriteDestinations UserFavoriteDestination[]
 
   @@map("users")
+}
+
+model UserFavoriteDestination {
+  userId        String   @map("user_id")
+  destinationId String   @map("destination_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  destination Destination @relation(fields: [destinationId], references: [id], onDelete: Cascade)
+
+  @@id([userId, destinationId])
+  @@index([destinationId])
+  @@map("user_favorite_destinations")
 }
 
 model Review {
@@ -201,6 +229,7 @@ model Review {
   rating     Int
   comment    String
   createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @default(now()) @map("updated_at")
 
   user User @relation(fields: [userId], references: [id])
 
@@ -323,6 +352,7 @@ model PromoCode {
   currentUses        Int       @default(0) @map("current_uses")
   validUntil         DateTime? @map("valid_until")
   isActive           Boolean   @default(true) @map("is_active")
+  updatedAt          DateTime  @updatedAt @default(now()) @map("updated_at")
 
   @@map("promo_codes")
 }

@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
@@ -41,22 +42,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     super.dispose();
   }
 
-  static final _emailRegex = RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$');
+  static final _emailRegex = RegExp(
+    r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$',
+  );
 
   Future<void> _handleLogin() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
     if (email.isEmpty || password.isEmpty) {
-      showErrorDialog(context, 'Vui lòng nhập đầy đủ thông tin');
+      showErrorDialog(context, tr('auth.error_empty'));
       return;
     }
     if (!_emailRegex.hasMatch(email)) {
-      showErrorDialog(context, 'Email không hợp lệ');
+      showErrorDialog(context, tr('auth.error_email'));
       return;
     }
     if (password.length < 6) {
-      showErrorDialog(context, 'Mật khẩu phải từ 6 ký tự');
+      showErrorDialog(context, tr('auth.error_password'));
       return;
     }
 
@@ -83,164 +86,171 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Stack(
-        children: [
-          // Background Image
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/halong_image.png',
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                color: Colors.black,
+          children: [
+            // Background Image
+            Positioned.fill(
+              child: Image.asset(
+                'assets/images/halong_image.png',
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    Container(color: Colors.black),
               ),
             ),
-          ),
-          // Dark Overlay
-          Positioned.fill(
-            child: Container(
-              color: Colors.black.withValues(alpha: 0.4),
+            // Dark Overlay
+            Positioned.fill(
+              child: Container(color: Colors.black.withValues(alpha: 0.4)),
             ),
-          ),
-          // Content
-          SafeArea(
-            child: FadeTransition(
-              opacity: _fadeAnim,
-              child: Center(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(32),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-                      child: Container(
-                        padding: const EdgeInsets.all(32),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(32),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            width: 1.5,
+            // Content
+            SafeArea(
+              child: FadeTransition(
+                opacity: _fadeAnim,
+                child: Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(32),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                        child: Container(
+                          padding: const EdgeInsets.all(32),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(32),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              width: 1.5,
+                            ),
                           ),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                shape: BoxShape.circle,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.flight_takeoff_rounded,
+                                  size: 40,
+                                  color: Colors.white,
+                                ),
                               ),
-                              child: const Icon(Icons.flight_takeoff_rounded,
-                                  size: 40, color: Colors.white),
-                            ),
-                            const SizedBox(height: 24),
-                            const Text(
-                              'Đăng Nhập',
-                              style: TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                              const SizedBox(height: 24),
+                              Text(
+                                tr('auth.login_title'),
+                                style: const TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Chào mừng bạn trở lại!',
-                              style: TextStyle(
-                                fontSize: 15,
-                                color: Colors.white70,
-                              ),
-                            ),
-                            const SizedBox(height: 40),
-                            _buildTextField(
-                              controller: _emailController,
-                              hint: 'Email',
-                              icon: Icons.email_outlined,
-                              keyboardType: TextInputType.emailAddress,
-                            ),
-                            const SizedBox(height: 16),
-                            _buildTextField(
-                              controller: _passwordController,
-                              hint: 'Mật khẩu',
-                              icon: Icons.lock_outline_rounded,
-                              obscure: _obscurePassword,
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword
-                                      ? Icons.visibility_off_rounded
-                                      : Icons.visibility_rounded,
+                              const SizedBox(height: 8),
+                              Text(
+                                tr('auth.login_subtitle'),
+                                style: const TextStyle(
+                                  fontSize: 15,
                                   color: Colors.white70,
-                                  size: 22,
                                 ),
-                                onPressed: () => setState(
-                                    () => _obscurePassword = !_obscurePassword),
                               ),
-                            ),
-                            const SizedBox(height: 32),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 56,
-                              child: ElevatedButton(
-                                onPressed: _isLoading ? null : _handleLogin,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppTheme.primaryBlue,
-                                  foregroundColor: Colors.white,
-                                  disabledBackgroundColor:
-                                      AppTheme.primaryBlue.withValues(alpha: 0.6),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  elevation: 0,
-                                ),
-                                child: _isLoading
-                                    ? const SizedBox(
-                                        width: 24,
-                                        height: 24,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2.5,
-                                          valueColor: AlwaysStoppedAnimation<Color>(
-                                              Colors.white),
-                                        ),
-                                      )
-                                    : const Text(
-                                        'Đăng Nhập',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                              const SizedBox(height: 40),
+                              _buildTextField(
+                                controller: _emailController,
+                                hint: tr('auth.email_hint'),
+                                icon: Icons.email_outlined,
+                                keyboardType: TextInputType.emailAddress,
                               ),
-                            ),
-                            const SizedBox(height: 24),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  'Chưa có tài khoản? ',
-                                  style: TextStyle(
+                              const SizedBox(height: 16),
+                              _buildTextField(
+                                controller: _passwordController,
+                                hint: tr('auth.password_hint'),
+                                icon: Icons.lock_outline_rounded,
+                                obscure: _obscurePassword,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_off_rounded
+                                        : Icons.visibility_rounded,
                                     color: Colors.white70,
-                                    fontSize: 14,
+                                    size: 22,
+                                  ),
+                                  onPressed: () => setState(
+                                    () => _obscurePassword = !_obscurePassword,
                                   ),
                                 ),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.pushReplacementNamed(
-                                        context, '/register');
-                                  },
-                                  child: const Text(
-                                    'Đăng ký',
-                                    style: TextStyle(
-                                      color: Colors.white,
+                              ),
+                              const SizedBox(height: 32),
+                              SizedBox(
+                                width: double.infinity,
+                                height: 56,
+                                child: ElevatedButton(
+                                  onPressed: _isLoading ? null : _handleLogin,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.primaryBlue,
+                                    foregroundColor: Colors.white,
+                                    disabledBackgroundColor: AppTheme
+                                        .primaryBlue
+                                        .withValues(alpha: 0.6),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  child: _isLoading
+                                      ? const SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2.5,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Colors.white,
+                                                ),
+                                          ),
+                                        )
+                                      : Text(
+                                          tr('auth.login_btn'),
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    tr('auth.no_account'),
+                                    style: const TextStyle(
+                                      color: Colors.white70,
                                       fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      decoration: TextDecoration.underline,
-                                      decorationColor: Colors.white,
                                     ),
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pushReplacementNamed(
+                                        context,
+                                        '/register',
+                                      );
+                                    },
+                                    child: Text(
+                                      tr('auth.register'),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        decoration: TextDecoration.underline,
+                                        decorationColor: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -248,25 +258,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                 ),
               ),
             ),
-          ),
-          // Back button
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 10,
-            left: 20,
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  shape: BoxShape.circle,
+            // Back button
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 10,
+              left: 20,
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.arrow_back, color: Colors.white),
                 ),
-                child: const Icon(Icons.arrow_back, color: Colors.white),
               ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }
@@ -283,9 +292,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.3),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
       ),
       child: TextField(
         controller: controller,
@@ -298,8 +305,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
           prefixIcon: Icon(icon, color: Colors.white, size: 22),
           suffixIcon: suffixIcon,
           border: InputBorder.none,
-          contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 18,
+          ),
         ),
       ),
     );

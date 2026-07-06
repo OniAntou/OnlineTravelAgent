@@ -7,7 +7,11 @@ class RecommendedTourCard extends StatelessWidget {
   final TourPackage tour;
   final VoidCallback onClick;
 
-  const RecommendedTourCard({super.key, required this.tour, required this.onClick});
+  const RecommendedTourCard({
+    super.key,
+    required this.tour,
+    required this.onClick,
+  });
 
   @override
   Widget build(BuildContext context) {

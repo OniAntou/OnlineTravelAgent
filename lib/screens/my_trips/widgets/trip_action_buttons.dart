@@ -13,11 +13,31 @@ class TripActionButtons extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _btn(context, Icons.support_agent, 'Hỗ trợ', () => _showNotImplemented(context, 'Hỗ trợ')),
-        _btn(context, Icons.receipt_long, 'Hóa đơn', () => _showNotImplemented(context, 'Hóa đơn')),
-        _btn(context, Icons.share_outlined, 'Chia sẻ', () => _showNotImplemented(context, 'Chia sẻ')),
+        _btn(
+          context,
+          Icons.support_agent,
+          'Hỗ trợ',
+          () => _showNotImplemented(context, 'Hỗ trợ'),
+        ),
+        _btn(
+          context,
+          Icons.receipt_long,
+          'Hóa đơn',
+          () => _showNotImplemented(context, 'Hóa đơn'),
+        ),
+        _btn(
+          context,
+          Icons.share_outlined,
+          'Chia sẻ',
+          () => _showNotImplemented(context, 'Chia sẻ'),
+        ),
         if (trip.status != 'Đã hủy' && trip.isUpcoming)
-          _btn(context, Icons.cancel_outlined, 'Hủy vé', () => _confirmCancel(context, ref)),
+          _btn(
+            context,
+            Icons.cancel_outlined,
+            'Hủy vé',
+            () => _confirmCancel(context, ref),
+          ),
       ],
     );
   }
@@ -37,7 +57,9 @@ class TripActionButtons extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Xác nhận hủy vé'),
-        content: const Text('Bạn có chắc chắn muốn hủy chuyến đi này không? Thao tác này không thể hoàn tác.'),
+        content: const Text(
+          'Bạn có chắc chắn muốn hủy chuyến đi này không? Thao tác này không thể hoàn tác.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -54,7 +76,7 @@ class TripActionButtons extends ConsumerWidget {
 
     if (confirmed == true) {
       if (!context.mounted) return;
-      
+
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -86,7 +108,12 @@ class TripActionButtons extends ConsumerWidget {
     }
   }
 
-  Widget _btn(BuildContext context, IconData icon, String label, VoidCallback onTap) {
+  Widget _btn(
+    BuildContext context,
+    IconData icon,
+    String label,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -98,7 +125,10 @@ class TripActionButtons extends ConsumerWidget {
               shape: BoxShape.circle,
               border: Border.all(color: const Color(0xFFEEEEEE)),
             ),
-            child: Icon(icon, color: label == 'Hủy vé' ? Colors.red : AppTheme.primaryBlue),
+            child: Icon(
+              icon,
+              color: label == 'Hủy vé' ? Colors.red : AppTheme.primaryBlue,
+            ),
           ),
           const SizedBox(height: 8),
           Text(

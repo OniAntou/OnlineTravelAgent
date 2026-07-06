@@ -13,6 +13,7 @@ import 'widgets/trip_action_buttons.dart';
 import 'widgets/trip_section_header.dart';
 import 'widgets/trip_schedule_timeline.dart';
 import '../../utils/app_utils.dart';
+import 'widgets/shared_trip_ui.dart';
 
 class PlaceTripDetailScreen extends ConsumerWidget {
   final Trip trip;
@@ -54,7 +55,9 @@ class PlaceTripDetailScreen extends ConsumerWidget {
     final destination = _findDestination(ref);
     final screenHeight = MediaQuery.sizeOf(context).height;
     final heroCacheWidth =
-        (MediaQuery.sizeOf(context).width * MediaQuery.devicePixelRatioOf(context)).round();
+        (MediaQuery.sizeOf(context).width *
+                MediaQuery.devicePixelRatioOf(context))
+            .round();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -79,16 +82,15 @@ class PlaceTripDetailScreen extends ConsumerWidget {
           // B. Back + Share buttons
           SafeArea(
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _floatingButton(
+                  SharedTripUI.floatingButton(
                     icon: Icons.chevron_left,
                     onTap: () => Navigator.pop(context),
                   ),
-                  _floatingButton(
+                  SharedTripUI.floatingButton(
                     icon: Icons.share_outlined,
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -155,14 +157,19 @@ class PlaceTripDetailScreen extends ConsumerWidget {
                               const SizedBox(height: 8),
                               Row(
                                 children: [
-                                  const Icon(Icons.location_on,
-                                      size: 16, color: AppTheme.primaryBlue),
+                                  const Icon(
+                                    Icons.location_on,
+                                    size: 16,
+                                    color: AppTheme.primaryBlue,
+                                  ),
                                   const SizedBox(width: 4),
                                   Expanded(
                                     child: Text(
                                       trip.location,
                                       style: const TextStyle(
-                                          color: Colors.grey, fontSize: 14),
+                                        color: Colors.grey,
+                                        fontSize: 14,
+                                      ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -175,7 +182,9 @@ class PlaceTripDetailScreen extends ConsumerWidget {
                         const SizedBox(width: 12),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 6),
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
                             color: _statusBgColor(),
                             borderRadius: BorderRadius.circular(12),
@@ -198,11 +207,21 @@ class PlaceTripDetailScreen extends ConsumerWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          _infoItem(Icons.star, destination.rating,
-                              '${destination.reviewsCount} Đánh giá'),
-                          _infoItem(Icons.access_time, destination.duration,
-                              'Thời lượng'),
-                          _infoItem(Icons.wb_cloudy, '24°C', 'Thời tiết'),
+                          SharedTripUI.infoItem(
+                            Icons.star,
+                            destination.rating,
+                            '${destination.reviewsCount} Đánh giá',
+                          ),
+                          SharedTripUI.infoItem(
+                            Icons.access_time,
+                            destination.duration,
+                            'Thời lượng',
+                          ),
+                          SharedTripUI.infoItem(
+                            Icons.wb_cloudy,
+                            '24°C',
+                            'Thời tiết',
+                          ),
                         ],
                       ),
                       const SizedBox(height: 28),
@@ -250,48 +269,6 @@ class PlaceTripDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _floatingButton(
-      {required IconData icon, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.9),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Icon(icon, color: Colors.black87),
-      ),
-    );
-  }
-
-  Widget _infoItem(IconData icon, String value, String label) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: AppTheme.backgroundGray,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(icon, size: 20, color: Colors.amber),
-        ),
-        const SizedBox(height: 8),
-        Text(value,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-        Text(label,
-            style: const TextStyle(color: Colors.grey, fontSize: 11)),
-      ],
-    );
-  }
-
   Widget _buildMap(Destination? destination) {
     if (destination == null ||
         destination.latitude == 0.0 ||
@@ -303,8 +280,10 @@ class PlaceTripDetailScreen extends ConsumerWidget {
           color: Colors.grey.shade100,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: const Text('Chưa có thông tin toạ độ',
-            style: TextStyle(color: Colors.grey)),
+        child: const Text(
+          'Chưa có thông tin toạ độ',
+          style: TextStyle(color: Colors.grey),
+        ),
       );
     }
 
@@ -319,30 +298,34 @@ class PlaceTripDetailScreen extends ConsumerWidget {
         child: RepaintBoundary(
           child: FlutterMap(
             options: MapOptions(
-              initialCenter:
-                  LatLng(destination.latitude, destination.longitude),
+              initialCenter: LatLng(
+                destination.latitude,
+                destination.longitude,
+              ),
               interactionOptions: const InteractionOptions(
                 flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
               ),
             ),
-          children: [
-            TileLayer(
-              urlTemplate: kOpenStreetMapTileUrl,
-              userAgentPackageName: 'com.example.onlinetravelagent',
-            ),
-            MarkerLayer(
-              markers: [
-                Marker(
-                  point: LatLng(
-                      destination.latitude, destination.longitude),
-                  width: 40,
-                  height: 40,
-                  child: const Icon(Icons.location_on,
-                      color: Colors.red, size: 40),
-                ),
-              ],
-            ),
-          ],
+            children: [
+              TileLayer(
+                urlTemplate: kOpenStreetMapTileUrl,
+                userAgentPackageName: 'com.example.onlinetravelagent',
+              ),
+              MarkerLayer(
+                markers: [
+                  Marker(
+                    point: LatLng(destination.latitude, destination.longitude),
+                    width: 40,
+                    height: 40,
+                    child: const Icon(
+                      Icons.location_on,
+                      color: Colors.red,
+                      size: 40,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -376,11 +359,14 @@ class PlaceTripDetailScreen extends ConsumerWidget {
                   child: Icon(f.$1, color: AppTheme.primaryBlue, size: 24),
                 ),
                 const SizedBox(height: 8),
-                Text(f.$2,
-                    style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500)),
+                Text(
+                  f.$2,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
             ),
           );
@@ -406,9 +392,10 @@ class PlaceTripDetailScreen extends ConsumerWidget {
                 Text(
                   destination?.rating ?? '4.8',
                   style: const TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87),
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -425,8 +412,7 @@ class PlaceTripDetailScreen extends ConsumerWidget {
                 const SizedBox(height: 8),
                 Text(
                   '${destination?.reviewsCount ?? '100'} nhận xét',
-                  style:
-                      const TextStyle(color: Colors.grey, fontSize: 12),
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
                 ),
               ],
             ),
@@ -458,11 +444,14 @@ class PlaceTripDetailScreen extends ConsumerWidget {
         children: [
           SizedBox(
             width: 40,
-            child: Text(label,
-                style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500)),
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.grey,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -472,7 +461,8 @@ class PlaceTripDetailScreen extends ConsumerWidget {
                 value: pct,
                 backgroundColor: Colors.grey.shade100,
                 valueColor: const AlwaysStoppedAnimation<Color>(
-                    AppTheme.primaryBlue),
+                  AppTheme.primaryBlue,
+                ),
                 minHeight: 6,
               ),
             ),
@@ -485,9 +475,10 @@ class PlaceTripDetailScreen extends ConsumerWidget {
               child: Text(
                 '${(pct * 100).toStringAsFixed(0)}%',
                 style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.w500),
+                  fontSize: 11,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           ),
@@ -528,15 +519,19 @@ class PlaceTripDetailScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(review['name']!,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
-                            color: Colors.black87)),
+                    Text(
+                      review['name']!,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: Colors.black87,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text(review['date']!,
-                        style: const TextStyle(
-                            color: Colors.grey, fontSize: 10)),
+                    Text(
+                      review['date']!,
+                      style: const TextStyle(color: Colors.grey, fontSize: 10),
+                    ),
                   ],
                 ),
               ),
@@ -557,7 +552,10 @@ class PlaceTripDetailScreen extends ConsumerWidget {
           Text(
             review['comment']!,
             style: TextStyle(
-                color: Colors.grey.shade800, fontSize: 13, height: 1.5),
+              color: Colors.grey.shade800,
+              fontSize: 13,
+              height: 1.5,
+            ),
           ),
         ],
       ),
@@ -568,27 +566,99 @@ class PlaceTripDetailScreen extends ConsumerWidget {
     final clean = name.toLowerCase().trim();
     if (clean.contains('đà lạt')) {
       return [
-        {'name': 'Trần Minh Quân', 'avatar': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&fit=crop', 'date': '3 ngày trước', 'rating': '5.0', 'comment': 'Đà Lạt mùa này lạnh tê tái rất thích hợp để nghỉ dưỡng. Khách sạn Mường Thanh ở vị trí trung tâm đi lại cực tiện!'},
-        {'name': 'Nguyễn Thảo Nguyên', 'avatar': 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&fit=crop', 'date': '1 tuần trước', 'rating': '4.5', 'comment': 'Đồ ăn đêm ở chợ Đà Lạt siêu ngon, bánh tráng nướng và sữa đậu nành nóng hổi giữa trời lạnh rất chill.'},
+        {
+          'name': 'Trần Minh Quân',
+          'avatar':
+              'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&fit=crop',
+          'date': '3 ngày trước',
+          'rating': '5.0',
+          'comment':
+              'Đà Lạt mùa này lạnh tê tái rất thích hợp để nghỉ dưỡng. Khách sạn Mường Thanh ở vị trí trung tâm đi lại cực tiện!',
+        },
+        {
+          'name': 'Nguyễn Thảo Nguyên',
+          'avatar':
+              'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&fit=crop',
+          'date': '1 tuần trước',
+          'rating': '4.5',
+          'comment':
+              'Đồ ăn đêm ở chợ Đà Lạt siêu ngon, bánh tráng nướng và sữa đậu nành nóng hổi giữa trời lạnh rất chill.',
+        },
       ];
     } else if (clean.contains('phú quốc')) {
       return [
-        {'name': 'Lê Hải Đăng', 'avatar': 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&fit=crop', 'date': '2 ngày trước', 'rating': '5.0', 'comment': 'Đảo ngọc Phú Quốc biển trong xanh vắt ngắm rõ san hô. Tour đi cano 4 đảo xuất sắc!'},
-        {'name': 'Phạm Khánh Linh', 'avatar': 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&fit=crop', 'date': '1 tuần trước', 'rating': '4.9', 'comment': 'Resort 5 sao bãi biển riêng cát trắng mịn. Đồ ăn hải sản nướng thơm ngon!'},
+        {
+          'name': 'Lê Hải Đăng',
+          'avatar':
+              'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&fit=crop',
+          'date': '2 ngày trước',
+          'rating': '5.0',
+          'comment':
+              'Đảo ngọc Phú Quốc biển trong xanh vắt ngắm rõ san hô. Tour đi cano 4 đảo xuất sắc!',
+        },
+        {
+          'name': 'Phạm Khánh Linh',
+          'avatar':
+              'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&fit=crop',
+          'date': '1 tuần trước',
+          'rating': '4.9',
+          'comment':
+              'Resort 5 sao bãi biển riêng cát trắng mịn. Đồ ăn hải sản nướng thơm ngon!',
+        },
       ];
     } else if (clean.contains('sapa') || clean.contains('sa pa')) {
       return [
-        {'name': 'Nguyễn Tiến Đạt', 'avatar': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&fit=crop', 'date': '5 ngày trước', 'rating': '5.0', 'comment': 'Chinh phục đỉnh Fansipan 3.143m ngắm thung lũng mây trôi bồng bềnh hùng vĩ!'},
-        {'name': 'Vũ Quỳnh Chi', 'avatar': 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&fit=crop', 'date': '1 tuần trước', 'rating': '4.8', 'comment': 'Trải nghiệm đi bộ trekking xuyên qua bản Cát Cát và thung lũng Mường Hoa rất thú vị.'},
+        {
+          'name': 'Nguyễn Tiến Đạt',
+          'avatar':
+              'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&fit=crop',
+          'date': '5 ngày trước',
+          'rating': '5.0',
+          'comment':
+              'Chinh phục đỉnh Fansipan 3.143m ngắm thung lũng mây trôi bồng bềnh hùng vĩ!',
+        },
+        {
+          'name': 'Vũ Quỳnh Chi',
+          'avatar':
+              'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&fit=crop',
+          'date': '1 tuần trước',
+          'rating': '4.8',
+          'comment':
+              'Trải nghiệm đi bộ trekking xuyên qua bản Cát Cát và thung lũng Mường Hoa rất thú vị.',
+        },
       ];
     } else if (clean.contains('hạ long') || clean.contains('halong')) {
       return [
-        {'name': 'Đỗ Hoàng Long', 'avatar': 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&fit=crop', 'date': '1 ngày trước', 'rating': '5.0', 'comment': 'Ngủ đêm trên du thuyền 5 sao lướt êm đềm giữa hàng ngàn đảo đá vôi là trải nghiệm thượng lưu.'},
+        {
+          'name': 'Đỗ Hoàng Long',
+          'avatar':
+              'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&fit=crop',
+          'date': '1 ngày trước',
+          'rating': '5.0',
+          'comment':
+              'Ngủ đêm trên du thuyền 5 sao lướt êm đềm giữa hàng ngàn đảo đá vôi là trải nghiệm thượng lưu.',
+        },
       ];
     }
     return [
-      {'name': 'Nguyễn Tuấn Kiệt', 'avatar': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&fit=crop', 'date': '4 ngày trước', 'rating': '4.9', 'comment': 'Địa điểm du lịch tuyệt vời mang đậm nét bản sắc văn hóa. Không gian phong cảnh lãng mạn!'},
-      {'name': 'Mai Thu Trang', 'avatar': 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&fit=crop', 'date': '1 tuần trước', 'rating': '4.8', 'comment': 'Chuyến đi tổ chức rất trọn vẹn và an toàn. Hướng dẫn viên nhiệt tình!'},
+      {
+        'name': 'Nguyễn Tuấn Kiệt',
+        'avatar':
+            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&fit=crop',
+        'date': '4 ngày trước',
+        'rating': '4.9',
+        'comment':
+            'Địa điểm du lịch tuyệt vời mang đậm nét bản sắc văn hóa. Không gian phong cảnh lãng mạn!',
+      },
+      {
+        'name': 'Mai Thu Trang',
+        'avatar':
+            'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&fit=crop',
+        'date': '1 tuần trước',
+        'rating': '4.8',
+        'comment':
+            'Chuyến đi tổ chức rất trọn vẹn và an toàn. Hướng dẫn viên nhiệt tình!',
+      },
     ];
   }
 }

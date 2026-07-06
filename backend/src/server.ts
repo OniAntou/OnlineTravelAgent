@@ -1,93 +1,43 @@
-import cors from "cors";
-import express from "express";
-import helmet from "helmet";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
 import { Server as SocketIOServer } from "socket.io";
+import jwt from "jsonwebtoken";
 import prisma from "./config/prisma.js";
-import { routes } from "./routes/index.js";
-import { Request, Response, NextFunction } from "express";
+import { env } from "./config/env.js";
+import { app } from "./app.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const app = express();
-const port = Number.parseInt(process.env.PORT ?? "3000", 10);
-
-// Security headers
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "cdn.tailwindcss.com"],
-      scriptSrcAttr: ["'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "fonts.googleapis.com", "cdnjs.cloudflare.com"],
-      fontSrc: ["'self'", "fonts.gstatic.com", "cdnjs.cloudflare.com"],
-      imgSrc: ["'self'", "data:", "blob:"],
-    },
-  },
-}));
-
-// CORS whitelist
-const allowedOrigins = (process.env.CORS_ORIGINS ?? "http://localhost:3000,http://10.0.2.2:3000,http://localhost:5173").split(",");
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-}));
-
-// Request body size limit
-app.use(express.json({ limit: "1mb" }));
-
-// Redirect root to /admin
-app.get("/", (req, res) => {
-  res.redirect("/admin");
-});
-
-// Serve admin panel at /admin (no auth for static files, UI handles login)
-app.use("/admin", express.static(join(__dirname, "../admin")));
-app.use("/partner", express.static(join(__dirname, "../partner")));
-
-// Serve uploads
-app.use("/uploads", express.static(join(__dirname, "../public/uploads")));
-
-app.get("/health", (_, res) => {
-  res.json({ ok: true });
-});
-
-// Mount all API routes
-app.use("/api", routes);
-
-// Global error handling middleware
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  console.error("Unhandled error:", err);
-  res.status(500).json({ message: "Internal server error" });
-});
-
-const server = app.listen(port, async () => {
+const server = app.listen(env.port, () => {
   console.log(`\n==============================================`);
-  console.log(`🚀 Backend running at http://localhost:${port}`);
+  console.log(`Backend running at http://localhost:${env.port}`);
   console.log(`==============================================`);
-  console.log(`👉 Admin Portal:   http://localhost:${port}/admin`);
-  console.log(`👉 Partner Portal: http://localhost:${port}/partner`);
-  console.log(`👉 Prisma Studio:  http://localhost:5555`);
+  console.log(`Admin Portal:   http://localhost:${env.port}/admin`);
+  console.log(`Partner Portal: http://localhost:${env.port}/partner`);
   console.log(`==============================================`);
 
   // Initialize Socket.IO
   const io = new SocketIOServer(server, {
     cors: {
-      origin: allowedOrigins,
+      origin: env.corsOrigins,
       methods: ["GET", "POST"]
     }
   });
 
   io.on("connection", (socket) => {
-    socket.on("join_trip_room", (tripId) => {
-      socket.join(`trip_${tripId}`);
+    socket.on("join_trip_room", async (payload) => {
+      const tripId = typeof payload === "string" ? payload : payload?.tripId;
+      const token = typeof payload === "object" ? payload?.token : undefined;
+      if (!tripId || !token) return;
+
+      try {
+        const decoded = jwt.verify(token, env.jwtSecret) as { userId: string };
+        const trip = await prisma.trip.findUnique({
+          where: { id: tripId },
+          select: { userId: true },
+        });
+        if (trip?.userId === decoded.userId) {
+          socket.join(`trip_${tripId}`);
+        }
+      } catch {
+        // Ignore unauthorized room join attempts.
+      }
     });
     socket.on("join_tour_room", (tourId) => {
       socket.join(`tour_${tourId}`);
@@ -95,32 +45,14 @@ const server = app.listen(port, async () => {
   });
 
   app.set("io", io);
-
-  try {
-    const admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
-    const partner = await prisma.user.findFirst({ where: { role: 'PARTNER' } });
-    
-    if (admin || partner) {
-      console.log(`[👤 System Users Info]`);
-      if (admin) {
-        console.log(`👑 ADMIN:   ${admin.email} / password123`);
-      }
-      if (partner) {
-        console.log(`🤝 PARTNER: ${partner.email} / password123`);
-      }
-      console.log(`==============================================\n`);
-    }
-  } catch (e) {
-    // Ignore db connection issues at startup if they occur
-  }
 });
 
 // Graceful shutdown
 async function shutdown() {
-  console.log("\n🔌 Shutting down gracefully...");
+  console.log("\nShutting down gracefully...");
   server.close();
   await prisma.$disconnect();
-  console.log("✅ Database disconnected. Goodbye!");
+  console.log("Database disconnected. Goodbye!");
   process.exit(0);
 }
 

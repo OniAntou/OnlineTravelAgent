@@ -88,6 +88,22 @@ function processTripStatus<T extends { status: string; isUpcoming: boolean; date
   return trip;
 }
 
+async function getFavoriteDestinationIds(userId?: string) {
+  if (!userId) return new Set<string>();
+
+  const favorites = await prisma.userFavoriteDestination.findMany({
+    where: { userId },
+    select: { destinationId: true },
+  });
+  return new Set(favorites.map((favorite) => favorite.destinationId));
+}
+
+function applyFavoriteState<T extends { id: string }>(items: T[], favoriteIds: Set<string>) {
+  return items.map((item) => ({
+    ...item,
+    isFavorite: favoriteIds.has(item.id),
+  }));
+}
 async function attachRealReviews<T extends { id: string }>(items: T[], targetType: string) {
   if (!items.length) return items;
 
@@ -124,7 +140,7 @@ export const store = {
       prisma.category.findMany({ orderBy: { name: "asc" } }),
       prisma.destination.findMany(),
       userId ? prisma.trip.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }) : Promise.resolve([]),
-      prisma.documentItem.findMany({ orderBy: { createdAt: "desc" } }),
+      userId ? prisma.documentItem.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }) : Promise.resolve([]),
       prisma.hotel.findMany(),
       prisma.tourPackage.findMany({ orderBy: { createdAt: "desc" } }),
     ]);
@@ -133,12 +149,14 @@ export const store = {
       ...destination,
       category: normalizeCategoryName(destination.category),
     }));
-    const [realDestinations, realHotels, realTours] = await Promise.all([
+    const [favoriteDestinationIds, reviewedDestinations, realHotels, realTours] = await Promise.all([
+      getFavoriteDestinationIds(userId),
       attachRealReviews(normalizedDestinations, "destination"),
       attachRealReviews(hotels, "hotel"),
-      attachRealReviews(tourPackages, "tour")
+      attachRealReviews(tourPackages, "tour"),
     ]);
 
+    const realDestinations = applyFavoriteState(reviewedDestinations, favoriteDestinationIds);
     const realRecommended = realDestinations.filter((d) => d.isRecommended);
 
     return {
@@ -299,23 +317,48 @@ export const store = {
     return trip;
   },
 
-  async getFavorites() {
-    const favs = await prisma.destination.findMany({ where: { isFavorite: true } });
-    return attachRealReviews(favs, "destination");
+  async getFavorites(userId?: string) {
+    if (!userId) return [];
+
+    const favorites = await prisma.userFavoriteDestination.findMany({
+      where: { userId },
+      include: { destination: true },
+      orderBy: { createdAt: "desc" },
+    });
+    const destinations = favorites.map((favorite) => ({
+      ...favorite.destination,
+      isFavorite: true,
+    }));
+    return attachRealReviews(destinations, "destination");
   },
 
-  async updateFavorite(destinationId: string, isFavorite?: boolean) {
+  async updateFavorite(userId: string | undefined, destinationId: string, isFavorite?: boolean) {
+    if (!userId) return null;
+
     const destination = await prisma.destination.findUnique({ where: { id: destinationId } });
     if (!destination) {
       return null;
     }
 
-    const newFavorite = typeof isFavorite === "boolean" ? isFavorite : !destination.isFavorite;
-
-    return prisma.destination.update({
-      where: { id: destinationId },
-      data: { isFavorite: newFavorite },
+    const existing = await prisma.userFavoriteDestination.findUnique({
+      where: { userId_destinationId: { userId, destinationId } },
     });
+    const newFavorite = typeof isFavorite === "boolean" ? isFavorite : !existing;
+
+    if (newFavorite) {
+      await prisma.userFavoriteDestination.upsert({
+        where: { userId_destinationId: { userId, destinationId } },
+        update: {},
+        create: { userId, destinationId },
+      });
+    } else {
+      await prisma.userFavoriteDestination.deleteMany({
+        where: { userId, destinationId },
+      });
+    }
+
+    const [withReviews] = await attachRealReviews([{ ...destination, isFavorite: newFavorite }], "destination");
+    return withReviews;
   },
 
   async createTrip(userId: string | undefined, destinationId: string, date: string, guests: string, totalPrice?: number) {
@@ -395,11 +438,16 @@ export const store = {
     return trips.map(processTripStatus);
   },
 
-  async getDocuments() {
-    return prisma.documentItem.findMany({ orderBy: { createdAt: "desc" } });
+  async getDocuments(userId?: string) {
+    if (!userId) return [];
+    return prisma.documentItem.findMany({ where: { userId }, orderBy: { createdAt: "desc" } });
   },
 
-  async createDocument(title: string, description: string, icon: string, color: string) {
+  async createDocument(userId: string | undefined, title: string, description: string, icon: string, color: string) {
+    if (!userId) {
+      throw new Error("Authentication required to create a document");
+    }
+
     return prisma.documentItem.create({
       data: {
         id: generateId("doc"),
@@ -407,12 +455,15 @@ export const store = {
         description,
         icon,
         color,
+        userId,
       },
     });
   },
 
-  async deleteDocument(id: string) {
-    return prisma.documentItem.delete({ where: { id } });
+  async deleteDocument(userId: string | undefined, id: string) {
+    if (!userId) return false;
+    const result = await prisma.documentItem.deleteMany({ where: { id, userId } });
+    return result.count > 0;
   },
 
   // --- Reviews ---

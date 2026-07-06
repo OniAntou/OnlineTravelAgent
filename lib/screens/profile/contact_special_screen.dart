@@ -10,7 +10,8 @@ class ContactSpecialScreen extends ConsumerStatefulWidget {
   const ContactSpecialScreen({super.key});
 
   @override
-  ConsumerState<ContactSpecialScreen> createState() => _ContactSpecialScreenState();
+  ConsumerState<ContactSpecialScreen> createState() =>
+      _ContactSpecialScreenState();
 }
 
 class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
@@ -72,7 +73,10 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
               child: Form(
                 key: _formKey,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 24,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -133,7 +137,10 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
             Image.asset(
               'assets/images/phuquoc_image.jpg', // Using premium beach image
               fit: BoxFit.cover,
-              cacheWidth: (MediaQuery.sizeOf(context).width * MediaQuery.devicePixelRatioOf(context)).round(),
+              cacheWidth:
+                  (MediaQuery.sizeOf(context).width *
+                          MediaQuery.devicePixelRatioOf(context))
+                      .round(),
               errorBuilder: (context, error, stackTrace) => Container(
                 color: Colors.grey[300],
                 child: const Icon(Icons.image, size: 50, color: Colors.grey),
@@ -235,7 +242,11 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
               color: AppTheme.primaryBlue.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(Icons.diamond_rounded, color: AppTheme.primaryBlue, size: 28),
+            child: const Icon(
+              Icons.diamond_rounded,
+              color: AppTheme.primaryBlue,
+              size: 28,
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -244,12 +255,20 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
               children: [
                 const Text(
                   'Dịch vụ VIP 24/7',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.textBlack),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: AppTheme.textBlack,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   'Cá nhân hoá trải nghiệm cho các đoàn khách lớn, hội nghị và nghỉ dưỡng cao cấp. Đội ngũ chuyên gia của chúng tôi sẽ thiết kế hành trình riêng theo đúng nhu cầu của bạn.',
-                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.5),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade600,
+                    height: 1.5,
+                  ),
                 ),
               ],
             ),
@@ -266,7 +285,11 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
       children: [
         const Text(
           'Dịch vụ bạn đang tìm kiếm?',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textBlack),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.textBlack,
+          ),
         ),
         const SizedBox(height: 16),
         SizedBox(
@@ -292,23 +315,27 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
                     color: isSelected ? AppTheme.primaryBlue : Colors.white,
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: isSelected ? AppTheme.primaryBlue : Colors.grey.shade200,
+                      color: isSelected
+                          ? AppTheme.primaryBlue
+                          : Colors.grey.shade200,
                       width: 1.5,
                     ),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: AppTheme.primaryBlue.withValues(alpha: 0.3),
+                              color: AppTheme.primaryBlue.withValues(
+                                alpha: 0.3,
+                              ),
                               blurRadius: 12,
                               offset: const Offset(0, 6),
-                            )
+                            ),
                           ]
                         : [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.02),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
-                            )
+                            ),
                           ],
                   ),
                   child: Column(
@@ -325,7 +352,9 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.w600,
                           color: isSelected ? Colors.white : AppTheme.textBlack,
                         ),
                       ),
@@ -342,7 +371,9 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
 
   // --- Guest Count Slider ---
   Widget _buildGuestsSlider() {
-    final guestLabel = _guests.toInt() == 500 ? '500+ người' : '${_guests.toInt()} người';
+    final guestLabel = _guests.toInt() == 500
+        ? '500+ người'
+        : '${_guests.toInt()} người';
 
     return _buildSliderCard(
       title: 'Số lượng khách dự kiến',
@@ -354,7 +385,10 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
           activeTrackColor: AppTheme.primaryBlue,
           inactiveTrackColor: AppTheme.primaryBlue.withValues(alpha: 0.1),
           thumbColor: Colors.white,
-          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12, elevation: 4),
+          thumbShape: const RoundSliderThumbShape(
+            enabledThumbRadius: 12,
+            elevation: 4,
+          ),
           overlayColor: AppTheme.primaryBlue.withValues(alpha: 0.2),
         ),
         child: Slider(
@@ -386,7 +420,10 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
           activeTrackColor: Colors.green.shade500,
           inactiveTrackColor: Colors.green.shade100,
           thumbColor: Colors.white,
-          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12, elevation: 4),
+          thumbShape: const RoundSliderThumbShape(
+            enabledThumbRadius: 12,
+            elevation: 4,
+          ),
           overlayColor: Colors.green.withValues(alpha: 0.2),
         ),
         child: Slider(
@@ -422,7 +459,7 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
             color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -437,19 +474,30 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
                   const SizedBox(width: 8),
                   Text(
                     title,
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppTheme.textBlack),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.textBlack,
+                    ),
                   ),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: bgColor ?? AppTheme.primaryBlue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   valueLabel,
-                  style: TextStyle(color: iconColor, fontWeight: FontWeight.bold, fontSize: 13),
+                  style: TextStyle(
+                    color: iconColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
                 ),
               ),
             ],
@@ -459,8 +507,22 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(minText, style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.w600)),
-              Text(maxText, style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.w600)),
+              Text(
+                minText,
+                style: TextStyle(
+                  color: Colors.grey.shade500,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                maxText,
+                style: TextStyle(
+                  color: Colors.grey.shade500,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
         ],
@@ -480,7 +542,7 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
             color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 20,
             offset: const Offset(0, 8),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -488,11 +550,19 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
         children: [
           const Row(
             children: [
-              Icon(Icons.assignment_ind_rounded, color: AppTheme.primaryBlue, size: 22),
+              Icon(
+                Icons.assignment_ind_rounded,
+                color: AppTheme.primaryBlue,
+                size: 22,
+              ),
               SizedBox(width: 8),
               Text(
                 'Thông tin liên hệ',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textBlack),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppTheme.textBlack,
+                ),
               ),
             ],
           ),
@@ -502,7 +572,8 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
             controller: _nameController,
             label: 'Họ và tên *',
             icon: Icons.person_rounded,
-            validator: (val) => val == null || val.isEmpty ? 'Vui lòng nhập họ tên' : null,
+            validator: (val) =>
+                val == null || val.isEmpty ? 'Vui lòng nhập họ tên' : null,
           ),
           const SizedBox(height: 16),
           // Phone Field
@@ -563,14 +634,21 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
       keyboardType: keyboardType,
       maxLines: maxLines,
       validator: validator,
-      style: const TextStyle(fontSize: 14, color: AppTheme.textBlack, fontWeight: FontWeight.w500),
+      style: const TextStyle(
+        fontSize: 14,
+        color: AppTheme.textBlack,
+        fontWeight: FontWeight.w500,
+      ),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: Colors.grey.shade500, fontSize: 13),
         prefixIcon: Icon(icon, size: 20, color: Colors.grey.shade400),
         filled: true,
         fillColor: const Color(0xFFF8FAFC), // very light sleek blue-grey
-        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 16,
+          horizontal: 20,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
@@ -619,7 +697,12 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
           children: [
             Text(
               'Gửi Yêu Cầu Thiết Kế',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 0.5),
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                letterSpacing: 0.5,
+              ),
             ),
             SizedBox(width: 12),
             Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
@@ -648,17 +731,24 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 30,
-              )
-            ]
+              ),
+            ],
           ),
           child: const Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(color: AppTheme.primaryBlue, strokeWidth: 3),
+              CircularProgressIndicator(
+                color: AppTheme.primaryBlue,
+                strokeWidth: 3,
+              ),
               SizedBox(height: 24),
               Text(
                 'Đang thiết lập hồ sơ VIP...',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.textBlack),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: AppTheme.textBlack,
+                ),
               ),
             ],
           ),
@@ -671,14 +761,19 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
 
     // Call travel provider to register a new tracker document
     final docTitle = 'Đoàn: ${_nameController.text} (${_guests.toInt()} khách)';
-    final docDesc = 'Dịch vụ: $_selectedCategory. Ngân sách: ${formatVND(_budget)}. Mã số: #$reqId. Trạng thái: Đang xử lý.';
+    final docDesc =
+        'Dịch vụ: $_selectedCategory. Ngân sách: ${formatVND(_budget)}. Mã số: #$reqId. Trạng thái: Đang xử lý.';
 
     try {
-      final success = await ref.read(documentsProvider.notifier).addDocument(
+      final success = await ref
+          .read(documentsProvider.notifier)
+          .addDocument(
             title: docTitle,
             description: docDesc,
             icon: 'business',
-            color: _selectedCategory == 'Nghỉ dưỡng VIP' ? '#FF9800' : '#176FF2',
+            color: _selectedCategory == 'Nghỉ dưỡng VIP'
+                ? '#FF9800'
+                : '#176FF2',
           );
 
       if (mounted) {
@@ -705,30 +800,50 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
                         color: Colors.green.shade50,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.check_circle_rounded, color: Colors.green.shade500, size: 56),
+                      child: Icon(
+                        Icons.check_circle_rounded,
+                        color: Colors.green.shade500,
+                        size: 56,
+                      ),
                     ),
                     const SizedBox(height: 24),
                     const Text(
                       'Đăng Ký Thành Công!',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: AppTheme.textBlack),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
+                        color: AppTheme.textBlack,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.primaryBlue.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         'Mã hồ sơ: #$reqId',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.primaryBlue, letterSpacing: 1),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          color: AppTheme.primaryBlue,
+                          letterSpacing: 1,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
                     Text(
                       'Chuyên viên tư vấn cấp cao của chúng tôi đã tiếp nhận yêu cầu và sẽ liên hệ với bạn trong vòng 2 giờ làm việc.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.6),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                        height: 1.6,
+                      ),
                     ),
                     const SizedBox(height: 32),
                     SizedBox(
@@ -736,7 +851,9 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.pop(dialogContext); // Close success dialog
-                          Navigator.pop(context); // Pop current contact page back to profile
+                          Navigator.pop(
+                            context,
+                          ); // Pop current contact page back to profile
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.primaryBlue,
@@ -746,7 +863,14 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           elevation: 0,
                         ),
-                        child: const Text('Quay lại Hồ sơ', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                        child: const Text(
+                          'Quay lại Hồ sơ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -757,7 +881,9 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại.'),
+              content: Text(
+                'Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại.',
+              ),
               backgroundColor: Colors.redAccent,
             ),
           );
@@ -767,10 +893,7 @@ class _ContactSpecialScreenState extends ConsumerState<ContactSpecialScreen> {
       if (mounted) {
         Navigator.pop(context); // Close loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi: $e'),
-            backgroundColor: Colors.redAccent,
-          ),
+          SnackBar(content: Text('Lỗi: $e'), backgroundColor: Colors.redAccent),
         );
       }
     }

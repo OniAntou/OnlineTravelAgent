@@ -32,7 +32,6 @@ class DestinationDetailScreen extends ConsumerStatefulWidget {
 
 class _DestinationDetailScreenState
     extends ConsumerState<DestinationDetailScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -60,13 +59,17 @@ class _DestinationDetailScreenState
   @override
   Widget build(BuildContext context) {
     final destinations = ref.watch(destinationsProvider);
-    final d = destinations.firstWhere((e) => e.id == widget.destination.id, orElse: () => widget.destination);
+    final d = destinations.firstWhere(
+      (e) => e.id == widget.destination.id,
+      orElse: () => widget.destination,
+    );
 
-    final heroCacheWidth = (MediaQuery.sizeOf(context).width *
-            MediaQuery.devicePixelRatioOf(context))
+    final heroCacheWidth =
+        (MediaQuery.sizeOf(context).width *
+                MediaQuery.devicePixelRatioOf(context))
+            .round();
+    final thumbCacheWidth = (100 * MediaQuery.devicePixelRatioOf(context))
         .round();
-    final thumbCacheWidth =
-        (100 * MediaQuery.devicePixelRatioOf(context)).round();
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundGray,
@@ -146,18 +149,25 @@ class _DestinationDetailScreenState
                   Text(
                     d.name,
                     style: const TextStyle(
-                        fontSize: 28, fontWeight: FontWeight.bold),
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.location_on,
-                          size: 16, color: AppTheme.primaryBlue),
+                      const Icon(
+                        Icons.location_on,
+                        size: 16,
+                        color: AppTheme.primaryBlue,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         d.location,
                         style: const TextStyle(
-                            color: Colors.grey, fontSize: 14),
+                          color: Colors.grey,
+                          fontSize: 14,
+                        ),
                       ),
                     ],
                   ),
@@ -165,7 +175,11 @@ class _DestinationDetailScreenState
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _infoItem(Icons.star, d.rating, '(${d.reviewsCount} Đánh giá)'),
+                      _infoItem(
+                        Icons.star,
+                        d.rating,
+                        '(${d.reviewsCount} Đánh giá)',
+                      ),
                       _infoItem(Icons.access_time, d.duration, 'Thời lượng'),
                       _infoItem(Icons.wb_cloudy, '24°C', 'Thời tiết'),
                     ],
@@ -181,7 +195,10 @@ class _DestinationDetailScreenState
                         ? d.description
                         : 'Khám phá vẻ đẹp tuyệt vời của ${d.name}. Một hành trình đáng nhớ đang chờ đợi bạn.',
                     style: const TextStyle(
-                        color: Colors.black87, fontSize: 15, height: 1.6),
+                      color: Colors.black87,
+                      fontSize: 15,
+                      height: 1.6,
+                    ),
                   ),
 
                   const SizedBox(height: 32),
@@ -197,15 +214,40 @@ class _DestinationDetailScreenState
                       physics: const BouncingScrollPhysics(),
                       clipBehavior: Clip.none,
                       children: [
-                        _highlightItem(Icons.camera_alt_outlined, 'Sống ảo', 'Góc check-in', const Color(0xFFE11D48)),
+                        _highlightItem(
+                          Icons.camera_alt_outlined,
+                          'Sống ảo',
+                          'Góc check-in',
+                          const Color(0xFFE11D48),
+                        ),
                         const SizedBox(width: 16),
-                        _highlightItem(Icons.restaurant_outlined, 'Đặc sản', 'Khám phá ẩm thực', const Color(0xFFD97706)),
+                        _highlightItem(
+                          Icons.restaurant_outlined,
+                          'Đặc sản',
+                          'Khám phá ẩm thực',
+                          const Color(0xFFD97706),
+                        ),
                         const SizedBox(width: 16),
-                        _highlightItem(Icons.landscape_outlined, 'Ngắm cảnh', 'Hòa vào thiên nhiên', const Color(0xFF059669)),
+                        _highlightItem(
+                          Icons.landscape_outlined,
+                          'Ngắm cảnh',
+                          'Hòa vào thiên nhiên',
+                          const Color(0xFF059669),
+                        ),
                         const SizedBox(width: 16),
-                        _highlightItem(Icons.water_drop_outlined, 'Thư giãn', 'Nghỉ dưỡng êm ái', const Color(0xFF0284C7)),
+                        _highlightItem(
+                          Icons.water_drop_outlined,
+                          'Thư giãn',
+                          'Nghỉ dưỡng êm ái',
+                          const Color(0xFF0284C7),
+                        ),
                         const SizedBox(width: 16),
-                        _highlightItem(Icons.local_mall_outlined, 'Mua sắm', 'Quà lưu niệm', const Color(0xFF7C3AED)),
+                        _highlightItem(
+                          Icons.local_mall_outlined,
+                          'Mua sắm',
+                          'Quà lưu niệm',
+                          const Color(0xFF7C3AED),
+                        ),
                       ],
                     ),
                   ),
@@ -229,13 +271,16 @@ class _DestinationDetailScreenState
                             options: MapOptions(
                               initialCenter: LatLng(d.latitude, d.longitude),
                               interactionOptions: const InteractionOptions(
-                                flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+                                flags:
+                                    InteractiveFlag.all &
+                                    ~InteractiveFlag.rotate,
                               ),
                             ),
                             children: [
                               TileLayer(
                                 urlTemplate: kOpenStreetMapTileUrl,
-                                userAgentPackageName: 'com.example.onlinetravelagent',
+                                userAgentPackageName:
+                                    'com.example.onlinetravelagent',
                               ),
                               MarkerLayer(
                                 markers: [
@@ -264,7 +309,10 @@ class _DestinationDetailScreenState
                         color: Colors.grey.shade100,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Text('Chưa có thông tin toạ độ', style: TextStyle(color: Colors.grey)),
+                      child: const Text(
+                        'Chưa có thông tin toạ độ',
+                        style: TextStyle(color: Colors.grey),
+                      ),
                     ),
                   const SizedBox(height: 32),
                   const Text(
@@ -324,18 +372,20 @@ class _DestinationDetailScreenState
             children: [
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text('Giá từ',
-                        style: TextStyle(color: Colors.grey, fontSize: 12)),
-                    Text(
-                      formatVND(parsePrice(d.price)),
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primaryBlue,
-                      ),
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Giá từ',
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                  Text(
+                    formatVND(parsePrice(d.price)),
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryBlue,
                     ),
+                  ),
                 ],
               ),
               const SizedBox(width: 24),
@@ -347,7 +397,8 @@ class _DestinationDetailScreenState
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryBlue,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
                       elevation: 0,
                     ),
                     child: const Row(
@@ -356,13 +407,17 @@ class _DestinationDetailScreenState
                         Text(
                           'Đặt ngay',
                           style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16),
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                         SizedBox(width: 8),
-                        Icon(Icons.arrow_forward,
-                            color: Colors.white, size: 20),
+                        Icon(
+                          Icons.arrow_forward,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ],
                     ),
                   ),
@@ -387,14 +442,21 @@ class _DestinationDetailScreenState
           child: Icon(icon, size: 20, color: Colors.amber),
         ),
         const SizedBox(height: 8),
-        Text(value,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        Text(
+          value,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
         Text(label, style: const TextStyle(color: Colors.grey, fontSize: 11)),
       ],
     );
   }
 
-  Widget _highlightItem(IconData icon, String title, String subtitle, Color color) {
+  Widget _highlightItem(
+    IconData icon,
+    String title,
+    String subtitle,
+    Color color,
+  ) {
     return Container(
       width: 110,
       padding: const EdgeInsets.all(14),

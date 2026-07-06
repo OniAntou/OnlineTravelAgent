@@ -42,7 +42,8 @@ class Hotel {
       priceFrom: (json['priceFrom'] as num?)?.toDouble() ?? 0.0,
       address: json['address']?.toString() ?? '',
       amenities: (json['amenities'] as List?)?.cast<String>() ?? [],
-      rooms: (json['rooms'] as List?)?.map((e) => Room.fromJson(e)).toList() ?? [],
+      rooms:
+          (json['rooms'] as List?)?.map((e) => Room.fromJson(e)).toList() ?? [],
     );
   }
 }

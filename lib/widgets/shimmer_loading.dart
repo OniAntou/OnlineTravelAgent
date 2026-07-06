@@ -57,7 +57,11 @@ class FlightCardShimmer extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(width: 100, height: 14, color: Colors.white),
+                          Container(
+                            width: 100,
+                            height: 14,
+                            color: Colors.white,
+                          ),
                           const SizedBox(height: 6),
                           Container(width: 60, height: 10, color: Colors.white),
                         ],
@@ -132,11 +136,7 @@ class TimelineShimmer extends StatelessWidget {
                       ),
                     ),
                     if (index < 2)
-                      Container(
-                        width: 2,
-                        height: 60,
-                        color: Colors.white,
-                      ),
+                      Container(width: 2, height: 60, color: Colors.white),
                   ],
                 ),
                 const SizedBox(width: 12),
@@ -152,9 +152,17 @@ class TimelineShimmer extends StatelessWidget {
                       children: [
                         Container(width: 100, height: 12, color: Colors.white),
                         const SizedBox(height: 10),
-                        Container(width: double.infinity, height: 16, color: Colors.white),
+                        Container(
+                          width: double.infinity,
+                          height: 16,
+                          color: Colors.white,
+                        ),
                         const SizedBox(height: 8),
-                        Container(width: double.infinity, height: 12, color: Colors.white),
+                        Container(
+                          width: double.infinity,
+                          height: 12,
+                          color: Colors.white,
+                        ),
                       ],
                     ),
                   ),
@@ -212,7 +220,11 @@ class ReviewCardShimmer extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 10),
-                Container(width: double.infinity, height: 12, color: Colors.white),
+                Container(
+                  width: double.infinity,
+                  height: 12,
+                  color: Colors.white,
+                ),
                 const SizedBox(height: 6),
                 Container(width: 200, height: 12, color: Colors.white),
               ],

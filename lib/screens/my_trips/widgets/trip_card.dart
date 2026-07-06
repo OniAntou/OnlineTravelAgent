@@ -48,7 +48,11 @@ class TripCard extends StatelessWidget {
                         filterQuality: FilterQuality.low,
                         errorBuilder: (context, error, stackTrace) => Container(
                           color: Colors.grey[200],
-                          child: const Icon(Icons.image, size: 30, color: Colors.grey),
+                          child: const Icon(
+                            Icons.image,
+                            size: 30,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                     ),
@@ -61,7 +65,9 @@ class TripCard extends StatelessWidget {
                     height: 40,
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(20),
+                        ),
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
@@ -73,7 +79,6 @@ class TripCard extends StatelessWidget {
                       ),
                     ),
                   ),
-
                 ],
               ),
             ),
@@ -102,12 +107,20 @@ class TripCard extends StatelessWidget {
                   // Row 2: Booking Info (Date & Guests)
                   Row(
                     children: [
-                      const Icon(Icons.calendar_today_rounded, size: 12, color: Colors.grey),
+                      const Icon(
+                        Icons.calendar_today_rounded,
+                        size: 12,
+                        color: Colors.grey,
+                      ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           trip.date,
-                          style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -118,11 +131,19 @@ class TripCard extends StatelessWidget {
                         color: Colors.grey.withValues(alpha: 0.3),
                         margin: const EdgeInsets.symmetric(horizontal: 8),
                       ),
-                      const Icon(Icons.people_alt_rounded, size: 12, color: Colors.grey),
+                      const Icon(
+                        Icons.people_alt_rounded,
+                        size: 12,
+                        color: Colors.grey,
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         trip.guests,
-                        style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.w500),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ],
                   ),
@@ -157,13 +178,18 @@ class TripCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: trip.status.toLowerCase() == 'đang diễn ra' || trip.status.toLowerCase() == 'ongoing'
+                          color:
+                              trip.status.toLowerCase() == 'đang diễn ra' ||
+                                  trip.status.toLowerCase() == 'ongoing'
                               ? const Color(0xFFFF9800).withValues(alpha: 0.1)
                               : trip.isUpcoming
-                                  ? AppTheme.primaryBlue.withValues(alpha: 0.08)
-                                  : Colors.grey.withValues(alpha: 0.1),
+                              ? AppTheme.primaryBlue.withValues(alpha: 0.08)
+                              : Colors.grey.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -171,11 +197,13 @@ class TripCard extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
-                            color: trip.status.toLowerCase() == 'đang diễn ra' || trip.status.toLowerCase() == 'ongoing'
+                            color:
+                                trip.status.toLowerCase() == 'đang diễn ra' ||
+                                    trip.status.toLowerCase() == 'ongoing'
                                 ? const Color(0xFFFF9800)
                                 : trip.isUpcoming
-                                    ? AppTheme.primaryBlue
-                                    : Colors.grey[600],
+                                ? AppTheme.primaryBlue
+                                : Colors.grey[600],
                           ),
                         ),
                       ),

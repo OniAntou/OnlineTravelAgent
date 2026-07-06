@@ -70,7 +70,10 @@ class StarRatingBar extends StatelessWidget {
                 width: 14,
                 child: Text(
                   '$stars',
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -86,7 +89,9 @@ class StarRatingBar extends StatelessWidget {
                     child: LinearProgressIndicator(
                       value: percentage,
                       backgroundColor: const Color(0xFFE8E8E8),
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.amber),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        Colors.amber,
+                      ),
                     ),
                   ),
                 ),

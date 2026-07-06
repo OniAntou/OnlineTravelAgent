@@ -9,8 +9,13 @@ import 'package:online_travel_agent/utils/api_exception.dart';
 import '../helpers/test_helpers.dart';
 
 BootstrapData emptyBootstrap() => BootstrapData(
-  categories: [], destinations: [], recommended: [],
-  trips: [], documents: [], hotels: [], tourPackages: [],
+  categories: [],
+  destinations: [],
+  recommended: [],
+  trips: [],
+  documents: [],
+  hotels: [],
+  tourPackages: [],
 );
 
 void main() {
@@ -71,13 +76,21 @@ void main() {
       );
       final notifier = container.read(tripsProvider.notifier);
       const trip1 = Trip(
-        id: '1', destination: 'Da Lat', location: 'Lam Dong',
-        date: '2026-07-01', guests: '2 Người', status: 'Ongoing',
+        id: '1',
+        destination: 'Da Lat',
+        location: 'Lam Dong',
+        date: '2026-07-01',
+        guests: '2 Người',
+        status: 'Ongoing',
         imagePath: 'assets/images/dalat_image.jpg',
       );
       const trip2 = Trip(
-        id: '2', destination: 'Ha Noi', location: 'Ha Noi',
-        date: '2026-08-01', guests: '1 Người', status: 'Upcoming',
+        id: '2',
+        destination: 'Ha Noi',
+        location: 'Ha Noi',
+        date: '2026-08-01',
+        guests: '1 Người',
+        status: 'Upcoming',
         imagePath: 'assets/images/hanoi_image.png',
       );
       notifier.addTrip(trip1);
@@ -87,7 +100,21 @@ void main() {
       expect(state.first.destination, 'Ha Noi');
     });
 
-    test('bookTrip throws ValidationException when destinationId is null', () async {
+    test(
+      'bookTrip throws ValidationException when destinationId is null',
+      () async {
+        container = ProviderContainer(
+          overrides: [
+            apiProvider.overrideWithValue(fakeApi),
+            bootstrapProvider.overrideWithValue(AsyncData(emptyBootstrap())),
+          ],
+        );
+        final notifier = container.read(tripsProvider.notifier);
+        expect(notifier.bookTrip, throwsA(isA<ValidationException>()));
+      },
+    );
+
+    test('bookTrip rejects blank date and invalid guests', () async {
       container = ProviderContainer(
         overrides: [
           apiProvider.overrideWithValue(fakeApi),
@@ -95,8 +122,104 @@ void main() {
         ],
       );
       final notifier = container.read(tripsProvider.notifier);
+
       expect(
-        notifier.bookTrip,
+        notifier.bookTrip(destinationId: 'dest1', date: ' ', guests: '2 Người'),
+        throwsA(isA<ValidationException>()),
+      );
+      expect(
+        notifier.bookTrip(
+          destinationId: 'dest1',
+          date: '2026-07-01',
+          guests: '0 Người',
+        ),
+        throwsA(isA<ValidationException>()),
+      );
+    });
+
+    test('bookFlight rejects blank flight id and guest count', () async {
+      container = ProviderContainer(
+        overrides: [
+          apiProvider.overrideWithValue(fakeApi),
+          bootstrapProvider.overrideWithValue(AsyncData(emptyBootstrap())),
+        ],
+      );
+      final notifier = container.read(tripsProvider.notifier);
+
+      expect(
+        notifier.bookFlight(
+          flightId: ' ',
+          date: '2026-07-01',
+          guests: '1 Người',
+        ),
+        throwsA(isA<ValidationException>()),
+      );
+      expect(
+        notifier.bookFlight(
+          flightId: 'flight1',
+          date: '2026-07-01',
+          guests: '0 Người',
+        ),
+        throwsA(isA<ValidationException>()),
+      );
+    });
+
+    test('bookHotel rejects invalid stay dates', () async {
+      container = ProviderContainer(
+        overrides: [
+          apiProvider.overrideWithValue(fakeApi),
+          bootstrapProvider.overrideWithValue(AsyncData(emptyBootstrap())),
+        ],
+      );
+      final notifier = container.read(tripsProvider.notifier);
+
+      expect(
+        notifier.bookHotel(
+          roomId: 'room1',
+          checkIn: '10/08/2026',
+          checkOut: '10/08/2026',
+          guests: '2 Người',
+        ),
+        throwsA(isA<ValidationException>()),
+      );
+      expect(
+        notifier.bookHotel(
+          roomId: 'room1',
+          checkIn: '31/02/2026',
+          checkOut: '02/03/2026',
+          guests: '2 Người',
+        ),
+        throwsA(isA<ValidationException>()),
+      );
+    });
+
+    test('createCustomTour rejects incomplete summary data', () async {
+      container = ProviderContainer(
+        overrides: [
+          apiProvider.overrideWithValue(fakeApi),
+          bootstrapProvider.overrideWithValue(AsyncData(emptyBootstrap())),
+        ],
+      );
+      final notifier = container.read(tripsProvider.notifier);
+
+      expect(
+        notifier.createCustomTour(
+          destination: '',
+          location: 'Da Nang',
+          date: '10/08/2026',
+          guests: '2 Người',
+          imagePath: 'assets/images/danang.jpg',
+        ),
+        throwsA(isA<ValidationException>()),
+      );
+      expect(
+        notifier.createCustomTour(
+          destination: 'Da Nang',
+          location: 'Da Nang',
+          date: '10/08/2026',
+          guests: '0 Người',
+          imagePath: 'assets/images/danang.jpg',
+        ),
         throwsA(isA<ValidationException>()),
       );
     });
@@ -126,16 +249,28 @@ void main() {
         ],
       );
       final notifier = container.read(tripsProvider.notifier);
-      notifier.addTrip(const Trip(
-        id: '1', destination: 'A', location: 'B',
-        date: '2026-07-01', guests: '1', status: 'Ongoing',
-        imagePath: '',
-      ));
-      notifier.addTrip(const Trip(
-        id: '2', destination: 'C', location: 'D',
-        date: '2026-08-01', guests: '1', status: 'Upcoming',
-        imagePath: '',
-      ));
+      notifier.addTrip(
+        const Trip(
+          id: '1',
+          destination: 'A',
+          location: 'B',
+          date: '2026-07-01',
+          guests: '1',
+          status: 'Ongoing',
+          imagePath: '',
+        ),
+      );
+      notifier.addTrip(
+        const Trip(
+          id: '2',
+          destination: 'C',
+          location: 'D',
+          date: '2026-08-01',
+          guests: '1',
+          status: 'Upcoming',
+          imagePath: '',
+        ),
+      );
       final ongoing = container.read(ongoingTripsProvider);
       expect(ongoing.length, 1);
       expect(ongoing.first.status, 'Ongoing');
@@ -149,16 +284,29 @@ void main() {
         ],
       );
       final notifier = container.read(tripsProvider.notifier);
-      notifier.addTrip(const Trip(
-        id: '1', destination: 'A', location: 'B',
-        date: '2026-01-01', guests: '1', status: 'Completed',
-        imagePath: '', isUpcoming: false,
-      ));
-      notifier.addTrip(const Trip(
-        id: '2', destination: 'C', location: 'D',
-        date: '2026-08-01', guests: '1', status: 'Upcoming',
-        imagePath: '',
-      ));
+      notifier.addTrip(
+        const Trip(
+          id: '1',
+          destination: 'A',
+          location: 'B',
+          date: '2026-01-01',
+          guests: '1',
+          status: 'Completed',
+          imagePath: '',
+          isUpcoming: false,
+        ),
+      );
+      notifier.addTrip(
+        const Trip(
+          id: '2',
+          destination: 'C',
+          location: 'D',
+          date: '2026-08-01',
+          guests: '1',
+          status: 'Upcoming',
+          imagePath: '',
+        ),
+      );
       final history = container.read(historyTripsProvider);
       expect(history.length, 1);
       expect(history.first.status, 'Completed');

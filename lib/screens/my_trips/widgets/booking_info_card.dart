@@ -9,7 +9,8 @@ class BookingInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hashStr = trip.id.toUpperCase().hashCode.abs().toString();
-    final bookingCode = 'BK-${hashStr.length >= 6 ? hashStr.substring(0, 6) : hashStr.padLeft(6, '0')}';
+    final bookingCode =
+        'BK-${hashStr.length >= 6 ? hashStr.substring(0, 6) : hashStr.padLeft(6, '0')}';
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -25,8 +26,11 @@ class BookingInfoCard extends StatelessWidget {
           _row(Icons.confirmation_num_outlined, 'Mã đặt chỗ', bookingCode),
           if (trip.totalPrice != null) ...[
             const SizedBox(height: 14),
-            _row(Icons.payments_outlined, 'Tổng thanh toán',
-                formatVND(trip.totalPrice!)),
+            _row(
+              Icons.payments_outlined,
+              'Tổng thanh toán',
+              formatVND(trip.totalPrice!),
+            ),
           ],
         ],
       ),
@@ -49,15 +53,20 @@ class BookingInfoCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label,
-                  style:
-                      const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text(
+                label,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
               const SizedBox(height: 2),
-              Text(value,
-                  style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.w600),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ],
           ),
         ),

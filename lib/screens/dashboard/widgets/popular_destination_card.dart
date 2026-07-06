@@ -22,9 +22,7 @@ class PopularDestinationCard extends StatelessWidget {
       onTap: onClick,
       child: Container(
         width: 188,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(24)),
         clipBehavior: Clip.antiAlias,
         child: Stack(
           children: [
@@ -50,7 +48,7 @@ class PopularDestinationCard extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withValues(alpha: 0.4)
+                    Colors.black.withValues(alpha: 0.4),
                   ],
                   stops: const [0.6, 1.0],
                 ),
@@ -85,8 +83,10 @@ class PopularDestinationCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTheme.darkGray.withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(12),
@@ -94,15 +94,18 @@ class PopularDestinationCard extends StatelessWidget {
                     child: Text(
                       destination.name,
                       style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500),
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTheme.darkGray.withValues(alpha: 0.8),
                       borderRadius: BorderRadius.circular(12),
@@ -114,9 +117,10 @@ class PopularDestinationCard extends StatelessWidget {
                         Text(
                           destination.rating,
                           style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),

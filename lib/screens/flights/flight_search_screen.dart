@@ -23,9 +23,27 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
   String _arrival = 'HAN';
   DateTime _selectedDate = DateTime.now();
 
-  final List<String> _airlines = ['Tất cả', 'Vietnam Airlines', 'Vietjet Air', 'Bamboo Airways'];
+  final List<String> _airlines = [
+    'Tất cả',
+    'Vietnam Airlines',
+    'Vietjet Air',
+    'Bamboo Airways',
+  ];
   final List<String> _airports = [
-    'SGN', 'HAN', 'DAD', 'CXR', 'PQC', 'DLI', 'HPH', 'HUI', 'VCA', 'VII', 'THD', 'BMV', 'PXU', 'VDO'
+    'SGN',
+    'HAN',
+    'DAD',
+    'CXR',
+    'PQC',
+    'DLI',
+    'HPH',
+    'HUI',
+    'VCA',
+    'VII',
+    'THD',
+    'BMV',
+    'PXU',
+    'VDO',
   ];
 
   void _swapAirports() {
@@ -51,7 +69,11 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
             iconTheme: IconThemeData(color: Colors.black87),
             title: Text(
               'Tìm chuyến bay',
-              style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w700, fontSize: 18),
+              style: TextStyle(
+                color: Colors.black87,
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+              ),
             ),
             elevation: 0,
           ),
@@ -61,15 +83,9 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
               child: _buildSearchForm(),
             ),
           ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 24),
-          ),
-          SliverToBoxAdapter(
-            child: _buildAirlineFilter(),
-          ),
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 24),
-          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
+          SliverToBoxAdapter(child: _buildAirlineFilter()),
+          const SliverToBoxAdapter(child: SizedBox(height: 24)),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
             sliver: flightsAsync.when(
@@ -85,10 +101,20 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
                   child: Center(
                     child: Column(
                       children: [
-                        Icon(Icons.error_outline, size: 48, color: Colors.grey.shade300),
+                        Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Colors.grey.shade300,
+                        ),
                         const SizedBox(height: 16),
-                        const Text('Không thể tải dữ liệu chuyến bay',
-                            style: TextStyle(color: Colors.black87, fontSize: 16, fontWeight: FontWeight.w600)),
+                        const Text(
+                          'Không thể tải dữ liệu chuyến bay',
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                         const SizedBox(height: 8),
                         TextButton(
                           onPressed: () => ref.invalidate(flightsProvider),
@@ -103,24 +129,29 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
                 final displayed = flights.where((f) {
                   final bool matchDep = f.departure == _departure;
                   final bool matchArr = f.arrival == _arrival;
-                  final bool matchAirline = _selectedAirline == null || _selectedAirline == 'Tất cả' || f.airline == _selectedAirline;
+                  final bool matchAirline =
+                      _selectedAirline == null ||
+                      _selectedAirline == 'Tất cả' ||
+                      f.airline == _selectedAirline;
                   return matchDep && matchArr && matchAirline;
                 }).toList();
 
                 if (displayed.isEmpty) {
-                  return SliverToBoxAdapter(child: Transform.translate(offset: const Offset(0, -10), child: _buildEmptyState()));
+                  return SliverToBoxAdapter(
+                    child: Transform.translate(
+                      offset: const Offset(0, -10),
+                      child: _buildEmptyState(),
+                    ),
+                  );
                 }
 
                 return SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
-                        child: _buildFlightCard(displayed[index]),
-                      );
-                    },
-                    childCount: displayed.length,
-                  ),
+                  delegate: SliverChildBuilderDelegate((context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: _buildFlightCard(displayed[index]),
+                    );
+                  }, childCount: displayed.length),
                 );
               },
             ),
@@ -154,15 +185,32 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('TỪ', style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                      Text(
+                        'TỪ',
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1,
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
                           value: _departure,
                           isDense: true,
                           icon: const SizedBox.shrink(),
-                          style: const TextStyle(color: Colors.black87, fontSize: 24, fontWeight: FontWeight.w700),
-                          items: _airports.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                          style: const TextStyle(
+                            color: Colors.black87,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          items: _airports
+                              .map(
+                                (e) =>
+                                    DropdownMenuItem(value: e, child: Text(e)),
+                              )
+                              .toList(),
                           onChanged: (v) {
                             if (v != null) setState(() => _departure = v);
                           },
@@ -179,14 +227,26 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
                       color: AppTheme.primaryBlue.withValues(alpha: 0.08),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.swap_horiz, color: AppTheme.primaryBlue, size: 24),
+                    child: const Icon(
+                      Icons.swap_horiz,
+                      color: AppTheme.primaryBlue,
+                      size: 24,
+                    ),
                   ),
                 ),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text('ĐẾN', style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                      Text(
+                        'ĐẾN',
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1,
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       DropdownButtonHideUnderline(
                         child: DropdownButton<String>(
@@ -194,8 +254,17 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
                           isDense: true,
                           icon: const SizedBox.shrink(),
                           alignment: Alignment.centerRight,
-                          style: const TextStyle(color: Colors.black87, fontSize: 24, fontWeight: FontWeight.w700),
-                          items: _airports.map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(),
+                          style: const TextStyle(
+                            color: Colors.black87,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          items: _airports
+                              .map(
+                                (e) =>
+                                    DropdownMenuItem(value: e, child: Text(e)),
+                              )
+                              .toList(),
                           onChanged: (v) {
                             if (v != null) setState(() => _arrival = v);
                           },
@@ -218,7 +287,9 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
                 builder: (context, child) {
                   return Theme(
                     data: Theme.of(context).copyWith(
-                      colorScheme: const ColorScheme.light(primary: AppTheme.primaryBlue),
+                      colorScheme: const ColorScheme.light(
+                        primary: AppTheme.primaryBlue,
+                      ),
                     ),
                     child: child!,
                   );
@@ -226,25 +297,46 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
               );
               if (date != null) setState(() => _selectedDate = date);
             },
-            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(16),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(20),
               child: Row(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: AppTheme.primaryBlue.withValues(alpha: 0.08), borderRadius: BorderRadius.circular(8)),
-                    child: const Icon(Icons.calendar_month_rounded, size: 20, color: AppTheme.primaryBlue),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryBlue.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.calendar_month_rounded,
+                      size: 20,
+                      color: AppTheme.primaryBlue,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('NGÀY ĐI', style: TextStyle(color: Colors.grey.shade500, fontSize: 11, fontWeight: FontWeight.w600, letterSpacing: 1)),
+                      Text(
+                        'NGÀY ĐI',
+                        style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 1,
+                        ),
+                      ),
                       const SizedBox(height: 2),
                       Text(
                         DateFormat('EEEE, dd MMM yyyy').format(_selectedDate),
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
                       ),
                     ],
                   ),
@@ -267,14 +359,18 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
         separatorBuilder: (_, _) => const SizedBox(width: 16),
         itemBuilder: (context, index) {
           final airline = _airlines[index];
-          final isSelected = (_selectedAirline == airline) || (_selectedAirline == null && airline == 'Tất cả');
+          final isSelected =
+              (_selectedAirline == airline) ||
+              (_selectedAirline == null && airline == 'Tất cả');
           return GestureDetector(
             onTap: () => setState(() => _selectedAirline = airline),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               decoration: BoxDecoration(
-                color: isSelected ? AppTheme.primaryBlue.withValues(alpha: 0.1) : Colors.transparent,
+                color: isSelected
+                    ? AppTheme.primaryBlue.withValues(alpha: 0.1)
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(16),
               ),
               alignment: Alignment.center,
@@ -343,24 +439,49 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(4),
-                            child: Image.asset(flight.airlineLogo, width: 24, height: 24, fit: BoxFit.contain, errorBuilder: (context, error, stackTrace) => const Icon(Icons.flight, size: 24)),
+                            child: Image.asset(
+                              flight.airlineLogo,
+                              width: 24,
+                              height: 24,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.flight, size: 24),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(flight.airline, style: const TextStyle(color: Colors.black87, fontSize: 14, fontWeight: FontWeight.w600)),
+                            Text(
+                              flight.airline,
+                              style: const TextStyle(
+                                color: Colors.black87,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                             const SizedBox(height: 2),
-                            Text('Bay thẳng', style: TextStyle(color: Colors.green.shade600, fontSize: 11, fontWeight: FontWeight.w500)),
+                            Text(
+                              'Bay thẳng',
+                              style: TextStyle(
+                                color: Colors.green.shade600,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ],
                         ),
                       ],
                     ),
-                      Text(
-                        formatVND(flight.price.toDouble()),
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.primaryBlue),
+                    Text(
+                      formatVND(flight.price.toDouble()),
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.primaryBlue,
                       ),
+                    ),
                   ],
                 ),
               ),
@@ -369,7 +490,17 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
                 children: [
                   Row(
                     children: [
-                      Container(width: 8, height: 16, decoration: const BoxDecoration(color: AppTheme.backgroundGray, borderRadius: BorderRadius.only(topRight: Radius.circular(8), bottomRight: Radius.circular(8)))),
+                      Container(
+                        width: 8,
+                        height: 16,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.backgroundGray,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(8),
+                            bottomRight: Radius.circular(8),
+                          ),
+                        ),
+                      ),
                       Expanded(
                         child: LayoutBuilder(
                           builder: (context, constraints) {
@@ -378,13 +509,31 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: List.generate(
                                 (constraints.constrainWidth() / 8).floor(),
-                                (index) => SizedBox(width: 4, height: 1.5, child: DecoratedBox(decoration: BoxDecoration(color: Colors.grey.shade300))),
+                                (index) => SizedBox(
+                                  width: 4,
+                                  height: 1.5,
+                                  child: DecoratedBox(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
+                                ),
                               ),
                             );
                           },
                         ),
                       ),
-                      Container(width: 8, height: 16, decoration: const BoxDecoration(color: AppTheme.backgroundGray, borderRadius: BorderRadius.only(topLeft: Radius.circular(8), bottomLeft: Radius.circular(8)))),
+                      Container(
+                        width: 8,
+                        height: 16,
+                        decoration: const BoxDecoration(
+                          color: AppTheme.backgroundGray,
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(8),
+                            bottomLeft: Radius.circular(8),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ],
@@ -397,24 +546,61 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(flight.departureTime, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                        Text(
+                          flight.departureTime,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                         const SizedBox(height: 4),
-                        Text(flight.departure, style: TextStyle(fontSize: 14, color: Colors.grey.shade500, fontWeight: FontWeight.w500)),
+                        Text(
+                          flight.departure,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade500,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ],
                     ),
                     Column(
                       children: [
-                        const Icon(Icons.flight_takeoff_rounded, color: AppTheme.primaryBlue, size: 24),
+                        const Icon(
+                          Icons.flight_takeoff_rounded,
+                          color: AppTheme.primaryBlue,
+                          size: 24,
+                        ),
                         const SizedBox(height: 4),
-                        Text(flight.duration, style: TextStyle(fontSize: 12, color: Colors.grey.shade500, fontWeight: FontWeight.w600)),
+                        Text(
+                          flight.duration,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade500,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ],
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(flight.arrivalTime, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                        Text(
+                          flight.arrivalTime,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                         const SizedBox(height: 4),
-                        Text(flight.arrival, style: TextStyle(fontSize: 14, color: Colors.grey.shade500, fontWeight: FontWeight.w500)),
+                        Text(
+                          flight.arrival,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade500,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ],
                     ),
                   ],

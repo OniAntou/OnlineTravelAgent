@@ -29,12 +29,12 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
 
   List<TourPackage> _getSortedAndFiltered(List<TourPackage> list) {
     var filtered = list;
-    
+
     if (_searchQuery.isNotEmpty) {
       filtered = filtered.where((t) {
         final lowerQuery = _searchQuery.toLowerCase();
-        return t.name.toLowerCase().contains(lowerQuery) || 
-               t.departure.toLowerCase().contains(lowerQuery);
+        return t.name.toLowerCase().contains(lowerQuery) ||
+            t.departure.toLowerCase().contains(lowerQuery);
       }).toList();
     }
 
@@ -100,111 +100,117 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
         child: RefreshIndicator(
           onRefresh: _onRefresh,
           child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-          // Elegant Search Input
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: AppTheme.backgroundGray,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: TextField(
-                controller: _searchController,
-                onChanged: (text) {
-                  setState(() {
-                    _searchQuery = text;
-                  });
-                },
-                decoration: InputDecoration(
-                  icon: const Icon(
-                    Icons.search,
-                    color: Colors.grey,
-                    size: 20,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Elegant Search Input
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.backgroundGray,
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                  hintText: 'Tìm kiếm gói tour, điểm đi...',
-                  hintStyle: TextStyle(
-                    color: Colors.grey.withValues(alpha: 0.6),
-                    fontSize: 14,
-                  ),
-                  border: InputBorder.none,
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, size: 18),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() {
-                              _searchQuery = '';
-                            });
-                          },
-                        )
-                      : null,
-                ),
-              ),
-            ),
-          ),
-
-          // Results and Sorter Bar
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Tìm thấy ${sortedList.length} gói tour',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                    fontSize: 13,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => _showSortBottomSheet(context),
-                  child: Row(
-                    children: [
-                      Text(
-                        _getSortLabel(),
-                        style: const TextStyle(
-                          color: AppTheme.primaryBlue,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const Icon(
-                        Icons.arrow_drop_down,
-                        color: AppTheme.primaryBlue,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Main Responsive Grid Layout
-          Expanded(
-            child: sortedList.isEmpty
-                ? _buildEmptyState(context)
-                : GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(20, 10, 20, 100), // extra padding for FAB
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 20,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 0.68,
-                    ),
-                    itemCount: sortedList.length,
-                    itemBuilder: (context, index) {
-                      final tour = sortedList[index];
-                      return _buildTourCard(context, tour);
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (text) {
+                      setState(() {
+                        _searchQuery = text;
+                      });
                     },
+                    decoration: InputDecoration(
+                      icon: const Icon(
+                        Icons.search,
+                        color: Colors.grey,
+                        size: 20,
+                      ),
+                      hintText: 'Tìm kiếm gói tour, điểm đi...',
+                      hintStyle: TextStyle(
+                        color: Colors.grey.withValues(alpha: 0.6),
+                        fontSize: 14,
+                      ),
+                      border: InputBorder.none,
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 18),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() {
+                                  _searchQuery = '';
+                                });
+                              },
+                            )
+                          : null,
+                    ),
                   ),
-          ),
+                ),
+              ),
+
+              // Results and Sorter Bar
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Tìm thấy ${sortedList.length} gói tour',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => _showSortBottomSheet(context),
+                      child: Row(
+                        children: [
+                          Text(
+                            _getSortLabel(),
+                            style: const TextStyle(
+                              color: AppTheme.primaryBlue,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const Icon(
+                            Icons.arrow_drop_down,
+                            color: AppTheme.primaryBlue,
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
-      ),
+                ),
+              ),
+
+              // Main Responsive Grid Layout
+              Expanded(
+                child: sortedList.isEmpty
+                    ? _buildEmptyState(context)
+                    : GridView.builder(
+                        padding: const EdgeInsets.fromLTRB(
+                          20,
+                          10,
+                          20,
+                          100,
+                        ), // extra padding for FAB
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 20,
+                              crossAxisSpacing: 16,
+                              childAspectRatio: 0.68,
+                            ),
+                        itemCount: sortedList.length,
+                        itemBuilder: (context, index) {
+                          final tour = sortedList[index];
+                          return _buildTourCard(context, tour);
+                        },
+                      ),
+              ),
+            ],
           ),
+        ),
       ),
       // Tạm thời ẩn nút Tự tạo tour
       // floatingActionButton: FloatingActionButton.extended(
@@ -231,9 +237,7 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => TourDetailScreen(tour: tour),
-          ),
+          MaterialPageRoute(builder: (context) => TourDetailScreen(tour: tour)),
         );
       },
       child: Container(
@@ -267,15 +271,19 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
                         child: Image.asset(
                           tour.imagePath,
                           fit: BoxFit.cover,
-                          cacheWidth: (MediaQuery.sizeOf(context).width / 2 * MediaQuery.devicePixelRatioOf(context)).round(),
+                          cacheWidth:
+                              (MediaQuery.sizeOf(context).width /
+                                      2 *
+                                      MediaQuery.devicePixelRatioOf(context))
+                                  .round(),
                           errorBuilder: (context, error, stackTrace) =>
                               Container(
-                            color: Colors.grey[200],
-                            child: const Icon(
-                              Icons.image,
-                              color: Colors.grey,
-                            ),
-                          ),
+                                color: Colors.grey[200],
+                                child: const Icon(
+                                  Icons.image,
+                                  color: Colors.grey,
+                                ),
+                              ),
                         ),
                       ),
                     ),
@@ -448,10 +456,13 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
   }
 
   void _showSortBottomSheet(BuildContext context) {
-    SortBottomSheet.show(context,
+    SortBottomSheet.show(
+      context,
       currentSort: _sortBy,
       onSortChanged: (code) {
-        if (code == 'Rating') return; // rating sorting not implemented for tours
+        if (code == 'Rating') {
+          return; // rating sorting not implemented for tours
+        }
         setState(() => _sortBy = code);
       },
       options: const [

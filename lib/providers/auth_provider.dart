@@ -10,11 +10,7 @@ class AuthState {
   final String? token;
   final UserProfile? user;
 
-  const AuthState({
-    this.isLoggedIn = false,
-    this.token,
-    this.user,
-  });
+  const AuthState({this.isLoggedIn = false, this.token, this.user});
 
   AuthState copyWith({bool? isLoggedIn, String? token, UserProfile? user}) {
     return AuthState(
@@ -42,22 +38,32 @@ class AuthNotifier extends Notifier<AuthState> {
           email: api.userEmail ?? '',
         );
         state = AuthState(isLoggedIn: true, token: api.token, user: user);
-        ref.read(profileProvider.notifier).updateFromAuth(name: user.name, email: user.email);
+        ref
+            .read(profileProvider.notifier)
+            .updateFromAuth(name: user.name, email: user.email);
       }
     } catch (e) {
       debugPrint('Session restore failed: $e');
     }
   }
 
-  Future<String?> login({required String email, required String password}) async {
+  Future<String?> login({
+    required String email,
+    required String password,
+  }) async {
     try {
       final api = ref.read(apiProvider);
       final data = await api.login(email: email, password: password);
-      final user = UserProfile.fromJson(data['user'] as Map<String, dynamic>? ?? {'name': email, 'email': email});
+      final user = UserProfile.fromJson(
+        data['user'] as Map<String, dynamic>? ??
+            {'name': email, 'email': email},
+      );
       final token = data['token']?.toString();
 
       state = AuthState(isLoggedIn: true, token: token, user: user);
-      ref.read(profileProvider.notifier).updateFromAuth(name: user.name, email: user.email);
+      ref
+          .read(profileProvider.notifier)
+          .updateFromAuth(name: user.name, email: user.email);
 
       return null;
     } on AuthException catch (e) {
@@ -73,15 +79,27 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
-  Future<String?> register({required String name, required String email, required String password}) async {
+  Future<String?> register({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
     try {
       final api = ref.read(apiProvider);
-      final data = await api.register(name: name, email: email, password: password);
-      final user = UserProfile.fromJson(data['user'] as Map<String, dynamic>? ?? {'name': name, 'email': email});
+      final data = await api.register(
+        name: name,
+        email: email,
+        password: password,
+      );
+      final user = UserProfile.fromJson(
+        data['user'] as Map<String, dynamic>? ?? {'name': name, 'email': email},
+      );
       final token = data['token']?.toString();
 
       state = AuthState(isLoggedIn: true, token: token, user: user);
-      ref.read(profileProvider.notifier).updateFromAuth(name: user.name, email: user.email);
+      ref
+          .read(profileProvider.notifier)
+          .updateFromAuth(name: user.name, email: user.email);
 
       return null;
     } on AuthException catch (e) {
@@ -108,4 +126,6 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 }
 
-final authProvider = NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);
+final authProvider = NotifierProvider<AuthNotifier, AuthState>(
+  AuthNotifier.new,
+);

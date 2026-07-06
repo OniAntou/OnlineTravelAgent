@@ -13,6 +13,5 @@ class RoomsDao extends DatabaseAccessor<AppDatabase> with _$RoomsDaoMixin {
       (select(roomsTable)..where((t) => t.hotelId.equals(hotelId))).get();
 
   Future<RoomsTableData?> getById(String id) =>
-      (select(roomsTable)..where((t) => t.id.equals(id)))
-          .getSingleOrNull();
+      (select(roomsTable)..where((t) => t.id.equals(id))).getSingleOrNull();
 }

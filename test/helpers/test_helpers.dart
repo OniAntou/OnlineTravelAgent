@@ -4,6 +4,7 @@ import 'package:online_travel_agent/services/travel_api_service.dart';
 import 'package:online_travel_agent/models/destination.dart';
 import 'package:online_travel_agent/models/document_item.dart';
 import 'package:online_travel_agent/models/trip.dart';
+import 'package:online_travel_agent/models/trip_schedule.dart';
 
 class FakeSecureStorage extends FlutterSecureStorage {
   final Map<String, String> data = {};
@@ -57,6 +58,7 @@ class FakeTravelApiService extends TravelApiService {
   final Map<String, dynamic> loginResponse;
   final Map<String, dynamic> registerResponse;
   final BootstrapData? bootstrapData;
+  final Map<String, TripSchedule> tripSchedules;
   String? loginError;
   String? registerError;
 
@@ -71,9 +73,11 @@ class FakeTravelApiService extends TravelApiService {
       'user': {'name': 'NewUser', 'email': 'new@test.com'},
     },
     this.bootstrapData,
+    Map<String, TripSchedule>? tripSchedules,
     this.loginError,
     this.registerError,
-  }) : super(baseUrl: 'http://localhost:3000');
+  })  : tripSchedules = tripSchedules ?? {},
+        super(baseUrl: 'http://localhost:3000');
 
   @override
   Future<Map<String, dynamic>> login({required String email, required String password}) async {
@@ -126,6 +130,12 @@ class FakeTravelApiService extends TravelApiService {
       hotels: [],
       tourPackages: [],
     );
+  }
+
+  @override
+  Future<TripSchedule> fetchTripSchedule(String tripId) async {
+    return tripSchedules[tripId] ??
+        TripSchedule(tripId: tripId, days: [], updates: []);
   }
 
   @override

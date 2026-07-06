@@ -1,10 +1,8 @@
 import { Request, Response } from "express";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
 import prisma from "../config/prisma.js";
-
-const BCRYPT_ROUNDS = 10;
+import { env } from "../config/env.js";
+import { passwordService } from "../services/password.service.js";
 
 export const authController = {
   login: async (req: Request, res: Response) => {
@@ -22,19 +20,7 @@ export const authController = {
       return;
     }
 
-    // Try bcrypt first (new format), then fall back to SHA-256 (legacy)
-    let passwordValid = false;
-    let needsMigration = false;
-
-    if (user.password.startsWith("$2a$") || user.password.startsWith("$2b$")) {
-      // bcrypt hash
-      passwordValid = await bcrypt.compare(password, user.password);
-    } else {
-      // Legacy SHA-256 hash
-      const sha256Hash = crypto.createHash("sha256").update(password).digest("hex");
-      passwordValid = user.password === sha256Hash;
-      needsMigration = passwordValid;
-    }
+    const passwordValid = await passwordService.verify(password, user.password);
 
     if (!passwordValid) {
       res.status(401).json({ message: "Invalid email or password" });
@@ -42,8 +28,8 @@ export const authController = {
     }
 
     // Migrate legacy SHA-256 hash to bcrypt
-    if (needsMigration) {
-      const bcryptHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    if (passwordService.shouldMigrate(user.password)) {
+      const bcryptHash = await passwordService.hash(password);
       await prisma.user.update({
         where: { id: user.id },
         data: { password: bcryptHash },
@@ -51,8 +37,7 @@ export const authController = {
     }
 
     const { password: _, ...userWithoutPassword } = user;
-    const JWT_SECRET = (process.env.JWT_SECRET as string);
-    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user.id, role: user.role }, env.jwtSecret, { expiresIn: '7d' });
     res.json({ user: userWithoutPassword, token });
   },
 
@@ -70,7 +55,7 @@ export const authController = {
       return;
     }
 
-    const hashedPassword = await bcrypt.hash(password, BCRYPT_ROUNDS);
+    const hashedPassword = await passwordService.hash(password);
 
     const user = await prisma.user.create({
       data: {
@@ -81,8 +66,7 @@ export const authController = {
     });
 
     const { password: _, ...userWithoutPassword } = user;
-    const JWT_SECRET = (process.env.JWT_SECRET as string);
-    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user.id, role: user.role }, env.jwtSecret, { expiresIn: '7d' });
     res.status(201).json({ user: userWithoutPassword, token });
   },
 
@@ -97,8 +81,7 @@ export const authController = {
       data: { role: 'PARTNER' }
     });
     const { password: _, ...userWithoutPassword } = user;
-    const JWT_SECRET = (process.env.JWT_SECRET as string);
-    const token = jwt.sign({ userId: user.id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user.id, role: user.role }, env.jwtSecret, { expiresIn: '7d' });
     res.json({ user: userWithoutPassword, token });
   }
 };

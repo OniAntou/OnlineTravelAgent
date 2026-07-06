@@ -29,7 +29,9 @@ class Review {
       targetId: json['targetId']?.toString() ?? '',
       rating: (json['rating'] as num?)?.toInt() ?? 5,
       comment: json['comment']?.toString() ?? '',
-      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
+      createdAt:
+          DateTime.tryParse(json['createdAt']?.toString() ?? '') ??
+          DateTime.now(),
     );
   }
 }
@@ -48,7 +50,9 @@ class ReviewResponse {
   factory ReviewResponse.fromJson(Map<String, dynamic> json) {
     final reviewsList = (json['reviews'] as List?) ?? [];
     return ReviewResponse(
-      reviews: reviewsList.map((r) => Review.fromJson(r as Map<String, dynamic>)).toList(),
+      reviews: reviewsList
+          .map((r) => Review.fromJson(r as Map<String, dynamic>))
+          .toList(),
       total: (json['total'] as num?)?.toInt() ?? 0,
       avgRating: (json['avgRating'] as num?)?.toDouble() ?? 0.0,
     );

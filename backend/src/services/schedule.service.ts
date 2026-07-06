@@ -298,9 +298,13 @@ export const scheduleService = {
     });
   },
 
-  async getTripSchedule(tripId: string) {
-    const trip = await prisma.trip.findUnique({ where: { id: tripId }, select: { id: true } });
+  async getTripSchedule(tripId: string, requesterUserId?: string) {
+    const trip = await prisma.trip.findUnique({
+      where: { id: tripId },
+      select: { id: true, userId: true },
+    });
     if (!trip) return null;
+    if (requesterUserId !== undefined && trip.userId !== requesterUserId) return null;
 
     const [days, updates] = await Promise.all([
       prisma.tripScheduleDay.findMany({

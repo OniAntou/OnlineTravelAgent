@@ -34,18 +34,33 @@ class Destination {
   }
 
   Destination copyWith({
-    String? id, String? name, String? location, String? rating,
-    String? duration, String? imagePath, bool? isFavorite,
-    String? description, String? price, String? reviewsCount,
-    String? category, double? latitude, double? longitude,
+    String? id,
+    String? name,
+    String? location,
+    String? rating,
+    String? duration,
+    String? imagePath,
+    bool? isFavorite,
+    String? description,
+    String? price,
+    String? reviewsCount,
+    String? category,
+    double? latitude,
+    double? longitude,
   }) {
     return Destination(
-      id: id ?? this.id, name: name ?? this.name,
-      location: location ?? this.location, rating: rating ?? this.rating,
-      duration: duration ?? this.duration, imagePath: imagePath ?? this.imagePath,
-      isFavorite: isFavorite ?? this.isFavorite, description: description ?? this.description,
-      price: price ?? this.price, reviewsCount: reviewsCount ?? this.reviewsCount,
-      category: category ?? this.category, latitude: latitude ?? this.latitude,
+      id: id ?? this.id,
+      name: name ?? this.name,
+      location: location ?? this.location,
+      rating: rating ?? this.rating,
+      duration: duration ?? this.duration,
+      imagePath: imagePath ?? this.imagePath,
+      isFavorite: isFavorite ?? this.isFavorite,
+      description: description ?? this.description,
+      price: price ?? this.price,
+      reviewsCount: reviewsCount ?? this.reviewsCount,
+      category: category ?? this.category,
+      latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
     );
   }
@@ -69,10 +84,18 @@ class Destination {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id, 'name': name, 'location': location,
-    'rating': rating, 'duration': duration, 'imagePath': imagePath,
-    'isFavorite': isFavorite, 'description': description, 'price': price,
-    'reviewsCount': reviewsCount, 'category': category,
-    'latitude': latitude, 'longitude': longitude,
+    'id': id,
+    'name': name,
+    'location': location,
+    'rating': rating,
+    'duration': duration,
+    'imagePath': imagePath,
+    'isFavorite': isFavorite,
+    'description': description,
+    'price': price,
+    'reviewsCount': reviewsCount,
+    'category': category,
+    'latitude': latitude,
+    'longitude': longitude,
   };
 }

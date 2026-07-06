@@ -9,6 +9,7 @@ import 'package:online_travel_agent/models/hotel.dart';
 import 'package:online_travel_agent/models/tour_package.dart';
 import 'package:online_travel_agent/models/document_item.dart';
 import 'package:online_travel_agent/models/trip.dart';
+import 'package:online_travel_agent/models/trip_schedule.dart';
 import 'package:online_travel_agent/providers/api_provider.dart';
 import 'package:online_travel_agent/services/sync_service.dart';
 import 'package:online_travel_agent/services/travel_api_service.dart';
@@ -174,6 +175,53 @@ void main() {
 
       expect(callCount, 1);
       c.dispose();
+    });
+
+    test('replaces stale schedule items during schedule sync', () async {
+      fakeApi.tripSchedules['t1'] = TripSchedule(
+        tripId: 't1',
+        days: [
+          TripScheduleDay(
+            id: 'day-old',
+            dayNumber: 1,
+            items: [
+              TripScheduleItem(
+                id: 'item-old',
+                title: 'Old activity',
+                description: '',
+                startTime: '08:00',
+                endTime: '',
+                location: '',
+              ),
+            ],
+          ),
+        ],
+        updates: [],
+      );
+
+      await syncService.syncAll();
+      expect(await db.tripScheduleItemsDao.getByDayId('day-old'), hasLength(1));
+
+      fakeApi.tripSchedules['t1'] = TripSchedule(
+        tripId: 't1',
+        days: [
+          TripScheduleDay(id: 'day-new', dayNumber: 1, items: []),
+        ],
+        updates: [],
+      );
+      container.dispose();
+      container = ProviderContainer(
+        overrides: [
+          apiProvider.overrideWithValue(fakeApi),
+          syncServiceProvider.overrideWith((ref) => SyncService(ref, db: db)),
+        ],
+      );
+      syncService = container.read(syncServiceProvider);
+
+      await syncService.syncAll();
+
+      expect(await db.tripScheduleItemsDao.getByDayId('day-old'), isEmpty);
+      expect(await db.tripScheduleDaysDao.getByTripId('t1'), hasLength(1));
     });
   });
 

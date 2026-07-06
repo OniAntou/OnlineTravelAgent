@@ -1,0 +1,51 @@
+{
+  "app_name": "OTA",
+  "bottom_nav": {
+    "home": "Explore",
+    "my_trips": "My Trips",
+    "favorites": "Favorites",
+    "profile": "Profile"
+  },
+  "home": {
+    "hello": "Hello, User!",
+    "search_hint": "Where do you want to go?",
+    "search_placeholder": "Search activities",
+    "categories": {
+      "hotel": "Hotel",
+      "tour": "Tour",
+      "flight": "Flight",
+      "custom": "Custom"
+    },
+    "popular_destinations": "Popular Destinations",
+    "view_all": "View all",
+    "recommended_tours": "Recommended Tours",
+    "no_destinations": "No destinations found",
+    "no_tours": "No recommended tours",
+    "upcoming_trip": "Upcoming trip:"
+  },
+  "profile": {
+    "title": "My Profile",
+    "settings": "Settings",
+    "language": "Language",
+    "logout": "Logout",
+    "login_prompt": "Manage your documents and\nbook tickets faster"
+  },
+  "welcome": {
+    "enjoy": "Enjoy",
+    "vacation": "Your Dream",
+    "dream": "Vacation",
+    "explore": "Explore"
+  },
+  "auth": {
+    "login_title": "Login",
+    "login_subtitle": "Welcome back!",
+    "email_hint": "Email",
+    "password_hint": "Password",
+    "login_btn": "Login",
+    "no_account": "Don't have an account? ",
+    "register": "Sign up",
+    "error_empty": "Please enter all fields",
+    "error_email": "Invalid email",
+    "error_password": "Password must be at least 6 characters"
+  }
+}

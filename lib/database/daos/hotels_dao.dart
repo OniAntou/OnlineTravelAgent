@@ -13,19 +13,19 @@ class HotelsDao extends DatabaseAccessor<AppDatabase> with _$HotelsDaoMixin {
   Future<List<HotelsTableData>> getAll() => select(hotelsTable).get();
 
   Future<HotelsTableData?> getById(String id) =>
-      (select(hotelsTable)..where((t) => t.id.equals(id)))
-          .getSingleOrNull();
+      (select(hotelsTable)..where((t) => t.id.equals(id))).getSingleOrNull();
 
-  Future<List<HotelsTableData>> search(String query) =>
-      (select(hotelsTable)
-            ..where((t) =>
-                t.name.like('%$query%') | t.location.like('%$query%')))
-          .get();
+  Future<List<HotelsTableData>> search(String query) => (select(
+    hotelsTable,
+  )..where((t) => t.name.like('%$query%') | t.location.like('%$query%'))).get();
 
   Future<List<RoomsTableData>> getRoomsByHotel(String hotelId) =>
       (select(roomsTable)..where((t) => t.hotelId.equals(hotelId))).get();
 
-  Future<void> insertAll(List<HotelsTableCompanion> hotels, List<RoomsTableCompanion> rooms) async {
+  Future<void> insertAll(
+    List<HotelsTableCompanion> hotels,
+    List<RoomsTableCompanion> rooms,
+  ) async {
     await batch((batch) {
       batch.insertAll(hotelsTable, hotels, mode: InsertMode.replace);
     });

@@ -14,7 +14,8 @@ class DestinationsTable extends Table {
   TextColumn get category => text().withDefault(const Constant('Địa điểm'))();
   RealColumn get latitude => real().withDefault(const Constant(0.0))();
   RealColumn get longitude => real().withDefault(const Constant(0.0))();
-  BoolColumn get isRecommended => boolean().withDefault(const Constant(false))();
+  BoolColumn get isRecommended =>
+      boolean().withDefault(const Constant(false))();
 
   @override
   Set<Column> get primaryKey => {id};

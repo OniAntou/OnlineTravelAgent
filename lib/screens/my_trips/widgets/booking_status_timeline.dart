@@ -41,8 +41,9 @@ class BookingStatusTimeline extends StatelessWidget {
                       boxShadow: isActive
                           ? [
                               BoxShadow(
-                                color:
-                                    AppTheme.primaryBlue.withValues(alpha: 0.3),
+                                color: AppTheme.primaryBlue.withValues(
+                                  alpha: 0.3,
+                                ),
                                 blurRadius: 6,
                                 offset: const Offset(0, 2),
                               ),
@@ -58,8 +59,9 @@ class BookingStatusTimeline extends StatelessWidget {
                     labels[step],
                     style: TextStyle(
                       fontSize: 10,
-                      fontWeight:
-                          isActive ? FontWeight.bold : FontWeight.normal,
+                      fontWeight: isActive
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                       color: isActive ? AppTheme.primaryBlue : Colors.grey,
                     ),
                     textAlign: TextAlign.center,
@@ -75,9 +77,7 @@ class BookingStatusTimeline extends StatelessWidget {
                 height: 2,
                 margin: const EdgeInsets.only(bottom: 22),
                 decoration: BoxDecoration(
-                  color: isActive
-                      ? AppTheme.primaryBlue
-                      : Colors.grey.shade300,
+                  color: isActive ? AppTheme.primaryBlue : Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(1),
                 ),
               ),

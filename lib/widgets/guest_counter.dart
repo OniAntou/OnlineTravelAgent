@@ -27,9 +27,15 @@ class GuestCounter extends StatelessWidget {
           ),
           onPressed: value > min ? () => onChanged(value - 1) : null,
         ),
-        Text('$value', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        Text(
+          '$value',
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
         IconButton(
-          icon: const Icon(Icons.add_circle_outline, color: AppTheme.primaryBlue),
+          icon: const Icon(
+            Icons.add_circle_outline,
+            color: AppTheme.primaryBlue,
+          ),
           onPressed: value < max ? () => onChanged(value + 1) : null,
         ),
       ],

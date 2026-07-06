@@ -1,88 +1,74 @@
 # Online Travel Agent
 
-Ứng dụng Flutter quản lý du lịch với backend `Express.js + TypeScript` và database `PostgreSQL`.
+Ứng dụng đặt và quản lý du lịch gồm Flutter mobile app, backend Express/TypeScript và PostgreSQL.
 
 ## Tech Stack
 
-### Frontend (Flutter)
-- **State Management**: Riverpod 3.3.1
-- **Local Database**: drift (SQLite) + sqlite3_flutter_libs
-- **Connectivity**: connectivity_plus
-- **UI**: flutter_map, cached_network_image, shimmer, animated_text_kit
-- **Storage**: flutter_secure_storage
+### Mobile
 
-### Backend (Express.js)
-- Runtime: Node.js + TypeScript
-- Database: PostgreSQL + Prisma 6.19
-- Auth: JWT (jsonwebtoken)
-- Realtime: Socket.IO
+- Flutter 3.44
+- Riverpod cho state management
+- Drift/SQLite cho local database và offline-first cache
+- `flutter_secure_storage` cho token
+- `socket_io_client` cho realtime trip schedule
+- `easy_localization` cho đa ngôn ngữ
 
-## Architecture
+### Backend
 
-```
-┌─────────────────────────────────────────────────┐
-│                   Flutter App                    │
-│  ┌──────────┐  ┌──────────┐  ┌──────────────┐  │
-│  │ Providers │  │  Screens │  │   Services   │  │
-│  │ (Riverpod)│  │          │  │              │  │
-│  └────┬─────┘  └──────────┘  └──────┬───────┘  │
-│       │                             │           │
-│  ┌────▼─────────────────────────────▼───────┐  │
-│  │              SQLite (drift)               │  │
-│  │  11 tables: destinations, categories,     │  │
-│  │  hotels, rooms, tours, trips, reviews...  │  │
-│  └────────────────────┬─────────────────────┘  │
-│                       │                         │
-│  ┌────────────────────▼─────────────────────┐  │
-│  │           SyncService                     │  │
-│  │  - Periodic sync (5 min)                  │  │
-│  │  - Event-based sync (reconnect, action)   │  │
-│  │  - Server wins conflict resolution        │  │
-│  └────────────────────┬─────────────────────┘  │
-└───────────────────────┼─────────────────────────┘
-                        │ HTTP/WebSocket
-                ┌───────▼───────┐
-                │  Express.js   │
-                │  PostgreSQL   │
-                └───────────────┘
+- Node.js 24 LTS
+- Express 5 + TypeScript strict mode
+- PostgreSQL + Prisma
+- Zod validation
+- JWT authentication
+- Socket.IO realtime
+- Helmet, CORS whitelist, rate limit
+
+## Yêu Cầu
+
+- Flutter 3.44
+- Node.js 24 + npm 11
+- PostgreSQL
+
+Backend dùng `.nvmrc`, có thể chạy:
+
+```bash
+nvm use
 ```
 
-## Offline Support
-
-App hoạt động offline với SQLite (drift):
-- **SQLite-first**: App khởi động đọc từ SQLite ngay lập tức
-- **Background sync**: Tự động đồng bộ khi có mạng
-- **Optimistic updates**: Cập nhật UI ngay, rollback nếu API lỗi
-- **Server wins**: Xung đột ưu tiên server
-
-11 bảng SQLite:
-- Destinations, Categories, Hotels, Rooms
-- TourPackages, Trips, Reviews, Documents
-- TripScheduleDays, TripScheduleItems, TripScheduleUpdates
-
-## Setup
-
-### 1. Backend
+## Setup Backend
 
 ```bash
 cd backend
-npm install
+npm ci
+cp .env.example .env
+npm run db:generate
+npm run db:migrate
 npm run dev
 ```
 
-Backend chạy tại `http://localhost:3000`.
+Backend mặc định chạy tại `http://localhost:3000`.
 
-### 2. Flutter
+Biến môi trường quan trọng:
+
+- `DATABASE_URL`: PostgreSQL connection string
+- `JWT_SECRET`: secret ký JWT
+- `ADMIN_PASSWORD`: mật khẩu Basic Auth cho admin panel
+- `CORS_ORIGINS`: danh sách origin được phép, phân tách bằng dấu phẩy
+- `TRUST_PROXY`: đặt `1` nếu backend chạy sau đúng một reverse proxy
+- `UPLOAD_DIR`: tùy chọn, thư mục lưu file upload
+
+## Setup Flutter
 
 ```bash
 flutter pub get
-dart run build_runner build  # Tạo drift generated code
+dart run build_runner build --delete-conflicting-outputs
 flutter run
 ```
 
 API URL mặc định:
+
 - Android emulator: `http://10.0.2.2:3000`
-- iOS simulator / Web: `http://localhost:3000`
+- Desktop/Web/iOS simulator: `http://localhost:3000`
 
 Override bằng `dart-define`:
 
@@ -90,40 +76,59 @@ Override bằng `dart-define`:
 flutter run --dart-define=API_BASE_URL=http://<your-ip>:3000
 ```
 
-### 3. Tạo lại drift code
+## Scripts
 
-Sau khi sửa drift tables/daos:
+Backend:
 
 ```bash
-dart run build_runner build --delete-conflicting-outputs
+npm run build
+npm test
+npm run db:validate
+npm run db:migrate
+npm run db:seed
 ```
 
-## API Endpoints
+Flutter:
 
-| Method | Endpoint | Mô tả |
-|--------|----------|-------|
-| GET | `/health` | Kiểm tra server |
-| GET | `/api/bootstrap` | Bootstrap data (destinations, categories, hotels...) |
-| PATCH | `/api/destinations/:id/favorite` | Thêm/bỏ yêu thích |
-| POST | `/api/trips/book` | Đặt chuyến đi |
-| PUT | `/api/profile` | Cập nhật profile |
-| POST | `/api/documents` | Thêm giấy tờ |
-
-## Project Structure
-
+```bash
+flutter analyze
+flutter test
 ```
-lib/
-├── core/           # Theme, constants
-├── database/       # drift tables, DAOs, AppDatabase
-│   ├── tables/     # 11 table definitions
-│   ├── daos/       # 11 Data Access Objects
-│   └── app_database.dart
-├── models/         # Data models
-├── providers/      # Riverpod providers
-├── screens/        # UI screens
-├── services/       # API, sync, connectivity
-│   ├── sync_service.dart
-│   └── connectivity_service.dart
-├── utils/          # Helpers
-└── main.dart       # Entry point
+
+## Docker Backend
+
+Build image:
+
+```bash
+docker build -t online-travel-agent-backend ./backend
 ```
+
+Run container:
+
+```bash
+docker run --rm -p 3000:3000 \
+  -e DATABASE_URL="postgresql://user:password@host:5432/online_travel_agent?schema=public" \
+  -e JWT_SECRET="change-me" \
+  -e ADMIN_PASSWORD="change-me" \
+  -e CORS_ORIGINS="http://localhost:3000" \
+  online-travel-agent-backend
+```
+
+Chạy migration trước khi deploy production:
+
+```bash
+cd backend
+npm run db:migrate
+```
+
+## CI
+
+GitHub Actions chạy:
+
+- Backend: `npm ci`, Prisma generate/validate, TypeScript build, Vitest, npm audit, Docker build
+- Flutter: `flutter pub get`, `flutter analyze`, `flutter test`
+
+## Lưu Ý
+
+- Không dùng `prisma db push` cho production. Dùng migration qua `npm run db:migrate`.
+- Payment đang là phần xử lý riêng, không nằm trong phạm vi hardening hiện tại.

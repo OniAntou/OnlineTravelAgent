@@ -1,0 +1,51 @@
+{
+  "app_name": "OTA",
+  "bottom_nav": {
+    "home": "Khám phá",
+    "my_trips": "Chuyến đi",
+    "favorites": "Yêu thích",
+    "profile": "Cá nhân"
+  },
+  "home": {
+    "hello": "Xin chào, User!",
+    "search_hint": "Bạn muốn đi đâu?",
+    "search_placeholder": "Tìm kiếm hoạt động",
+    "categories": {
+      "hotel": "Khách sạn",
+      "tour": "Tour",
+      "flight": "Máy bay",
+      "custom": "Tự chọn"
+    },
+    "popular_destinations": "Địa điểm phổ biến",
+    "view_all": "Xem tất cả",
+    "recommended_tours": "Đề xuất tour",
+    "no_destinations": "Không tìm thấy địa điểm phù hợp",
+    "no_tours": "Không có đề xuất tour nào",
+    "upcoming_trip": "Kế hoạch gần nhất:"
+  },
+  "profile": {
+    "title": "Hồ sơ của tôi",
+    "settings": "Cài đặt",
+    "language": "Ngôn ngữ",
+    "logout": "Đăng xuất",
+    "login_prompt": "Quản lý giấy tờ cá nhân và\nđặt vé nhanh chóng hơn"
+  },
+  "welcome": {
+    "enjoy": "Tận hưởng",
+    "vacation": "Kỳ nghỉ",
+    "dream": "Trong mơ",
+    "explore": "Khám phá"
+  },
+  "auth": {
+    "login_title": "Đăng Nhập",
+    "login_subtitle": "Chào mừng bạn trở lại!",
+    "email_hint": "Email",
+    "password_hint": "Mật khẩu",
+    "login_btn": "Đăng Nhập",
+    "no_account": "Chưa có tài khoản? ",
+    "register": "Đăng ký",
+    "error_empty": "Vui lòng nhập đầy đủ thông tin",
+    "error_email": "Email không hợp lệ",
+    "error_password": "Mật khẩu phải từ 6 ký tự"
+  }
+}

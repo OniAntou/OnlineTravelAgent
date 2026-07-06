@@ -1,11 +1,14 @@
-# Thư mục build và các file tự sinh của Flutter/Dart
+# Flutter/Dart generated files
 /build/
+/android/build/
+/ios/build/
+/coverage/
 /.dart_tool/
 /.flutter-plugins
 /.flutter-plugins-dependencies
 /.packages
 
-# Cấu hình Android cụ thể
+# Android local config
 /android/local.properties
 /android/key.properties
 /android/app/local.properties
@@ -14,18 +17,18 @@
 .gradle/
 .kotlin/
 
-# Các file cấu hình của IDE (Android Studio / VS Code)
+# IDE config
 .idea/
 *.iml
 *.ipr
 *.iws
 .vscode/
 
-# Hệ điều hành và log
+# OS files and logs
 .DS_Store
 *.log
 
-# Backend (Express + TypeScript)
+# Backend
 /backend/node_modules/
 /backend/dist/
 /backend/.env
@@ -35,7 +38,7 @@
 # Temp SVG
 /temp_svg/node_modules/
 
-# AI Agents workspace
+# AI agents workspace
 .agents/
 .agent/
 docs/

@@ -57,8 +57,14 @@ class AppTheme {
       surface: Colors.white,
     ),
     textTheme: GoogleFonts.plusJakartaSansTextTheme().copyWith(
-      displayLarge: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: textBlack),
-      titleLarge: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: textBlack),
+      displayLarge: GoogleFonts.plusJakartaSans(
+        fontWeight: FontWeight.bold,
+        color: textBlack,
+      ),
+      titleLarge: GoogleFonts.plusJakartaSans(
+        fontWeight: FontWeight.bold,
+        color: textBlack,
+      ),
       bodyLarge: GoogleFonts.plusJakartaSans(color: textBlack),
       bodyMedium: GoogleFonts.plusJakartaSans(color: textBlack),
       labelSmall: GoogleFonts.plusJakartaSans(color: textGray, fontSize: 11),

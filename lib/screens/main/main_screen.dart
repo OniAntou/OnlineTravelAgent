@@ -11,6 +11,7 @@ import '../favorites/favorites_screen.dart';
 import '../my_trips/my_trips_screen.dart';
 import '../profile/profile_screen.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -24,11 +25,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   // Track visited tabs and only build them after first selection.
   final Set<int> _visitedTabs = {0};
 
-  final List<String> _titles = [
-    'Khám phá',
-    'Chuyến đi',
-    'Yêu thích',
-    'Cá nhân'
+  final List<String> _titleKeys = [
+    'bottom_nav.home',
+    'bottom_nav.my_trips',
+    'bottom_nav.favorites',
+    'bottom_nav.profile',
   ];
   final List<IconData> _icons = [
     Icons.home,
@@ -58,11 +59,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     });
 
     return bootstrapAsync.when(
-      loading: () => const Scaffold(
-        body: SafeArea(
-          child: _SkeletonLoading(),
-        ),
-      ),
+      loading: () => const Scaffold(body: SafeArea(child: _SkeletonLoading())),
       error: (error, stack) => Scaffold(
         body: Center(
           child: Column(
@@ -86,7 +83,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primaryBlue,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
                 ),
               ),
             ],
@@ -99,12 +99,14 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                 destination: selectedDestination,
                 onBackClick: () =>
                     ref.read(selectedDestinationProvider.notifier).update(null),
-                onFavoriteClick: () =>
-                    ref.read(destinationsProvider.notifier).toggleFavorite(selectedDestination.id),
+                onFavoriteClick: () => ref
+                    .read(destinationsProvider.notifier)
+                    .toggleFavorite(selectedDestination.id),
               )
             : _buildLazyIndexedStack(),
-        bottomNavigationBar:
-            selectedDestination == null ? _buildBottomNavigationBar() : null,
+        bottomNavigationBar: selectedDestination == null
+            ? _buildBottomNavigationBar()
+            : null,
       ),
     );
   }
@@ -184,10 +186,10 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             unselectedLabelStyle: const TextStyle(fontSize: 14),
             elevation: 0,
             items: List.generate(
-              _titles.length,
+              _titleKeys.length,
               (index) => BottomNavigationBarItem(
                 icon: Icon(_icons[index]),
-                label: _titles[index],
+                label: _titleKeys[index].tr(),
               ),
             ),
           ),
@@ -223,7 +225,14 @@ class _SkeletonLoading extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-              Container(width: 40, height: 40, decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle)),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 32),
@@ -231,7 +240,10 @@ class _SkeletonLoading extends StatelessWidget {
           Container(
             width: double.infinity,
             height: 56,
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24)),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
           ),
           const SizedBox(height: 32),
           // Categories
@@ -242,7 +254,14 @@ class _SkeletonLoading extends StatelessWidget {
                 4,
                 (index) => Padding(
                   padding: const EdgeInsets.only(right: 16),
-                  child: Container(width: 80, height: 40, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
+                  child: Container(
+                    width: 80,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -252,7 +271,10 @@ class _SkeletonLoading extends StatelessWidget {
           Container(
             width: double.infinity,
             height: 100,
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
           ),
           const SizedBox(height: 32),
           // Popular Destinations Title
@@ -266,7 +288,14 @@ class _SkeletonLoading extends StatelessWidget {
                 2,
                 (index) => Padding(
                   padding: const EdgeInsets.only(right: 16),
-                  child: Container(width: 200, height: 240, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24))),
+                  child: Container(
+                    width: 200,
+                    height: 240,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
                 ),
               ),
             ),

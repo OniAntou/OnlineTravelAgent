@@ -48,11 +48,7 @@ class AppPlaceholderCard extends StatelessWidget {
                 color: AppTheme.primaryBlue.withValues(alpha: 0.08),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                size: 64,
-                color: AppTheme.primaryBlue,
-              ),
+              child: Icon(icon, size: 64, color: AppTheme.primaryBlue),
             ),
             const SizedBox(height: 24),
             Text(
@@ -82,7 +78,9 @@ class AppPlaceholderCard extends StatelessWidget {
                 child: isOutlinedButton
                     ? OutlinedButton.icon(
                         onPressed: onActionTap,
-                        icon: actionIcon != null ? Icon(actionIcon, size: 20) : const SizedBox.shrink(),
+                        icon: actionIcon != null
+                            ? Icon(actionIcon, size: 20)
+                            : const SizedBox.shrink(),
                         label: Text(
                           actionText!,
                           style: const TextStyle(
@@ -92,7 +90,10 @@ class AppPlaceholderCard extends StatelessWidget {
                         ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppTheme.primaryBlue,
-                          side: const BorderSide(color: AppTheme.primaryBlue, width: 1.5),
+                          side: const BorderSide(
+                            color: AppTheme.primaryBlue,
+                            width: 1.5,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
                           ),

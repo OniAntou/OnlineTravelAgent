@@ -48,121 +48,128 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
         child: RefreshIndicator(
           onRefresh: _onRefresh,
           child: Consumer(
-          builder: (context, ref, child) {
-            final isLoggedIn = ref.watch(authProvider.select((state) => state.isLoggedIn));
-            if (!isLoggedIn) {
-              return ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: const [
-                  SizedBox(height: 24),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: Text(
-                      'Chuyến đi của tôi',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textBlack,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 24),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
-                    child: RequireLoginPlaceholder(
-                      subtitle: 'Bạn cần đăng nhập để xem danh sách các chuyến đi và lịch sử đặt chỗ của mình.',
-                    ),
-                  ),
-                ],
+            builder: (context, ref, child) {
+              final isLoggedIn = ref.watch(
+                authProvider.select((state) => state.isLoggedIn),
               );
-            }
-
-            final ongoing = ref.watch(ongoingTripsProvider);
-            final upcoming = ref.watch(upcomingTripsProvider);
-            final history = ref.watch(historyTripsProvider);
-
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: CustomScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                slivers: [
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: 24),
-                  ),
-                  const SliverToBoxAdapter(
-                    child: Text(
-                      'Chuyến đi của tôi',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.textBlack,
+              if (!isLoggedIn) {
+                return ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  children: const [
+                    SizedBox(height: 24),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Text(
+                        'Chuyến đi của tôi',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textBlack,
+                        ),
                       ),
                     ),
-                  ),
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: 20),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Container(
-                      height: 52,
-                      padding: const EdgeInsets.all(4),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.withValues(alpha: 0.12)),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.02),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                    SizedBox(height: 24),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: RequireLoginPlaceholder(
+                        subtitle:
+                            'Bạn cần đăng nhập để xem danh sách các chuyến đi và lịch sử đặt chỗ của mình.',
                       ),
-                      child: TabBar(
-                        controller: _tabController,
-                        indicator: BoxDecoration(
-                          color: AppTheme.primaryBlue,
-                          borderRadius: BorderRadius.circular(12),
+                    ),
+                  ],
+                );
+              }
+
+              final ongoing = ref.watch(ongoingTripsProvider);
+              final upcoming = ref.watch(upcomingTripsProvider);
+              final history = ref.watch(historyTripsProvider);
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    const SliverToBoxAdapter(child: SizedBox(height: 24)),
+                    const SliverToBoxAdapter(
+                      child: Text(
+                        'Chuyến đi của tôi',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.textBlack,
+                        ),
+                      ),
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                    SliverToBoxAdapter(
+                      child: Container(
+                        height: 52,
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Colors.grey.withValues(alpha: 0.12),
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppTheme.primaryBlue.withValues(alpha: 0.25),
-                              blurRadius: 8,
+                              color: Colors.black.withValues(alpha: 0.02),
+                              blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
                           ],
                         ),
-                        labelColor: Colors.white,
-                        unselectedLabelColor: Colors.grey[500],
-                        labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        dividerColor: Colors.transparent,
-                        tabs: const [
-                          Tab(text: 'Đang diễn ra'),
-                          Tab(text: 'Sắp tới'),
-                          Tab(text: 'Lịch sử'),
+                        child: TabBar(
+                          controller: _tabController,
+                          indicator: BoxDecoration(
+                            color: AppTheme.primaryBlue,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.primaryBlue.withValues(
+                                  alpha: 0.25,
+                                ),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          labelColor: Colors.white,
+                          unselectedLabelColor: Colors.grey[500],
+                          labelStyle: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                          unselectedLabelStyle: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          dividerColor: Colors.transparent,
+                          tabs: const [
+                            Tab(text: 'Đang diễn ra'),
+                            Tab(text: 'Sắp tới'),
+                            Tab(text: 'Lịch sử'),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 16)),
+                    SliverFillRemaining(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          _tripList(ongoing),
+                          _tripList(upcoming),
+                          _tripList(history),
                         ],
                       ),
                     ),
-                  ),
-                  const SliverToBoxAdapter(
-                    child: SizedBox(height: 16),
-                  ),
-                  SliverFillRemaining(
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: [
-                        _tripList(ongoing),
-                        _tripList(upcoming),
-                        _tripList(history),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -172,21 +179,35 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
     if (_activeProductFilter == 'all') {
       return trips;
     } else if (_activeProductFilter == 'tour') {
-      return trips.where((t) => t.isCustom || t.id.startsWith('trip_tour_') || t.id.startsWith('trip_custom_')).toList();
+      return trips
+          .where(
+            (t) =>
+                t.isCustom ||
+                t.id.startsWith('trip_tour_') ||
+                t.id.startsWith('trip_custom_'),
+          )
+          .toList();
     } else if (_activeProductFilter == 'place') {
-      return trips.where((t) => 
-        !t.isCustom && 
-        !t.id.startsWith('trip_tour_') && 
-        !t.id.startsWith('trip_custom_') && 
-        t.hotelId == null && 
-        !t.id.startsWith('trip-hotel-') && 
-        t.flightId == null && 
-        !t.id.startsWith('trip-fl-')
-      ).toList();
+      return trips
+          .where(
+            (t) =>
+                !t.isCustom &&
+                !t.id.startsWith('trip_tour_') &&
+                !t.id.startsWith('trip_custom_') &&
+                t.hotelId == null &&
+                !t.id.startsWith('trip-hotel-') &&
+                t.flightId == null &&
+                !t.id.startsWith('trip-fl-'),
+          )
+          .toList();
     } else if (_activeProductFilter == 'hotel') {
-      return trips.where((t) => t.hotelId != null || t.id.startsWith('trip-hotel-')).toList();
+      return trips
+          .where((t) => t.hotelId != null || t.id.startsWith('trip-hotel-'))
+          .toList();
     } else if (_activeProductFilter == 'flight') {
-      return trips.where((t) => t.flightId != null || t.id.startsWith('trip-fl-')).toList();
+      return trips
+          .where((t) => t.flightId != null || t.id.startsWith('trip-fl-'))
+          .toList();
     }
     return trips;
   }
@@ -218,14 +239,17 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
               borderRadius: BorderRadius.circular(20),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
-                  color: isSelected 
+                  color: isSelected
                       ? AppTheme.primaryBlue.withValues(alpha: 0.08)
                       : Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isSelected 
+                    color: isSelected
                         ? AppTheme.primaryBlue
                         : Colors.grey.withValues(alpha: 0.15),
                   ),
@@ -266,7 +290,8 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
                     final trip = finalTrips[index];
                     return GestureDetector(
                       onTap: () {
-                        final isTour = trip.isCustom ||
+                        final isTour =
+                            trip.isCustom ||
                             trip.id.startsWith('trip_tour_') ||
                             trip.id.startsWith('trip_custom_') ||
                             trip.id.toLowerCase().contains('tour');
@@ -292,7 +317,8 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
     return AppPlaceholderCard(
       icon: Icons.explore_rounded,
       title: 'Bắt đầu hành trình mới',
-      subtitle: 'Bạn chưa có chuyến đi nào được lên lịch. Hãy bắt đầu lên kế hoạch cho hành trình tiếp theo của bạn ngay hôm nay để nhận những ưu đãi hấp dẫn nhất.',
+      subtitle:
+          'Bạn chưa có chuyến đi nào được lên lịch. Hãy bắt đầu lên kế hoạch cho hành trình tiếp theo của bạn ngay hôm nay để nhận những ưu đãi hấp dẫn nhất.',
       actionText: 'Khám phá ngay',
       actionIcon: Icons.arrow_forward_rounded,
       onActionTap: () {
@@ -300,5 +326,4 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
       },
     );
   }
-
 }
