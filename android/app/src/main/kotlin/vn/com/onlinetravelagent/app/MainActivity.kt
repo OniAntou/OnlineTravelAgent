@@ -1,4 +1,4 @@
-package com.example.online_travel_agent
+package vn.com.onlinetravelagent.app
 
 import io.flutter.embedding.android.FlutterActivity
 
