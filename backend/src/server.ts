@@ -7,6 +7,27 @@ import { memoryDb } from "./store/memory-db.js";
 
 memoryDb.init();
 
+type SocketAuthPayload = {
+  token?: unknown;
+};
+
+function extractSocketToken(payload: unknown): string | null {
+  if (!payload || typeof payload !== "object") return null;
+  const token = (payload as SocketAuthPayload).token;
+  return typeof token === "string" && token.trim() ? token.trim() : null;
+}
+
+function verifySocketToken(payload: unknown): { userId: string } | null {
+  const token = extractSocketToken(payload);
+  if (!token) return null;
+
+  try {
+    return jwt.verify(token, env.jwtSecret) as { userId: string };
+  } catch {
+    return null;
+  }
+}
+
 const server = app.listen(env.port, () => {
   console.log(`\n==============================================`);
   console.log(`Backend running at http://localhost:${env.port}`);
@@ -19,8 +40,8 @@ const server = app.listen(env.port, () => {
   const io = new SocketIOServer(server, {
     cors: {
       origin: env.corsOrigins,
-      methods: ["GET", "POST"]
-    }
+      methods: ["GET", "POST"],
+    },
   });
 
   io.on("connection", (socket) => {
@@ -49,14 +70,19 @@ const server = app.listen(env.port, () => {
     });
     socket.on("join_tour_room", async (payload) => {
       const tourId = typeof payload === "string" ? payload : payload?.tourId;
-      if (!tourId || typeof tourId !== "string") return;
+      const decoded = verifySocketToken(payload);
+      if (!tourId || typeof tourId !== "string" || !decoded) return;
 
       try {
-        const tour = await prisma.tourPackage.findUnique({
-          where: { id: tourId },
+        const hasPurchased = await prisma.trip.findFirst({
+          where: {
+            userId: decoded.userId,
+            tourPackageId: tourId,
+            status: { not: "CANCELLED" }
+          },
           select: { id: true },
         });
-        if (tour) {
+        if (hasPurchased) {
           socket.join(`tour_${tourId}`);
         }
       } catch {

@@ -69,6 +69,7 @@ export const tourStore = {
         status: TripStatus.ONGOING,
         imagePath: tour.imagePath,
         isUpcoming: true,
+        tourPackageId: tour.id,
         totalPrice: totalPrice,
         requestId,
       },

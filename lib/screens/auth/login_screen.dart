@@ -77,7 +77,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     if (error != null) {
       showErrorDialog(context, error);
     } else {
-      Navigator.pop(context, true);
+      final from = GoRouterState.of(context).uri.queryParameters['from'];
+      if (from != null && from.isNotEmpty) {
+        context.go(from);
+      } else if (Navigator.canPop(context)) {
+        Navigator.pop(context, true);
+      } else {
+        context.go(AppRoutes.main);
+      }
     }
   }
 

@@ -18,6 +18,7 @@ import {
   bookTourSchema,
   createDocumentSchema,
   createReviewSchema,
+  createCustomTourSchema,
 } from "../validators/index.js";
 
 export const clientController = {
@@ -240,22 +241,22 @@ export const clientController = {
     res.status(201).json(trip);
   }),
 
-  createCustomTour: asyncHandler(async (req: Request<unknown, unknown, BookTourBody & { destination?: string; location?: string; imagePath?: string; requestId?: string }>, res: Response) => {
+  createCustomTour: asyncHandler(async (req: Request<unknown, unknown, BookTourBody & { destination?: string; location?: string; imagePath?: string; requestId?: string }>, res: Response, next: import("express").NextFunction) => {
     const userId = req.userId;
-    const body = req.body;
     try {
+      const body = createCustomTourSchema.parse(req.body);
       const trip = await store.createCustomTour(userId, {
         destinations: [],
         date: body.date || "",
         guests: String(body.guests || ""),
         location: body.location || "",
         imagePath: body.imagePath || "",
-        totalPrice: body.totalPrice ? Number(body.totalPrice) : undefined,
+        totalPrice: body.totalPrice,
         requestId: body.requestId
       });
       res.status(201).json(trip);
     } catch (error) {
-      res.status(500).json({ message: "Failed to create custom tour" });
+      next(error);
     }
   }),
 

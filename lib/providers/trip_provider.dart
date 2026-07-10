@@ -1,5 +1,5 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../core/constants/app_constants.dart';
 import '../models/trip.dart';
 import '../utils/api_exception.dart';
@@ -45,7 +45,8 @@ class TripNotifier extends Notifier<List<Trip>> {
       return trip.id;
     } on ApiException {
       rethrow;
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Error in bookTrip: $e\n$st');
       throw ApiException(statusCode: 500, message: getErrorMessage(e));
     }
   }
@@ -71,7 +72,8 @@ class TripNotifier extends Notifier<List<Trip>> {
       return trip.id;
     } on ApiException {
       rethrow;
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Error in bookFlight: $e\n$st');
       throw ApiException(statusCode: 500, message: getErrorMessage(e));
     }
   }
@@ -105,7 +107,8 @@ class TripNotifier extends Notifier<List<Trip>> {
       return trip.id;
     } on ApiException {
       rethrow;
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Error in bookHotel: $e\n$st');
       throw ApiException(statusCode: 500, message: getErrorMessage(e));
     }
   }
@@ -133,7 +136,8 @@ class TripNotifier extends Notifier<List<Trip>> {
       return trip.id;
     } on ApiException {
       rethrow;
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Error in bookTour: $e\n$st');
       throw ApiException(statusCode: 500, message: getErrorMessage(e));
     }
   }
@@ -173,7 +177,8 @@ class TripNotifier extends Notifier<List<Trip>> {
       return trip.id;
     } on ApiException {
       rethrow;
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Error in createCustomTour: $e\n$st');
       throw ApiException(statusCode: 500, message: getErrorMessage(e));
     }
   }
@@ -184,7 +189,8 @@ class TripNotifier extends Notifier<List<Trip>> {
       state = state.map((t) => t.id == tripId ? updatedTrip : t).toList();
     } on ApiException {
       rethrow;
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Error in cancelTrip: $e\n$st');
       throw ApiException(statusCode: 500, message: getErrorMessage(e));
     }
   }

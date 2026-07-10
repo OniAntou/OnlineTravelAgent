@@ -166,6 +166,8 @@ export interface CreateScheduleItemBody {
   latitude?: number | null;
   longitude?: number | null;
   sortOrder?: number;
+  statusOverride?: string | null;
+  note?: string | null;
 }
 
 export interface CreateScheduleDayBody {

@@ -73,10 +73,7 @@ void main() {
     });
 
     test('fromJson defaults for invalid date', () {
-      final review = Review.fromJson({
-        'id': 'r1',
-        'createdAt': 'invalid-date',
-      });
+      final review = Review.fromJson({'id': 'r1', 'createdAt': 'invalid-date'});
       expect(review.createdAt, isA<DateTime>());
     });
   });
@@ -131,6 +128,7 @@ void main() {
         'latitude': 21.03,
         'longitude': 105.84,
         'statusOverride': 'completed',
+        'note': 'Bring a raincoat',
       };
       final item = TripScheduleItem.fromJson(json);
       expect(item.id, 'i1');
@@ -142,6 +140,7 @@ void main() {
       expect(item.latitude, 21.03);
       expect(item.longitude, 105.84);
       expect(item.statusOverride, 'completed');
+      expect(item.note, 'Bring a raincoat');
     });
 
     test('fromJson handles nullable fields', () {
@@ -156,6 +155,7 @@ void main() {
       expect(item.latitude, isNull);
       expect(item.longitude, isNull);
       expect(item.statusOverride, isNull);
+      expect(item.note, '');
     });
 
     test('fromJson uses locationName as fallback', () {
@@ -188,10 +188,7 @@ void main() {
     });
 
     test('fromJson handles null items', () {
-      final day = TripScheduleDay.fromJson({
-        'id': 'day1',
-        'dayNumber': 1,
-      });
+      final day = TripScheduleDay.fromJson({'id': 'day1', 'dayNumber': 1});
       expect(day.items, isEmpty);
       expect(day.date, isNull);
     });
@@ -205,7 +202,11 @@ void main() {
           {'id': 'day1', 'dayNumber': 1, 'items': []},
         ],
         'updates': [
-          {'id': 'u1', 'message': 'Update', 'createdAt': '2026-07-01T10:00:00.000Z'},
+          {
+            'id': 'u1',
+            'message': 'Update',
+            'createdAt': '2026-07-01T10:00:00.000Z',
+          },
         ],
       };
       final schedule = TripSchedule.fromJson(json);

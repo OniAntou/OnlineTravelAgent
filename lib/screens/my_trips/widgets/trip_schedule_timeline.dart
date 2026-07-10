@@ -21,11 +21,6 @@ class TripScheduleTimeline extends ConsumerStatefulWidget {
 class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
   int _selectedDayIndex = 0;
 
-  // Custom Time simulation for testing
-  int? _simulatedHour;
-  int? _simulatedMinute;
-  bool _showSimulatePanel = false;
-
   Timer? _refreshTimer;
   int _lastUpdateMinute = -1;
 
@@ -86,14 +81,12 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
         statusLower == 'completed') {
       return 'completed';
     }
-    if (statusLower == 'sắp tới' &&
-        (_simulatedHour == null || _simulatedMinute == null)) {
+    if (statusLower == 'sắp tới') {
       return 'upcoming';
     }
 
     final scheduleDate = _parseScheduleDate(day.date);
-    if (scheduleDate != null &&
-        (_simulatedHour == null || _simulatedMinute == null)) {
+    if (scheduleDate != null) {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
       if (scheduleDate.isBefore(today)) {
@@ -104,14 +97,8 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
       }
     }
 
-    // Process real-time or simulated tracking
-    int currentMinutes;
-    if (_simulatedHour != null && _simulatedMinute != null) {
-      currentMinutes = _simulatedHour! * 60 + _simulatedMinute!;
-    } else {
-      final now = TimeOfDay.now();
-      currentMinutes = now.hour * 60 + now.minute;
-    }
+    final now = TimeOfDay.now();
+    final currentMinutes = now.hour * 60 + now.minute;
 
     // Find the currently active index
     int activeIndex = -1;
@@ -156,64 +143,13 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Lịch trình chi tiết',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.textBlack,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _showSimulatePanel = !_showSimulatePanel;
-                    });
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _showSimulatePanel
-                          ? AppTheme.primaryBlue.withValues(alpha: 0.08)
-                          : Colors.white,
-                      border: Border.all(
-                        color: _showSimulatePanel
-                            ? AppTheme.primaryBlue
-                            : Colors.grey.shade300,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.tune_rounded,
-                          size: 14,
-                          color: _showSimulatePanel
-                              ? AppTheme.primaryBlue
-                              : Colors.grey.shade600,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Giả lập',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: _showSimulatePanel
-                                ? AppTheme.primaryBlue
-                                : Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+            const Text(
+              'Lịch trình chi tiết',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.textBlack,
+              ),
             ),
             const SizedBox(height: 16),
 
@@ -264,8 +200,8 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
               ),
             ],
 
-            // Real-time tracking status banner if ongoing or simulated
-            if (isOngoingTrip || _simulatedHour != null) ...[
+            // Real-time tracking status banner
+            if (isOngoingTrip) ...[
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
@@ -277,20 +213,14 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: const Color(0xFFC8E6C9)),
                 ),
-                child: Row(
+                child: const Row(
                   children: [
-                    const Icon(
-                      Icons.flash_on_rounded,
-                      color: Colors.green,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
+                    Icon(Icons.flash_on_rounded, color: Colors.green, size: 18),
+                    SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        _simulatedHour != null
-                            ? '⚡ Chế độ giả lập: Đang chạy ở lúc ${_simulatedHour.toString().padLeft(2, '0')}:${(_simulatedMinute ?? 0).toString().padLeft(2, '0')}'
-                            : '⚡ Đang tự động theo dõi lịch trình theo thời gian thực tế',
-                        style: const TextStyle(
+                        'Đang tự động theo dõi lịch trình theo thời gian thực tế',
+                        style: TextStyle(
                           color: Color(0xFF2E7D32),
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -301,9 +231,6 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                 ),
               ),
             ],
-
-            // Time simulation control panel
-            if (_showSimulatePanel) _buildSimulationControlPanel(),
 
             // Day Selector
             SingleChildScrollView(
@@ -379,96 +306,6 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
     );
   }
 
-  Widget _buildSimulationControlPanel() {
-    final List<Map<String, dynamic>> selectOptions = [
-      {'label': 'Sáng sớm (07:00)', 'hour': 7, 'min': 0},
-      {'label': 'Đón khách (08:45)', 'hour': 8, 'min': 45},
-      {'label': 'Hoạt động sáng (10:30)', 'hour': 10, 'min': 30},
-      {'label': 'Giờ ăn trưa (12:30)', 'hour': 12, 'min': 30},
-      {'label': 'Hoạt động chiều (15:00)', 'hour': 15, 'min': 0},
-      {'label': 'Bữa tối (19:00)', 'hour': 19, 'min': 0},
-    ];
-
-    return Container(
-      padding: const EdgeInsets.all(14),
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: AppTheme.backgroundGray,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Chọn mốc giờ để thử nghiệm Real-Time Tracking:',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.textBlack,
-            ),
-          ),
-          const SizedBox(height: 10),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: selectOptions.map((opt) {
-              final isCurrent =
-                  _simulatedHour == opt['hour'] &&
-                  _simulatedMinute == opt['min'];
-              return ChoiceChip(
-                label: Text(
-                  opt['label'] as String,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: isCurrent ? Colors.white : Colors.black87,
-                  ),
-                ),
-                selected: isCurrent,
-                selectedColor: AppTheme.primaryBlue,
-                backgroundColor: Colors.white,
-                onSelected: (selected) {
-                  setState(() {
-                    if (selected) {
-                      _simulatedHour = opt['hour'] as int;
-                      _simulatedMinute = opt['min'] as int;
-                    } else {
-                      _simulatedHour = null;
-                      _simulatedMinute = null;
-                    }
-                  });
-                },
-              );
-            }).toList(),
-          ),
-          if (_simulatedHour != null) ...[
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton.icon(
-                onPressed: () {
-                  setState(() {
-                    _simulatedHour = null;
-                    _simulatedMinute = null;
-                  });
-                },
-                icon: const Icon(
-                  Icons.refresh_rounded,
-                  size: 14,
-                  color: Colors.red,
-                ),
-                label: const Text(
-                  'Về thực tế',
-                  style: TextStyle(fontSize: 12, color: Colors.red),
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
   Widget _buildMilestonesTimeline(TripScheduleDay day) {
     final items = day.items;
     if (items.isEmpty) {
@@ -518,6 +355,11 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
           lineColor = Colors.grey.shade300;
           lineOpacity = 0.5;
           iconData = Icons.cancel_rounded;
+        } else if (status == 'delayed') {
+          dotColor = Colors.deepOrange;
+          lineColor = Colors.grey.shade300;
+          lineOpacity = 0.5;
+          iconData = Icons.schedule_rounded;
         } else {
           dotColor = Colors.grey.shade300;
           lineColor = Colors.grey.shade300;
@@ -658,6 +500,25 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                                   ),
                                 ),
                               ),
+                            if (status == 'delayed')
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.deepOrange,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: const Text(
+                                  'Bị trễ',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -685,6 +546,39 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
                             height: 1.4,
                           ),
                         ),
+                        if (item.note.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.shade50,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.amber.shade200),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.info_outline_rounded,
+                                  size: 14,
+                                  color: Colors.amber.shade800,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    item.note,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.amber.shade900,
+                                      height: 1.35,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                         if (item.location.isNotEmpty) ...[
                           const SizedBox(height: 12),
                           Row(

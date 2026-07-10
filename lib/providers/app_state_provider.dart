@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
 import '../services/sync_service.dart';
@@ -10,10 +11,12 @@ final bootstrapProvider = FutureProvider<BootstrapData>((ref) async {
   final api = ref.watch(apiProvider);
   final syncService = ref.watch(syncServiceProvider);
   // Watch token to trigger refetch on login/logout
-  ref.watch(authProvider.select((state) => state.token));
+  final token = ref.watch(authProvider.select((state) => state.token));
+  final isLoggedIn = token != null && token.isNotEmpty;
 
   // Load from SQLite first (offline-first)
   final cached = await syncService.loadBootstrapFromSQLite();
+  final scopedCached = isLoggedIn ? cached : _withoutUserOwnedData(cached);
 
   // Then fetch fresh data from API in background
   try {
@@ -21,11 +24,29 @@ final bootstrapProvider = FutureProvider<BootstrapData>((ref) async {
     // Sync to SQLite for next launch
     await syncService.syncAll();
     return fresh;
-  } catch (_) {
-    // API failed, use cached data
-    return cached;
+  } catch (error, stackTrace) {
+    // API failed, log error and use cached data
+    debugPrint('Failed to fetch bootstrap data: $error\n$stackTrace');
+    return scopedCached;
   }
 });
+
+BootstrapData _withoutUserOwnedData(BootstrapData data) {
+  return BootstrapData(
+    categories: data.categories,
+    destinations: data.destinations
+        .map((destination) => destination.copyWith(isFavorite: false))
+        .toList(growable: false),
+    recommended: data.recommended
+        .map((destination) => destination.copyWith(isFavorite: false))
+        .toList(growable: false),
+    trips: const [],
+    documents: const [],
+    hotels: data.hotels,
+    tourPackages: data.tourPackages,
+    flights: data.flights,
+  );
+}
 
 // Sync bootstrap data to documents provider
 final bootstrapSyncProvider = Provider<void>((ref) {

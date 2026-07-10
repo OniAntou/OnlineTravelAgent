@@ -28,7 +28,7 @@ export const partnerController = {
 
   createHotel: asyncHandler(async (req: Request, res: Response) => {
     const partnerId = (req as any).userId;
-    const { name, location, rating, imagePath, description, priceFrom, address, amenities } = req.body;
+    const { name, location, imagePath, description, priceFrom, address, amenities } = req.body;
     
     const hotel = await prisma.hotel.create({
       data: {
@@ -36,7 +36,7 @@ export const partnerController = {
         partnerId,
         name,
         location,
-        rating: rating || "4.0",
+        rating: "0.0", // Partners cannot set their own rating
         imagePath: imagePath || "assets/images/hotel_placeholder.jpg",
         description,
         priceFrom: priceFrom || 0,
@@ -79,7 +79,7 @@ export const partnerController = {
     const id = req.params.id as string;
     const hotel = await prisma.hotel.findFirst({ where: { id, partnerId } });
     if (!hotel) return res.status(404).json({ message: "Not found or unauthorized" });
-    const { id: _id, partnerId: _partnerId, ...data } = req.body;
+    const { id: _id, partnerId: _partnerId, rating: _rating, ...data } = req.body;
     
     const updated = await prisma.hotel.update({
       where: { id },
@@ -103,7 +103,7 @@ export const partnerController = {
     const id = req.params.id as string;
     const tour = await prisma.tourPackage.findFirst({ where: { id, partnerId } });
     if (!tour) return res.status(404).json({ message: "Not found or unauthorized" });
-    const { id: _id, partnerId: _partnerId, ...data } = req.body;
+    const { id: _id, partnerId: _partnerId, isPopular: _isPopular, ...data } = req.body;
     
     const updated = await prisma.tourPackage.update({
       where: { id },

@@ -8,16 +8,27 @@ import 'providers/app_state_provider.dart';
 import 'services/sync_service.dart';
 import 'services/connectivity_service.dart';
 
+import 'dart:ui';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint('Flutter Error: ${details.exception}');
+  };
+  
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    debugPrint('Async Error: $error\n$stack');
+    return true;
+  };
 
   runApp(
     EasyLocalization(
       supportedLocales: const [Locale('vi'), Locale('en')],
       path: 'assets/translations',
       fallbackLocale: const Locale('vi'),
-      startLocale: const Locale('vi'), // Force default to Vietnamese
       child: const ProviderScope(child: OnlineTravelAgentApp()),
     ),
   );
