@@ -36,16 +36,6 @@ class TripApiService {
     return Trip.fromJson(data);
   }
 
-  Future<Trip> createCustomTour({required String destination, required String location, required String date, required String guests, required String imagePath, List<String>? flightIds, List<String>? hotelIds, String? roomId, double? totalPrice}) async {
-    final body = <String, dynamic>{'destination': destination, 'location': location, 'date': date, 'guests': guests, 'imagePath': imagePath, 'requestId': const Uuid().v4()};
-    if (flightIds != null) body['flightIds'] = flightIds;
-    if (hotelIds != null) body['hotelIds'] = hotelIds;
-    if (roomId != null) body['roomId'] = roomId;
-    if (totalPrice != null) body['totalPrice'] = totalPrice;
-    final data = await _client.postJson('/api/trips/custom-tour', body, queueOnFailure: false);
-    return Trip.fromJson(data);
-  }
-
   Future<TripSchedule> fetchTripSchedule(String tripId) async {
     final data = await _client.getJson('/api/trips/$tripId/schedule');
     return TripSchedule.fromJson(data);

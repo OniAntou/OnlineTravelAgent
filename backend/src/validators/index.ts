@@ -32,15 +32,6 @@ export const bookTourSchema = z.object({
   requestId: z.string().optional(),
 });
 
-export const createCustomTourSchema = z.object({
-  date: z.string().optional(),
-  guests: z.string().optional(),
-  location: z.string().optional(),
-  imagePath: z.string().optional(),
-  totalPrice: z.number().min(0).optional(),
-  requestId: z.string().optional(),
-});
-
 export const createDocumentSchema = z.object({
   title: z.string(),
   description: z.string().optional(),

@@ -142,47 +142,6 @@ class TripNotifier extends Notifier<List<Trip>> {
     }
   }
 
-  Future<String?> createCustomTour({
-    required String destination,
-    required String location,
-    required String date,
-    required String guests,
-    required String imagePath,
-    List<String>? flightIds,
-    List<String>? hotelIds,
-    String? roomId,
-    double? totalPrice,
-  }) async {
-    final normalizedDestination = TripValidator.requiredText(destination, 'Điểm đến');
-    final normalizedLocation = TripValidator.requiredText(location, 'Khu vực');
-    final normalizedDate = TripValidator.requiredText(date, 'Ngày đi');
-    final normalizedGuests = TripValidator.requiredGuests(guests);
-    final normalizedImagePath = TripValidator.requiredText(imagePath, 'Ảnh đại diện');
-
-    try {
-      final trip = await ref
-          .read(apiProvider)
-          .createCustomTour(
-            destination: normalizedDestination,
-            location: normalizedLocation,
-            date: normalizedDate,
-            guests: normalizedGuests,
-            imagePath: normalizedImagePath,
-            flightIds: flightIds,
-            hotelIds: hotelIds,
-            roomId: roomId,
-            totalPrice: totalPrice,
-          );
-      addTrip(trip);
-      return trip.id;
-    } on ApiException {
-      rethrow;
-    } catch (e, st) {
-      debugPrint('Error in createCustomTour: $e\n$st');
-      throw ApiException(statusCode: 500, message: getErrorMessage(e));
-    }
-  }
-
   Future<void> cancelTrip(String tripId) async {
     try {
       final updatedTrip = await ref.read(apiProvider).cancelTrip(tripId);

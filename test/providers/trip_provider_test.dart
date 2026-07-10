@@ -193,37 +193,6 @@ void main() {
       );
     });
 
-    test('createCustomTour rejects incomplete summary data', () async {
-      container = ProviderContainer(
-        overrides: [
-          apiProvider.overrideWithValue(fakeApi),
-          bootstrapProvider.overrideWithValue(AsyncData(emptyBootstrap())),
-        ],
-      );
-      final notifier = container.read(tripsProvider.notifier);
-
-      expect(
-        notifier.createCustomTour(
-          destination: '',
-          location: 'Da Nang',
-          date: '10/08/2026',
-          guests: '2 Người',
-          imagePath: 'assets/images/danang.jpg',
-        ),
-        throwsA(isA<ValidationException>()),
-      );
-      expect(
-        notifier.createCustomTour(
-          destination: 'Da Nang',
-          location: 'Da Nang',
-          date: '10/08/2026',
-          guests: '0 Người',
-          imagePath: 'assets/images/danang.jpg',
-        ),
-        throwsA(isA<ValidationException>()),
-      );
-    });
-
     test('bookTrip adds trip on success', () async {
       container = ProviderContainer(
         overrides: [

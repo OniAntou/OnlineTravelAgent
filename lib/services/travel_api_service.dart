@@ -167,27 +167,6 @@ class TravelApiService {
     guests: guests,
     totalPrice: totalPrice,
   );
-  Future<Trip> createCustomTour({
-    required String destination,
-    required String location,
-    required String date,
-    required String guests,
-    required String imagePath,
-    List<String>? flightIds,
-    List<String>? hotelIds,
-    String? roomId,
-    double? totalPrice,
-  }) => tripsService.createCustomTour(
-    destination: destination,
-    location: location,
-    date: date,
-    guests: guests,
-    imagePath: imagePath,
-    flightIds: flightIds,
-    hotelIds: hotelIds,
-    roomId: roomId,
-    totalPrice: totalPrice,
-  );
   Future<TripSchedule> fetchTripSchedule(String tripId) =>
       tripsService.fetchTripSchedule(tripId);
   Future<Map<String, TripSchedule>> fetchTripSchedulesBatch(

@@ -131,66 +131,6 @@ export const tripStore = {
     });
   },
 
-  async createCustomTour(
-    userId: string | undefined,
-    data: {
-      destinations: string[];
-      date: string;
-      guests: string;
-      location: string;
-      imagePath: string;
-      totalPrice?: number;
-      requestId?: string;
-    },
-  ) {
-    const useMem = !(await dbAvailable());
-
-    if (useMem) {
-      if (data.requestId) {
-        const existing = memoryDb.findTripByRequestId(userId, data.requestId);
-        if (existing) return existing;
-      }
-      return memoryDb.createTrip({
-        id: generateId("trip-custom"),
-        userId: userId || null,
-        destination: "Tour thiết kế riêng",
-        location: data.location,
-        date: data.date,
-        guests: data.guests,
-        status: "ONGOING",
-        imagePath: data.imagePath,
-        isUpcoming: true,
-        isCustom: true,
-        totalPrice: data.totalPrice || null,
-        requestId: data.requestId || null,
-      });
-    }
-
-    if (data.requestId) {
-      const existing = await prisma.trip.findFirst({
-        where: { userId, requestId: data.requestId },
-      });
-      if (existing) return existing;
-    }
-
-    return prisma.trip.create({
-      data: {
-        id: generateId("trip-custom"),
-        userId,
-        destination: "Tour thiết kế riêng",
-        location: data.location,
-        date: data.date,
-        guests: data.guests,
-        status: TripStatus.ONGOING,
-        imagePath: data.imagePath,
-        isUpcoming: true,
-        totalPrice: data.totalPrice,
-        isCustom: true,
-        requestId: data.requestId,
-      },
-    });
-  },
-
   async cancelTrip(userId: string | undefined, tripId: string) {
     const useMem = !(await dbAvailable());
 

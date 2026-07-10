@@ -155,10 +155,6 @@ export const bootstrapStore = {
   async updateFavorite(userId: string | undefined, destinationId: string, isFavorite?: boolean) {
     if (!userId) return null;
 
-    const destinations = mockDestinations as any[];
-    const destination = destinations.find((d: any) => d.id === destinationId);
-    if (!destination) return null;
-
     // Try real DB first
     try {
       const dbDest = await prisma.destination.findUnique({ where: { id: destinationId } });
@@ -191,6 +187,10 @@ export const bootstrapStore = {
     }
 
     // Memory DB fallback
+    const destinations = mockDestinations as any[];
+    const destination = destinations.find((d: any) => d.id === destinationId);
+    if (!destination) return null;
+
     const existing = memoryDb.findFavorite(userId, destinationId);
     const newFavorite = typeof isFavorite === "boolean" ? isFavorite : !existing;
 

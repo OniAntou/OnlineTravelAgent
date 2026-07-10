@@ -8,7 +8,6 @@ import {
   documentSchema,
   bookHotelSchema,
   bookTourSchema,
-  customTourSchema,
   reviewSchema,
 } from "../schemas/client.schema.js";
 
@@ -32,7 +31,6 @@ clientRouter.get("/trips/schedules", clientAuth, clientController.getTripSchedul
 clientRouter.get("/trips/:id/schedule", clientAuth, clientController.getTripSchedule);
 clientRouter.post("/trips/book", clientAuth, validate(bookTripSchema), clientController.bookTrip);
 clientRouter.post("/trips/book-flight", clientAuth, validate(bookFlightSchema), clientController.bookFlightTrip);
-clientRouter.post("/trips/custom-tour", clientAuth, validate(customTourSchema), clientController.createCustomTour);
 clientRouter.post("/trips/:id/cancel", clientAuth, clientController.cancelTrip);
 
 // Flights

@@ -115,21 +115,6 @@ export const bookTourSchema = z.object({
   requestId: optionalText,
 });
 
-export const customTourSchema = z.object({
-  destination: requiredText("destination"),
-  location: requiredText("location"),
-  date: requiredText("date"),
-  guests: requiredText("guests"),
-  imagePath: requiredText("imagePath"),
-  flightId: optionalText,
-  hotelId: optionalText,
-  flightIds: z.array(z.string().min(1)).optional(),
-  hotelIds: z.array(z.string().min(1)).optional(),
-  roomId: optionalText,
-  totalPrice: optionalMoney,
-  requestId: optionalText,
-});
-
 export const reviewSchema = z.object({
   targetType: requiredText("targetType"),
   targetId: requiredText("targetId"),

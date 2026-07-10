@@ -3,7 +3,6 @@ import {
   bookHotelSchema,
   bookTripSchema,
   bookTourSchema,
-  customTourSchema,
   reviewSchema,
 } from "../src/schemas/client.schema.js";
 
@@ -45,21 +44,6 @@ describe("client request schemas", () => {
 
     expect(tour.success).toBe(true);
     expect(review.success).toBe(true);
-  });
-
-  it("accepts custom tour arrays sent by the Flutter client", () => {
-    const parsed = customTourSchema.safeParse({
-      destination: "Da Nang",
-      location: "Da Nang",
-      date: "2026-08-01",
-      guests: "2",
-      imagePath: "/images/da-nang.jpg",
-      flightIds: ["flight-1"],
-      hotelIds: ["hotel-1"],
-      totalPrice: "1500",
-    });
-
-    expect(parsed.success).toBe(true);
   });
 
   it("accepts hotel dates sent as DD/MM/YYYY", () => {

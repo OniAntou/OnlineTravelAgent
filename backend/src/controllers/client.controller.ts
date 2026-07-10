@@ -7,7 +7,6 @@ import {
   BookTripBody,
   BookFlightBody,
   BookHotelBody,
-  BookTourBody,
   CreateDocumentBody,
   CreateReviewBody,
 } from "../types/index.js";
@@ -18,7 +17,6 @@ import {
   bookTourSchema,
   createDocumentSchema,
   createReviewSchema,
-  createCustomTourSchema,
 } from "../validators/index.js";
 
 export const clientController = {
@@ -239,25 +237,6 @@ export const clientController = {
       return;
     }
     res.status(201).json(trip);
-  }),
-
-  createCustomTour: asyncHandler(async (req: Request<unknown, unknown, BookTourBody & { destination?: string; location?: string; imagePath?: string; requestId?: string }>, res: Response, next: import("express").NextFunction) => {
-    const userId = req.userId;
-    try {
-      const body = createCustomTourSchema.parse(req.body);
-      const trip = await store.createCustomTour(userId, {
-        destinations: [],
-        date: body.date || "",
-        guests: String(body.guests || ""),
-        location: body.location || "",
-        imagePath: body.imagePath || "",
-        totalPrice: body.totalPrice,
-        requestId: body.requestId
-      });
-      res.status(201).json(trip);
-    } catch (error) {
-      next(error);
-    }
   }),
 
   checkPromoCode: asyncHandler(async (req: Request, res: Response) => {
