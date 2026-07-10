@@ -185,8 +185,8 @@ class MemoryDB {
     return this.trips.find((t) => t.id === id) || null;
   }
 
-  findTripByRequestId(requestId: string) {
-    return this.trips.find((t) => t.requestId === requestId) || null;
+  findTripByRequestId(userId: string | undefined, requestId: string) {
+    return this.trips.find((t) => t.userId === userId && t.requestId === requestId) || null;
   }
 
   findTripsByUserId(userId: string, type?: string) {

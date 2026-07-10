@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 const isTest = process.env.NODE_ENV === "test" || process.env.VITEST === "true";
 
 function readPort(): number {

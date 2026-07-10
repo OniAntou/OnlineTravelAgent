@@ -6,10 +6,12 @@ const mocks = vi.hoisted(() => ({
   refreshFindUnique: vi.fn(),
   refreshUpdate: vi.fn(),
   refreshUpdateMany: vi.fn(),
+  queryRaw: vi.fn(),
 }));
 
 vi.mock("../src/config/prisma.js", () => ({
   default: {
+    $queryRaw: mocks.queryRaw,
     refreshToken: {
       create: mocks.refreshCreate,
       findUnique: mocks.refreshFindUnique,
@@ -28,6 +30,7 @@ describe("tokenService", () => {
     mocks.refreshFindUnique.mockResolvedValue(null);
     mocks.refreshUpdate.mockResolvedValue({});
     mocks.refreshUpdateMany.mockResolvedValue({ count: 1 });
+    mocks.queryRaw.mockResolvedValue([{ ok: 1 }]);
   });
 
   it("issues access and refresh tokens", async () => {

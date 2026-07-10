@@ -306,7 +306,6 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
           const SizedBox(height: 16),
           QrImageView(
             data: widget.paymentUrl,
-            version: QrVersions.auto,
             size: 200,
             backgroundColor: Colors.white,
             eyeStyle: const QrEyeStyle(
@@ -325,12 +324,12 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
               color: const Color(0xFFF0F4FF),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Row(
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.info_outline, size: 16, color: AppTheme.primaryBlue),
-                const SizedBox(width: 6),
-                const Expanded(
+                Icon(Icons.info_outline, size: 16, color: AppTheme.primaryBlue),
+                SizedBox(width: 6),
+                Expanded(
                   child: Text(
                     'Sau khi thanh toán xong, nhấn "Đã thanh toán xong" bên dưới',
                     style: TextStyle(color: AppTheme.primaryBlue, fontSize: 11),

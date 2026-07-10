@@ -1,7 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../core/router/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/dialog_utils.dart';
@@ -81,8 +83,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
     if (error != null) {
       showErrorDialog(context, error);
     } else {
-      showSuccessSnackBar(context, 'Đăng ký thành công, vui lòng đăng nhập');
-      Navigator.pop(context, true);
+      showSuccessSnackBar(context, 'Đăng ký thành công!');
+      context.go(AppRoutes.main);
     }
   }
 

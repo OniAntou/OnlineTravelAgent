@@ -41,13 +41,13 @@ class _BankTransferScreenState extends ConsumerState<BankTransferScreen> {
     final info = _transferContent.toUpperCase();
 
     // Tag 00: Payload Format Indicator
-    final tag00 = '000201';
+    const tag00 = '000201';
     // Tag 01: Point of Initiation Method (12=dynamic)
-    final tag01 = '010212';
+    const tag01 = '010212';
 
     // Tag 38: Merchant Account Information (VietQR)
-    final aid = 'A000000727';
-    final serviceCode = 'QRIBFTTA';
+    const aid = 'A000000727';
+    const serviceCode = 'QRIBFTTA';
 
     final sub00 = '00${_padLen(aid)}$aid';
     // Sub01: nested — BIN in sub00, account in sub01
@@ -58,18 +58,19 @@ class _BankTransferScreenState extends ConsumerState<BankTransferScreen> {
     final tag38 = '38${_padLen(merchantInfo)}$merchantInfo';
 
     // Tag 53: Currency (VND)
-    final tag53 = '5303704';
+    const tag53 = '5303704';
     // Tag 54: Amount
     final tag54 = '54${_padLen(amount)}$amount';
     // Tag 58: Country
-    final tag58 = '5802VN';
+    const tag58 = '5802VN';
 
     // Tag 62: Additional Data (sub 08 = purpose info)
     final sub62 = '08${_padLen(info)}$info';
     final tag62 = '62${_padLen(sub62)}$sub62';
 
     // Tag 63: CRC16-CCITT
-    final payloadWithoutCrc = '$tag00$tag01$tag38$tag53$tag54$tag58$tag626304';
+    const tag63 = '6304';
+    final payloadWithoutCrc = '$tag00$tag01$tag38$tag53$tag54$tag58$tag62$tag63';
     final crc = _crc16CCITT(payloadWithoutCrc);
     return '$payloadWithoutCrc$crc';
   }
@@ -259,7 +260,6 @@ class _BankTransferScreenState extends ConsumerState<BankTransferScreen> {
           children: [
             QrImageView(
               data: _vietQrPayload,
-              version: QrVersions.auto,
               size: 220,
               backgroundColor: Colors.white,
               eyeStyle: const QrEyeStyle(

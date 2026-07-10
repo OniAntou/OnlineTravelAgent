@@ -71,7 +71,7 @@ export const hotelStore = {
 
     if (useMem) {
       if (requestId) {
-        const existing = memoryDb.findTripByRequestId(requestId);
+        const existing = memoryDb.findTripByRequestId(userId, requestId);
         if (existing) return existing;
       }
       // Find hotel from mock data by roomId prefix
@@ -93,7 +93,7 @@ export const hotelStore = {
     }
 
     if (requestId) {
-      const existing = await prisma.trip.findUnique({ where: { requestId } });
+      const existing = await prisma.trip.findFirst({ where: { userId, requestId } });
       if (existing) return existing;
     }
 

@@ -88,7 +88,7 @@ model Trip {
   destinationRef Destination? @relation(fields: [destinationId], references: [id], onDelete: SetNull)
   tourPackage    TourPackage? @relation(fields: [tourPackageId], references: [id], onDelete: SetNull)
 
-  requestId String? @unique @map("request_id")
+  requestId String? @map("request_id")
 
   promoCode String?  @map("promo_code")
   discount  Decimal? @default(0.00) @db.Decimal(12, 2)
@@ -112,6 +112,7 @@ model Trip {
   @@index([tourPackageId])
   @@index([isUpcoming])
   @@index([createdAt])
+  @@unique([userId, requestId])
   @@map("trips")
 }
 

@@ -50,7 +50,7 @@ export const tourStore = {
     requestId?: string,
   ) {
     if (requestId) {
-      const existing = await prisma.trip.findUnique({ where: { requestId } });
+      const existing = await prisma.trip.findFirst({ where: { userId, requestId } });
       if (existing) return existing;
     }
 

@@ -26,7 +26,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final protectedPrefixes = [
         AppRoutes.partnerDashboard,
       ];
-      final isProtectedRoute = protectedPrefixes.any((prefix) => location.startsWith(prefix));
+      final isProtectedRoute = protectedPrefixes.any(location.startsWith);
 
       if (!authState.isLoggedIn && isProtectedRoute) {
         return '${AppRoutes.login}?from=${Uri.encodeComponent(location)}';

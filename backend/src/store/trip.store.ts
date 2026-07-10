@@ -26,7 +26,7 @@ export const tripStore = {
 
     if (useMem) {
       if (requestId) {
-        const existing = memoryDb.findTripByRequestId(requestId);
+        const existing = memoryDb.findTripByRequestId(userId, requestId);
         if (existing) return existing;
       }
       const destination = mockDestinations.find((d) => d.id === destinationId);
@@ -48,7 +48,7 @@ export const tripStore = {
     }
 
     if (requestId) {
-      const existing = await prisma.trip.findUnique({ where: { requestId } });
+      const existing = await prisma.trip.findFirst({ where: { userId, requestId } });
       if (existing) return existing;
     }
 
@@ -86,7 +86,7 @@ export const tripStore = {
 
     if (useMem) {
       if (requestId) {
-        const existing = memoryDb.findTripByRequestId(requestId);
+        const existing = memoryDb.findTripByRequestId(userId, requestId);
         if (existing) return existing;
       }
       const flight = mockFlights.find((f) => f.id === flightId);
@@ -107,7 +107,7 @@ export const tripStore = {
     }
 
     if (requestId) {
-      const existing = await prisma.trip.findUnique({ where: { requestId } });
+      const existing = await prisma.trip.findFirst({ where: { userId, requestId } });
       if (existing) return existing;
     }
 
@@ -147,7 +147,7 @@ export const tripStore = {
 
     if (useMem) {
       if (data.requestId) {
-        const existing = memoryDb.findTripByRequestId(data.requestId);
+        const existing = memoryDb.findTripByRequestId(userId, data.requestId);
         if (existing) return existing;
       }
       return memoryDb.createTrip({
@@ -167,8 +167,8 @@ export const tripStore = {
     }
 
     if (data.requestId) {
-      const existing = await prisma.trip.findUnique({
-        where: { requestId: data.requestId },
+      const existing = await prisma.trip.findFirst({
+        where: { userId, requestId: data.requestId },
       });
       if (existing) return existing;
     }

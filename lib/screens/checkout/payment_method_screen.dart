@@ -400,7 +400,6 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Vui lòng hoàn tất thanh toán trên cổng VNPAY, sau đó quay lại kiểm tra'),
-              duration: Duration(seconds: 4),
             ),
           );
         }
