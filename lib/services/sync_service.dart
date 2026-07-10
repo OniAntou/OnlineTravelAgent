@@ -48,7 +48,8 @@ class SyncService {
   Future<void> syncAll() async {
     if (_isSyncing) return;
 
-    if (_lastSync != null && DateTime.now().difference(_lastSync!) < const Duration(minutes: 1)) {
+    if (_lastSync != null &&
+        DateTime.now().difference(_lastSync!) < const Duration(minutes: 1)) {
       return;
     }
 
@@ -71,7 +72,9 @@ class SyncService {
 
       if (data.trips.isNotEmpty) {
         try {
-          final tripIds = data.trips.map((trip) => trip.id).toList(growable: false);
+          final tripIds = data.trips
+              .map((trip) => trip.id)
+              .toList(growable: false);
           final schedules = await api.fetchTripSchedulesBatch(tripIds);
           for (final entry in schedules.entries) {
             await _syncSchedule(entry.key, entry.value);
@@ -94,7 +97,9 @@ class SyncService {
     final api = _ref.read(apiProvider);
     for (final item in queue) {
       try {
-        final body = item.bodyJson != null ? jsonDecode(item.bodyJson!) as Map<String, dynamic> : null;
+        final body = item.bodyJson != null
+            ? jsonDecode(item.bodyJson!) as Map<String, dynamic>
+            : null;
         await api.flushRequest(item.method, item.endpoint, body);
         await db.offlineQueueDao.deleteItem(item.id);
       } catch (e, st) {
@@ -335,6 +340,7 @@ class SyncService {
               longitude: Value(item.longitude),
               sortOrder: Value(i),
               statusOverride: Value(item.statusOverride),
+              note: Value(item.note),
             ),
           );
         }

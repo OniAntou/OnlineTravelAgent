@@ -6,12 +6,14 @@ import '../../providers/api_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/hotel.dart';
 import '../../models/tour_package.dart';
+import '../../models/user_profile.dart';
 import '../../utils/api_exception.dart';
 import '../../utils/dialog_utils.dart';
 import '../../widgets/shimmer_loading.dart';
 import 'room_manager_screen.dart';
 import 'widgets/hotel_form_dialog.dart';
 import 'widgets/tour_form_dialog.dart';
+
 class PartnerDashboardScreen extends ConsumerStatefulWidget {
   const PartnerDashboardScreen({super.key});
 
@@ -90,7 +92,14 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
       final newToken = data['token']?.toString();
       if (newToken != null) {
         api.token = newToken;
-        ref.read(authProvider.notifier).updateToken(newToken);
+        ref
+            .read(authProvider.notifier)
+            .updateToken(
+              newToken,
+              user: UserProfile.fromJson(
+                data['user'] as Map<String, dynamic>? ?? {},
+              ),
+            );
       }
       await _loadData();
       if (mounted) {

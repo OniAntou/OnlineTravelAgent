@@ -43,4 +43,33 @@ describe("admin schedule security", () => {
     expect(res.status).toBe(404);
     expect(mocks.tripScheduleItemUpdate).not.toHaveBeenCalled();
   });
+
+  it("accepts supported schedule override statuses", async () => {
+    mocks.tripScheduleItemFindFirst.mockResolvedValue({ id: "item-1" });
+    mocks.tripScheduleItemUpdate.mockResolvedValue({
+      id: "item-1",
+      statusOverride: "delayed",
+    });
+
+    const res = await request(app)
+      .put("/api/admin/trips/trip-1/schedule/items/item-1")
+      .set("Authorization", adminAuth)
+      .send({ statusOverride: "delayed" });
+
+    expect(res.status).toBe(200);
+    expect(mocks.tripScheduleItemUpdate).toHaveBeenCalledWith({
+      where: { id: "item-1" },
+      data: { statusOverride: "delayed" },
+    });
+  });
+
+  it("rejects empty schedule update messages", async () => {
+    const res = await request(app)
+      .post("/api/admin/trips/trip-1/schedule/updates")
+      .set("Authorization", adminAuth)
+      .send({ message: "   " });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toBe("message is required");
+  });
 });

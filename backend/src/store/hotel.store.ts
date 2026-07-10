@@ -70,6 +70,9 @@ export const hotelStore = {
         status: TripStatus.ONGOING,
         imagePath: room.hotel.imagePath,
         isUpcoming: true,
+        hotelId: room.hotel.id,
+        roomId: room.id,
+        totalPrice: room.price,
         requestId,
       },
     });

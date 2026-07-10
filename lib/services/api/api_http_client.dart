@@ -13,11 +13,9 @@ import '../../database/app_database.dart';
 import '../../utils/api_exception.dart';
 
 class ApiHttpClient {
-  ApiHttpClient({
-    String? baseUrl,
-    FlutterSecureStorage? secureStorage,
-  })  : _baseUrl = baseUrl ?? _defaultBaseUrl(),
-        _secureStorage = secureStorage ?? const FlutterSecureStorage() {
+  ApiHttpClient({String? baseUrl, FlutterSecureStorage? secureStorage})
+    : _baseUrl = baseUrl ?? _defaultBaseUrl(),
+      _secureStorage = secureStorage ?? const FlutterSecureStorage() {
     loadTokenFuture = _loadToken();
   }
 
@@ -28,6 +26,7 @@ class ApiHttpClient {
   String? refreshToken;
   String? userName;
   String? userEmail;
+  String? userRole;
   late final Future<void> loadTokenFuture;
   void Function()? onAuthError;
   bool _isRefreshing = false;
@@ -41,6 +40,7 @@ class ApiHttpClient {
       refreshToken = await _secureStorage.read(key: _refreshTokenKey);
       userName = await _secureStorage.read(key: 'auth_user_name');
       userEmail = await _secureStorage.read(key: 'auth_user_email');
+      userRole = await _secureStorage.read(key: 'auth_user_role');
     } catch (e) {
       debugPrint('Failed to read token from secure storage: $e');
     }
@@ -129,7 +129,10 @@ class ApiHttpClient {
       token = nextToken;
       refreshToken = nextRefreshToken;
       await _secureStorage.write(key: _tokenKey, value: nextToken);
-      await _secureStorage.write(key: _refreshTokenKey, value: nextRefreshToken);
+      await _secureStorage.write(
+        key: _refreshTokenKey,
+        value: nextRefreshToken,
+      );
       return true;
     } catch (e) {
       debugPrint('Refresh token failed: $e');
@@ -182,7 +185,9 @@ class ApiHttpClient {
     final targetUri = uri(path);
     switch (method) {
       case 'GET':
-        return http.get(targetUri, headers: headers).timeout(AppTheme.apiTimeout);
+        return http
+            .get(targetUri, headers: headers)
+            .timeout(AppTheme.apiTimeout);
       case 'POST':
         return http
             .post(targetUri, headers: headers, body: jsonEncode(body))
@@ -196,7 +201,9 @@ class ApiHttpClient {
             .put(targetUri, headers: headers, body: jsonEncode(body))
             .timeout(AppTheme.apiTimeout);
       case 'DELETE':
-        return http.delete(targetUri, headers: headers).timeout(AppTheme.apiTimeout);
+        return http
+            .delete(targetUri, headers: headers)
+            .timeout(AppTheme.apiTimeout);
       default:
         throw UnsupportedError('Unsupported HTTP method: $method');
     }
@@ -241,7 +248,9 @@ class ApiHttpClient {
     await sendRequest('DELETE', path);
   }
 
-  Future<Map<String, dynamic>> handleAuthResponse(Map<String, dynamic> res) async {
+  Future<Map<String, dynamic>> handleAuthResponse(
+    Map<String, dynamic> res,
+  ) async {
     final tokenValue = res['token']?.toString();
     final refreshValue = res['refreshToken']?.toString();
     if (tokenValue != null) {
@@ -250,10 +259,17 @@ class ApiHttpClient {
       try {
         await _secureStorage.write(key: _tokenKey, value: tokenValue);
         if (refreshValue != null) {
-          await _secureStorage.write(key: _refreshTokenKey, value: refreshValue);
+          await _secureStorage.write(
+            key: _refreshTokenKey,
+            value: refreshValue,
+          );
         }
-        final resName = (res['user'] as Map<String, dynamic>?)?['name']?.toString();
-        final resEmail = (res['user'] as Map<String, dynamic>?)?['email']?.toString();
+        final resName = (res['user'] as Map<String, dynamic>?)?['name']
+            ?.toString();
+        final resEmail = (res['user'] as Map<String, dynamic>?)?['email']
+            ?.toString();
+        final resRole = (res['user'] as Map<String, dynamic>?)?['role']
+            ?.toString();
         if (resName != null) {
           userName = resName;
           await _secureStorage.write(key: 'auth_user_name', value: resName);
@@ -261,6 +277,10 @@ class ApiHttpClient {
         if (resEmail != null) {
           userEmail = resEmail;
           await _secureStorage.write(key: 'auth_user_email', value: resEmail);
+        }
+        if (resRole != null) {
+          userRole = resRole;
+          await _secureStorage.write(key: 'auth_user_role', value: resRole);
         }
       } catch (e) {
         debugPrint('Failed to write auth data to secure storage: $e');
@@ -289,14 +309,33 @@ class ApiHttpClient {
     refreshToken = null;
     userName = null;
     userEmail = null;
+    userRole = null;
     try {
       await _secureStorage.delete(key: _tokenKey);
       await _secureStorage.delete(key: _refreshTokenKey);
       await _secureStorage.delete(key: 'auth_user_name');
       await _secureStorage.delete(key: 'auth_user_email');
+      await _secureStorage.delete(key: 'auth_user_role');
     } catch (e) {
       debugPrint('Failed to delete auth data from secure storage: $e');
     }
+
+    try {
+      await _clearLocalUserOwnedData();
+    } catch (e) {
+      debugPrint('Failed to clear local user data: $e');
+    }
+  }
+
+  Future<void> _clearLocalUserOwnedData() async {
+    var hasInitializedBinding = true;
+    assert(() {
+      hasInitializedBinding = BindingBase.debugBindingType() != null;
+      return true;
+    }());
+    if (!hasInitializedBinding) return;
+
+    await AppDatabase.instance().clearUserOwnedData();
   }
 
   void throwIfError(http.Response response) {
@@ -329,7 +368,7 @@ class ApiHttpClient {
       default:
         throw ApiException(
           statusCode: response.statusCode,
-          message: 'Lỗi API (${response.statusCode}): $message',
+          message: 'API Error (${response.statusCode}): $message',
         );
     }
   }
@@ -349,7 +388,7 @@ class ApiHttpClient {
       if (queueOnFailure && method != null && method != 'GET' && path != null) {
         await queueRequest(method, path, body);
         throw const NetworkException(
-          message: 'Mạng rớt. Đã lưu yêu cầu vào hàng đợi Offline.',
+          message: 'Network disconnected. Request queued offline.',
         );
       }
       throw const NetworkException();
@@ -357,15 +396,15 @@ class ApiHttpClient {
       if (queueOnFailure && method != null && method != 'GET' && path != null) {
         await queueRequest(method, path, body);
         throw const NetworkException(
-          message: 'Không thể kết nối. Đã lưu yêu cầu vào hàng đợi Offline.',
+          message: 'Cannot connect to server. Request queued offline.',
         );
       }
-      throw const NetworkException(message: 'Không thể kết nối đến máy chủ.');
+      throw const NetworkException(message: 'Cannot connect to server.');
     } on TimeoutException {
       if (queueOnFailure && method != null && method != 'GET' && path != null) {
         await queueRequest(method, path, body);
         throw const TimeoutApiException(
-          message: 'Hết thời gian. Đã lưu yêu cầu vào hàng đợi Offline.',
+          message: 'Request timed out. Request queued offline.',
         );
       }
       throw const TimeoutApiException();

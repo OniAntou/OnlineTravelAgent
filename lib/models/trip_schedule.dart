@@ -28,6 +28,7 @@ class TripScheduleItem {
   final double? latitude;
   final double? longitude;
   final String? statusOverride;
+  final String note;
 
   TripScheduleItem({
     required this.id,
@@ -39,6 +40,7 @@ class TripScheduleItem {
     this.latitude,
     this.longitude,
     this.statusOverride,
+    this.note = '',
   });
 
   factory TripScheduleItem.fromJson(Map<String, dynamic> json) {
@@ -56,6 +58,7 @@ class TripScheduleItem {
           ? (json['longitude'] as num).toDouble()
           : null,
       statusOverride: json['statusOverride'] as String?,
+      note: json['note'] as String? ?? '',
     );
   }
 }

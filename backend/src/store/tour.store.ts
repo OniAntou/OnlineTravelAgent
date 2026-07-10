@@ -5,7 +5,9 @@ import { TripStatus } from "@prisma/client";
 
 export const tourStore = {
   async getTours() {
-    const tours = await prisma.tourPackage.findMany({ orderBy: { createdAt: "desc" } });
+    const tours = await prisma.tourPackage.findMany({
+      orderBy: { createdAt: "desc" },
+    });
     return attachRealReviews(tours, "tour");
   },
 
@@ -56,6 +58,7 @@ export const tourStore = {
         status: TripStatus.ONGOING,
         imagePath: tour.imagePath,
         isUpcoming: true,
+        tourPackageId: tour.id,
         totalPrice: totalPrice,
         requestId,
       },

@@ -32,12 +32,16 @@ final tourFavoritesProvider =
 final tourScheduleProvider = FutureProvider.autoDispose
     .family<TripSchedule, String>((ref, tourId) async {
       final apiService = ref.watch(apiProvider);
+      await apiService.loadTokenFuture;
 
       // Real-time WebSocket updates
       final socket = apiService.socket;
+      final token = apiService.token;
 
       // Listen to this specific tour's room
-      socket.emit('join_tour_room', tourId);
+      if (token != null && token.isNotEmpty) {
+        socket.emit('join_tour_room', {'tourId': tourId, 'token': token});
+      }
 
       void onScheduleUpdated(dynamic data) {
         if (data is Map && data['tourId'] != null && data['tourId'] != tourId) {

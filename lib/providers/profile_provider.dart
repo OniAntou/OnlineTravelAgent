@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_profile.dart';
 import '../models/document_item.dart';
 import 'api_provider.dart';
+import 'package:flutter/foundation.dart';
 
 class ProfileNotifier extends Notifier<UserProfile> {
   @override
@@ -37,7 +38,8 @@ class DocumentsNotifier extends Notifier<List<DocumentItem>> {
           );
       state = [doc, ...state];
       return true;
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('Error adding document: $e\n$st');
       return false;
     }
   }
@@ -47,7 +49,8 @@ class DocumentsNotifier extends Notifier<List<DocumentItem>> {
       await ref.read(apiProvider).deleteDocument(documentId);
       state = state.where((d) => d.id != documentId).toList();
       return true;
-    } catch (_) {
+    } catch (e, st) {
+      debugPrint('Error deleting document: $e\n$st');
       return false;
     }
   }

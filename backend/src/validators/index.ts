@@ -5,7 +5,7 @@ export const bookTripSchema = z.object({
   destinationId: z.string(),
   date: z.string().optional(),
   guests: z.string().optional(),
-  totalPrice: z.number().optional(),
+  totalPrice: z.number().min(0).optional(),
   requestId: z.string().optional(),
 });
 
@@ -28,7 +28,16 @@ export const bookTourSchema = z.object({
   tourId: z.string(),
   date: z.string().optional(),
   guests: z.string().optional(),
-  totalPrice: z.number().optional(),
+  totalPrice: z.number().min(0).optional(),
+  requestId: z.string().optional(),
+});
+
+export const createCustomTourSchema = z.object({
+  date: z.string().optional(),
+  guests: z.string().optional(),
+  location: z.string().optional(),
+  imagePath: z.string().optional(),
+  totalPrice: z.number().min(0).optional(),
   requestId: z.string().optional(),
 });
 

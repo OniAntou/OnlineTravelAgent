@@ -937,10 +937,11 @@ function renderItemRow(item, idx) {
       <div class="flex flex-col gap-2 shrink-0 w-36">
         <select class="text-[10px] bg-white border border-silver rounded-lg p-1.5 font-bold" onchange="updateItem('${item.id}','statusOverride',this.value)">
           <option value="" ${!item.statusOverride ? 'selected' : ''}>-- Mặc định --</option>
-          <option value="pending" ${item.statusOverride==='pending'?'selected':''}>Chưa diễn ra</option>
+          <option value="upcoming" ${item.statusOverride==='upcoming'?'selected':''}>Chưa diễn ra</option>
           <option value="ongoing" ${item.statusOverride==='ongoing'?'selected':''}>Đang diễn ra</option>
           <option value="completed" ${item.statusOverride==='completed'?'selected':''}>Đã hoàn thành</option>
-          <option value="skipped" ${item.statusOverride==='skipped'?'selected':''}>Đã bỏ qua</option>
+          <option value="delayed" ${item.statusOverride==='delayed'?'selected':''}>Bị trễ</option>
+          <option value="cancelled" ${item.statusOverride==='cancelled'?'selected':''}>Đã huỷ</option>
         </select>
         <input type="text" class="text-[10px] bg-white border border-silver rounded-lg px-2 py-1.5" placeholder="Ghi chú" value="${item.note || ''}" onblur="updateItem('${item.id}','note',this.value)">
       </div>

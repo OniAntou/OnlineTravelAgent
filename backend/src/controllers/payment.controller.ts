@@ -3,18 +3,19 @@ import crypto from "crypto";
 import prisma from "../config/prisma.js";
 import { vnpayService } from "../services/vnpay.service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { PaymentStatus, TripStatus } from "@prisma/client";
+import { PaymentStatus, Prisma, TripStatus } from "@prisma/client";
 
 const MOMO_PARTNER_CODE = process.env.MOMO_PARTNER_CODE ?? "MOMO";
 const MOMO_ACCESS_KEY = process.env.MOMO_ACCESS_KEY ?? "";
 const MOMO_SECRET_KEY = process.env.MOMO_SECRET_KEY ?? "";
-const MOMO_URL = process.env.MOMO_URL ?? "https://test-payment.momo.vn/v2/gateway/api/create";
+const MOMO_URL =
+  process.env.MOMO_URL ?? "https://test-payment.momo.vn/v2/gateway/api/create";
 const PAYMENT_AMOUNT_TOLERANCE = 1;
 
 type PaymentTrip = {
   id: string;
   userId: string | null;
-  totalPrice: number | null;
+  totalPrice: Prisma.Decimal | number | null;
   paymentTxnRef?: string | null;
 };
 
@@ -23,9 +24,12 @@ function parsePositiveAmount(value: unknown): number | null {
   return Number.isFinite(amount) && amount > 0 ? amount : null;
 }
 
-function amountMatches(expected: number | null | undefined, actual: number): boolean {
+function amountMatches(
+  expected: Prisma.Decimal | number | null | undefined,
+  actual: number,
+): boolean {
   if (expected === null || expected === undefined) return true;
-  return Math.abs(expected - actual) <= PAYMENT_AMOUNT_TOLERANCE;
+  return Math.abs(Number(expected) - actual) <= PAYMENT_AMOUNT_TOLERANCE;
 }
 
 async function loadPaymentTrip(tripId: string): Promise<PaymentTrip | null> {
@@ -48,7 +52,10 @@ async function validateClientPaymentRequest(
   const trip = await loadPaymentTrip(tripId);
   if (!trip) return { status: 404, message: "Trip not found" };
   if (!userId || trip.userId !== userId) {
-    return { status: 403, message: "Forbidden - Trip does not belong to this user" };
+    return {
+      status: 403,
+      message: "Forbidden - Trip does not belong to this user",
+    };
   }
   if (!amountMatches(trip.totalPrice, amount)) {
     return { status: 400, message: "Payment amount does not match trip total" };
@@ -73,7 +80,11 @@ async function markVnpayResult(result: {
   if (!result.isValid || !tripId) return false;
 
   const trip = await loadPaymentTrip(tripId);
-  if (!trip || trip.paymentTxnRef !== result.txnRef || !amountMatches(trip.totalPrice, result.amount)) {
+  if (
+    !trip ||
+    trip.paymentTxnRef !== result.txnRef ||
+    !amountMatches(trip.totalPrice, result.amount)
+  ) {
     return false;
   }
 
@@ -120,7 +131,10 @@ function buildMomoRawSignature(query: Record<string, string>): string {
   ];
 
   return fields
-    .map((field) => `${field}=${field === "accessKey" ? MOMO_ACCESS_KEY : (query[field] ?? "")}`)
+    .map(
+      (field) =>
+        `${field}=${field === "accessKey" ? MOMO_ACCESS_KEY : (query[field] ?? "")}`,
+    )
     .join("&");
 }
 
@@ -138,13 +152,19 @@ function verifyMomoSignature(query: Record<string, string>): boolean {
 async function markMomoResult(query: Record<string, string>): Promise<boolean> {
   if (!verifyMomoSignature(query)) return false;
 
-  const tripId = Buffer.from(query["extraData"] ?? "", "base64").toString("utf-8");
+  const tripId = Buffer.from(query["extraData"] ?? "", "base64").toString(
+    "utf-8",
+  );
   const amount = parsePositiveAmount(query["amount"]);
   const orderId = query["orderId"] ?? "";
   if (!tripId || !amount || !orderId) return false;
 
   const trip = await loadPaymentTrip(tripId);
-  if (!trip || trip.paymentTxnRef !== orderId || !amountMatches(trip.totalPrice, amount)) {
+  if (
+    !trip ||
+    trip.paymentTxnRef !== orderId ||
+    !amountMatches(trip.totalPrice, amount)
+  ) {
     return false;
   }
 
@@ -173,7 +193,11 @@ async function markMomoResult(query: Record<string, string>): Promise<boolean> {
   return true;
 }
 
-function paymentResultHtml(provider: string, success: boolean, reference: string): string {
+function paymentResultHtml(
+  provider: string,
+  success: boolean,
+  reference: string,
+): string {
   return `
     <!DOCTYPE html>
     <html lang="vi">
@@ -211,9 +235,15 @@ export const paymentController = {
       return;
     }
 
-    const validation = await validateClientPaymentRequest(req.userId, tripId, parsedAmount);
+    const validation = await validateClientPaymentRequest(
+      req.userId,
+      tripId,
+      parsedAmount,
+    );
     if (!validation.trip) {
-      res.status(validation.status ?? 400).json({ message: validation.message });
+      res
+        .status(validation.status ?? 400)
+        .json({ message: validation.message });
       return;
     }
 
@@ -237,7 +267,11 @@ export const paymentController = {
       return;
     }
 
-    await vnpayService.updateTripPaymentStatus(tripId, PaymentStatus.PENDING, txnRef);
+    await vnpayService.updateTripPaymentStatus(
+      tripId,
+      PaymentStatus.PENDING,
+      txnRef,
+    );
 
     res.json({
       paymentUrl,
@@ -248,13 +282,25 @@ export const paymentController = {
   }),
 
   vnpayReturn: asyncHandler(async (req: Request, res: Response) => {
-    const result = vnpayService.verifyReturnUrl(req.query as Record<string, string>);
+    const result = vnpayService.verifyReturnUrl(
+      req.query as Record<string, string>,
+    );
     const accepted = await markVnpayResult(result);
-    res.status(accepted ? 200 : 400).send(paymentResultHtml("VNPAY", accepted && result.responseCode === "00", result.txnRef));
+    res
+      .status(accepted ? 200 : 400)
+      .send(
+        paymentResultHtml(
+          "VNPAY",
+          accepted && result.responseCode === "00",
+          result.txnRef,
+        ),
+      );
   }),
 
   vnpayIpn: asyncHandler(async (req: Request, res: Response) => {
-    const result = vnpayService.verifyReturnUrl(req.query as Record<string, string>);
+    const result = vnpayService.verifyReturnUrl(
+      req.query as Record<string, string>,
+    );
     if (await markVnpayResult(result)) {
       res.status(200).json({ RspCode: "00", Message: "Confirm Success" });
       return;
@@ -285,7 +331,9 @@ export const paymentController = {
       return;
     }
     if (trip.userId !== req.userId) {
-      res.status(403).json({ message: "Forbidden - Trip does not belong to this user" });
+      res
+        .status(403)
+        .json({ message: "Forbidden - Trip does not belong to this user" });
       return;
     }
 
@@ -301,9 +349,15 @@ export const paymentController = {
       return;
     }
 
-    const validation = await validateClientPaymentRequest(req.userId, tripId, parsedAmount);
+    const validation = await validateClientPaymentRequest(
+      req.userId,
+      tripId,
+      parsedAmount,
+    );
     if (!validation.trip) {
-      res.status(validation.status ?? 400).json({ message: validation.message });
+      res
+        .status(validation.status ?? 400)
+        .json({ message: validation.message });
       return;
     }
 
@@ -323,7 +377,10 @@ export const paymentController = {
     const extraData = Buffer.from(tripId).toString("base64");
 
     const rawSignature = `accessKey=${MOMO_ACCESS_KEY}&amount=${parsedAmount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfoStr}&partnerCode=${MOMO_PARTNER_CODE}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=captureWallet`;
-    const signature = crypto.createHmac("sha256", MOMO_SECRET_KEY).update(rawSignature).digest("hex");
+    const signature = crypto
+      .createHmac("sha256", MOMO_SECRET_KEY)
+      .update(rawSignature)
+      .digest("hex");
 
     const requestBody = {
       partnerCode: MOMO_PARTNER_CODE,
@@ -347,12 +404,16 @@ export const paymentController = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
       });
-      const result = await response.json() as Record<string, string>;
+      const result = (await response.json()) as Record<string, string>;
 
       if (result.resultCode === "0" || result.payUrl) {
         await prisma.trip.update({
           where: { id: tripId },
-          data: { paymentStatus: PaymentStatus.PENDING, paymentMethod: "momo", paymentTxnRef: orderId },
+          data: {
+            paymentStatus: PaymentStatus.PENDING,
+            paymentMethod: "momo",
+            paymentTxnRef: orderId,
+          },
         });
         res.json({
           payUrl: result.payUrl,
@@ -363,7 +424,9 @@ export const paymentController = {
           qrCodeUrl: result.qrCodeUrl,
         });
       } else {
-        res.status(400).json({ message: result.message ?? "MoMo payment creation failed" });
+        res
+          .status(400)
+          .json({ message: result.message ?? "MoMo payment creation failed" });
       }
     } catch {
       res.status(500).json({ message: "Failed to create MoMo payment" });
@@ -377,7 +440,13 @@ export const paymentController = {
       res.status(400).send("Invalid MoMo signature");
       return;
     }
-    res.send(paymentResultHtml("MoMo", query["resultCode"] === "0", query["orderId"] ?? ""));
+    res.send(
+      paymentResultHtml(
+        "MoMo",
+        query["resultCode"] === "0",
+        query["orderId"] ?? "",
+      ),
+    );
   }),
 
   momoIpn: asyncHandler(async (req: Request, res: Response) => {

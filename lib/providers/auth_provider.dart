@@ -36,6 +36,7 @@ class AuthNotifier extends Notifier<AuthState> {
         final user = UserProfile(
           name: api.userName ?? 'User',
           email: api.userEmail ?? '',
+          role: api.userRole ?? 'USER',
         );
         state = AuthState(isLoggedIn: true, token: api.token, user: user);
         ref
@@ -74,7 +75,8 @@ class AuthNotifier extends Notifier<AuthState> {
       return e.message;
     } on TimeoutApiException catch (e) {
       return e.message;
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Login error: $e\n$st');
       return getErrorMessage(e);
     }
   }
@@ -110,7 +112,8 @@ class AuthNotifier extends Notifier<AuthState> {
       return e.message;
     } on TimeoutApiException catch (e) {
       return e.message;
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Register error: $e\n$st');
       return getErrorMessage(e);
     }
   }
@@ -120,9 +123,15 @@ class AuthNotifier extends Notifier<AuthState> {
     state = const AuthState();
   }
 
-  void updateToken(String newToken) {
+  void updateToken(String newToken, {UserProfile? user}) {
     ref.read(apiProvider).token = newToken;
-    state = state.copyWith(token: newToken);
+    if (user != null) {
+      final api = ref.read(apiProvider);
+      api.userName = user.name;
+      api.userEmail = user.email;
+      api.userRole = user.role;
+    }
+    state = state.copyWith(token: newToken, user: user);
   }
 }
 

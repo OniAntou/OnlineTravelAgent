@@ -75,7 +75,7 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.instance() => _instance ??= AppDatabase();
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -89,8 +89,27 @@ class AppDatabase extends _$AppDatabase {
       if (from < 4) {
         await m.createTable(flightsTable);
       }
+      if (from < 5) {
+        await m.createTable(tripScheduleDaysTable);
+        await m.createTable(tripScheduleItemsTable);
+        await m.createTable(tripScheduleUpdatesTable);
+      }
     },
   );
+
+  Future<void> clearUserOwnedData() async {
+    await transaction(() async {
+      await delete(tripScheduleItemsTable).go();
+      await delete(tripScheduleUpdatesTable).go();
+      await delete(tripScheduleDaysTable).go();
+      await delete(tripsTable).go();
+      await delete(documentsTable).go();
+      await delete(offlineQueueTable).go();
+      await update(
+        destinationsTable,
+      ).write(const DestinationsTableCompanion(isFavorite: Value(false)));
+    });
+  }
 }
 
 LazyDatabase _openConnection() {

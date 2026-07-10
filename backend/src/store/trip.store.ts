@@ -18,7 +18,9 @@ export const tripStore = {
       if (existing) return existing;
     }
 
-    const destination = await prisma.destination.findUnique({ where: { id: destinationId } });
+    const destination = await prisma.destination.findUnique({
+      where: { id: destinationId },
+    });
     if (!destination) return null;
 
     const tripId = generateId("trip-dest");
@@ -33,6 +35,7 @@ export const tripStore = {
         status: TripStatus.ONGOING,
         imagePath: destination.imagePath,
         isUpcoming: true,
+        destinationId: destination.id,
         totalPrice: totalPrice,
         requestId,
       },
@@ -81,6 +84,7 @@ export const tripStore = {
         status: TripStatus.ONGOING,
         imagePath: flight.airlineLogo,
         isUpcoming: true,
+        flightId: flight.id,
         requestId,
       },
     });
@@ -99,7 +103,9 @@ export const tripStore = {
     },
   ) {
     if (data.requestId) {
-      const existing = await prisma.trip.findUnique({ where: { requestId: data.requestId } });
+      const existing = await prisma.trip.findUnique({
+        where: { requestId: data.requestId },
+      });
       if (existing) return existing;
     }
 
@@ -141,7 +147,10 @@ export const tripStore = {
     const where: Prisma.TripWhereInput = userId ? { userId } : {};
     if (type === "upcoming") where.isUpcoming = true;
     if (type === "past") where.isUpcoming = false;
-    const trips = await prisma.trip.findMany({ where, orderBy: { createdAt: "desc" } });
+    const trips = await prisma.trip.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+    });
     return trips.map(processTripStatus);
   },
 

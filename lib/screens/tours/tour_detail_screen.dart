@@ -262,7 +262,9 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                             TourOverviewItem(
                               icon: Icons.map_rounded,
                               title: 'tour_detail.destination'.tr(),
-                              value: 'tour_detail.destinations_count'.tr(args: [t.destinations.length.toString()]),
+                              value: 'tour_detail.destinations_count'.tr(
+                                args: [t.destinations.length.toString()],
+                              ),
                             ),
                           ],
                         ),
@@ -355,7 +357,8 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  'tour_detail.departure_date'.tr(),
+                                                  'tour_detail.departure_date'
+                                                      .tr(),
                                                   style: const TextStyle(
                                                     color: Colors.grey,
                                                     fontSize: 11,
@@ -532,7 +535,9 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                                           ),
                                           const SizedBox(height: 2),
                                           Text(
-                                            'tour_detail.guide_fee'.tr(args: [formatVND(t.guideFee)]),
+                                            'tour_detail.guide_fee'.tr(
+                                              args: [formatVND(t.guideFee)],
+                                            ),
                                             style: const TextStyle(
                                               color: AppTheme.primaryBlue,
                                               fontWeight: FontWeight.w600,
@@ -604,7 +609,9 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                                           ),
                                         ),
                                         child: Icon(
-                                          TourDetailHelpers.getInclusionIcon(item),
+                                          TourDetailHelpers.getInclusionIcon(
+                                            item,
+                                          ),
                                           color: AppTheme.primaryBlue,
                                           size: 20,
                                         ),
@@ -634,40 +641,54 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                                 .watch(tourScheduleProvider(widget.tour.id))
                                 .when(
                                   data: (schedule) {
-                                    List<Map<String, dynamic>> finalItinerary = [];
-                                    bool hasValidSchedule = schedule.days.isNotEmpty && 
-                                        schedule.days.any((day) => day.items.isNotEmpty);
-                                        
-                                    if (hasValidSchedule) {
-                                      for (var day in schedule.days) {
-                                        finalItinerary.add({
-                                          'day': 'tour_detail.day'.tr(args: [day.dayNumber.toString()]),
-                                          'title':
-                                              'tour_detail.activity_day'.tr(args: [day.dayNumber.toString()]),
-                                          'desc': '',
-                                          'milestones': day.items
+                                    final bool hasValidSchedule =
+                                        schedule.days.isNotEmpty &&
+                                        schedule.days.any(
+                                          (day) => day.items.isNotEmpty,
+                                        );
+                                    final List<Map<String, dynamic>>
+                                    finalItinerary = hasValidSchedule
+                                        ? schedule.days
                                               .map(
-                                                (item) => {
-                                                  'time':
-                                                      item.startTime +
-                                                      (item.endTime.isNotEmpty
-                                                          ? ' - ${item.endTime}'
-                                                          : ''),
-                                                  'event':
-                                                      item.title +
-                                                      (item
-                                                              .description
-                                                              .isNotEmpty
-                                                          ? ' - ${item.description}'
-                                                          : ''),
+                                                (day) => {
+                                                  'day': 'tour_detail.day'.tr(
+                                                    args: [
+                                                      day.dayNumber.toString(),
+                                                    ],
+                                                  ),
+                                                  'title':
+                                                      'tour_detail.activity_day'
+                                                          .tr(
+                                                            args: [
+                                                              day.dayNumber
+                                                                  .toString(),
+                                                            ],
+                                                          ),
+                                                  'desc': '',
+                                                  'milestones': day.items
+                                                      .map(
+                                                        (item) => {
+                                                          'time':
+                                                              item.startTime +
+                                                              (item
+                                                                      .endTime
+                                                                      .isNotEmpty
+                                                                  ? ' - ${item.endTime}'
+                                                                  : ''),
+                                                          'event':
+                                                              item.title +
+                                                              (item
+                                                                      .description
+                                                                      .isNotEmpty
+                                                                  ? ' - ${item.description}'
+                                                                  : ''),
+                                                        },
+                                                      )
+                                                      .toList(),
                                                 },
                                               )
-                                              .toList(),
-                                        });
-                                      }
-                                    } else {
-                                      finalItinerary = fallbackItinerary;
-                                    }
+                                              .toList()
+                                        : fallbackItinerary;
                                     return Column(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
@@ -681,7 +702,9 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                                           ),
                                         ),
                                         const SizedBox(height: 16),
-                                        TourItineraryList(itinerary: finalItinerary),
+                                        TourItineraryList(
+                                          itinerary: finalItinerary,
+                                        ),
                                       ],
                                     );
                                   },
@@ -702,7 +725,9 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                                         ),
                                       ),
                                       const SizedBox(height: 16),
-                                      TourItineraryList(itinerary: fallbackItinerary),
+                                      TourItineraryList(
+                                        itinerary: fallbackItinerary,
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -780,5 +805,4 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
       ),
     );
   }
-
 }

@@ -87,10 +87,6 @@ export const authController = {
       await tokenService.revokeRefreshToken(refreshToken);
     }
 
-    if (req.userId) {
-      await tokenService.revokeAllForUser(req.userId);
-    }
-
     res.json({ ok: true });
   }),
 
