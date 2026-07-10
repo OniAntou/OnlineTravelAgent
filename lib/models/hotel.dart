@@ -1,4 +1,5 @@
 import 'room.dart';
+import '../utils/json_number.dart';
 
 class Hotel {
   final String id;
@@ -34,12 +35,12 @@ class Hotel {
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
       location: json['location']?.toString() ?? '',
-      latitude: (json['latitude'] as num?)?.toDouble() ?? 0.0,
-      longitude: (json['longitude'] as num?)?.toDouble() ?? 0.0,
+      latitude: jsonDouble(json['latitude']) ?? 0.0,
+      longitude: jsonDouble(json['longitude']) ?? 0.0,
       rating: json['rating']?.toString() ?? '',
       imagePath: json['imagePath']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
-      priceFrom: (json['priceFrom'] as num?)?.toDouble() ?? 0.0,
+      priceFrom: jsonDouble(json['priceFrom']) ?? 0.0,
       address: json['address']?.toString() ?? '',
       amenities: (json['amenities'] as List?)?.cast<String>() ?? [],
       rooms:

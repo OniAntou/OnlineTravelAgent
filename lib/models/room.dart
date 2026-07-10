@@ -1,3 +1,5 @@
+import '../utils/json_number.dart';
+
 class Room {
   final String id;
   final String hotelId;
@@ -25,8 +27,8 @@ class Room {
       hotelId: json['hotelId']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
-      price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      capacity: (json['capacity'] as num?)?.toInt() ?? 1,
+      price: jsonDouble(json['price']) ?? 0.0,
+      capacity: jsonInt(json['capacity']) ?? 1,
       imagePath: json['imagePath']?.toString() ?? '',
       amenities: (json['amenities'] as List?)?.cast<String>() ?? [],
     );

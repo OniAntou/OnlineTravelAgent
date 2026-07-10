@@ -1,3 +1,5 @@
+import '../utils/json_number.dart';
+
 class TourPackage {
   final String id;
   final String name;
@@ -38,15 +40,15 @@ class TourPackage {
       description: json['description']?.toString() ?? '',
       imagePath: json['imagePath']?.toString() ?? '',
       duration: json['duration']?.toString() ?? '',
-      price: (json['price'] as num?)?.toDouble() ?? 0.0,
-      originalPrice: (json['originalPrice'] as num?)?.toDouble(),
+      price: jsonDouble(json['price']) ?? 0.0,
+      originalPrice: jsonDouble(json['originalPrice']),
       destinations: (json['destinations'] as List?)?.cast<String>() ?? [],
       includes: (json['includes'] as List?)?.cast<String>() ?? [],
       departure: json['departure']?.toString() ?? '',
       departureDate: json['departureDate']?.toString(),
       isPopular: json['isPopular'] == true,
       includesGuide: json['includesGuide'] != false,
-      guideFee: (json['guideFee'] as num?)?.toDouble() ?? 50.0,
+      guideFee: jsonDouble(json['guideFee']) ?? 50.0,
     );
   }
 }

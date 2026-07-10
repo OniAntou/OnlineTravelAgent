@@ -28,6 +28,7 @@ Future<void> main() async {
     EasyLocalization(
       supportedLocales: const [Locale('vi'), Locale('en')],
       path: 'assets/translations',
+      startLocale: const Locale('vi'),
       fallbackLocale: const Locale('vi'),
       child: const ProviderScope(child: OnlineTravelAgentApp()),
     ),

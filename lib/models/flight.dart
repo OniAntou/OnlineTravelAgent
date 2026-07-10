@@ -1,3 +1,5 @@
+import '../utils/json_number.dart';
+
 class Flight {
   final String id;
   final String airline;
@@ -30,7 +32,7 @@ class Flight {
       arrival: json['arrival']?.toString() ?? '',
       departureTime: json['departureTime']?.toString() ?? '',
       arrivalTime: json['arrivalTime']?.toString() ?? '',
-      price: (json['price'] as num?)?.toInt() ?? 0,
+      price: jsonInt(json['price']) ?? 0,
       duration: json['duration']?.toString() ?? '',
     );
   }

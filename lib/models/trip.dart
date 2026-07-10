@@ -1,3 +1,5 @@
+import '../utils/json_number.dart';
+
 class Trip {
   final String id;
   final String destination;
@@ -61,7 +63,7 @@ class Trip {
       flightId: json['flightId']?.toString(),
       hotelId: json['hotelId']?.toString(),
       roomId: json['roomId']?.toString(),
-      totalPrice: (json['totalPrice'] as num?)?.toDouble(),
+      totalPrice: jsonDouble(json['totalPrice']),
       isCustom: json['isCustom'] == true,
     );
   }
