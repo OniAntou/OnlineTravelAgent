@@ -5,6 +5,7 @@ import { passwordService } from "../services/password.service.js";
 import { tokenService } from "../services/token.service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { memoryDb } from "../store/memory-db.js";
+import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
 
 type SafeUser = { id: string; name: string; email: string; role: Role; createdAt: Date; updatedAt: Date };
 
@@ -35,6 +36,7 @@ export const authController = {
     const useMem = !(await dbAvailable());
 
     if (useMem) {
+      assertMemoryFallbackEnabled();
       const user = memoryDb.findUserByEmail(email);
       if (!user) {
         res.status(401).json({ message: "Invalid email or password" });
@@ -80,6 +82,7 @@ export const authController = {
     const useMem = !(await dbAvailable());
 
     if (useMem) {
+      assertMemoryFallbackEnabled();
       const existing = memoryDb.findUserByEmail(email);
       if (existing) {
         res.status(409).json({ message: "Email already exists" });
@@ -150,6 +153,7 @@ export const authController = {
     const useMem = !(await dbAvailable());
 
     if (useMem) {
+      assertMemoryFallbackEnabled();
       const user = memoryDb.updateUser(userId, { role: "PARTNER" });
       if (!user) {
         res.status(404).json({ message: "User not found" });

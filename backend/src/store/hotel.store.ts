@@ -4,6 +4,7 @@ import { attachRealReviews, generateId } from "./helpers.js";
 import { TripStatus } from "@prisma/client";
 import { mockHotels } from "../data/mock-data.js";
 import { memoryDb } from "./memory-db.js";
+import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
 
 export const hotelStore = {
   async getHotels(location?: string) {
@@ -14,6 +15,7 @@ export const hotelStore = {
       const hotels = await prisma.hotel.findMany({ where });
       return attachRealReviews(hotels, "hotel");
     } catch {
+      assertMemoryFallbackEnabled();
       const filtered = location
         ? mockHotels.filter((h) => h.location.toLowerCase().includes(location.toLowerCase()))
         : mockHotels;
@@ -31,6 +33,7 @@ export const hotelStore = {
       const items = await attachRealReviews([hotel], "hotel");
       return items[0];
     } catch {
+      assertMemoryFallbackEnabled();
       const hotel = mockHotels.find((h) => h.id === id);
       return hotel || null;
     }
@@ -52,6 +55,7 @@ export const hotelStore = {
       });
       return attachRealReviews(hotels, "hotel");
     } catch {
+      assertMemoryFallbackEnabled();
       const q = query.toLowerCase();
       return mockHotels.filter(
         (h) => h.name.toLowerCase().includes(q) || h.location.toLowerCase().includes(q),
@@ -70,6 +74,7 @@ export const hotelStore = {
     const useMem = !(await prisma.$queryRaw`SELECT 1`.then(() => true).catch(() => false));
 
     if (useMem) {
+      assertMemoryFallbackEnabled();
       if (requestId) {
         const existing = memoryDb.findTripByRequestId(userId, requestId);
         if (existing) return existing;

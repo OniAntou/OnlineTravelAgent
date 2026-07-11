@@ -1,6 +1,7 @@
 import prisma from "../config/prisma.js";
 import { attachRealReviews } from "./helpers.js";
 import { mockHotels, mockTourPackages, mockDestinations } from "../data/mock-data.js";
+import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
 
 export const searchStore = {
   async globalSearch(query: string) {
@@ -47,6 +48,7 @@ export const searchStore = {
         destinations: await attachRealReviews(destinations, "destination"),
       };
     } catch {
+      assertMemoryFallbackEnabled();
       const q = query.toLowerCase();
       const filterByName = <T extends { name: string }>(items: T[]) =>
         items.filter((i) => i.name.toLowerCase().includes(q));

@@ -4,6 +4,7 @@ import { Role } from "@prisma/client";
 import prisma from "../config/prisma.js";
 import { env } from "../config/env.js";
 import { memoryDb } from "../store/memory-db.js";
+import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
 
 const ACCESS_TOKEN_TTL = "15m";
 const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
@@ -48,6 +49,7 @@ export const tokenService = {
 
     const useMem = !(await dbAvailable());
     if (useMem) {
+      assertMemoryFallbackEnabled();
       memoryDb.createRefreshToken(user.id, tokenHash, expiresAt);
     } else {
       await prisma.refreshToken.create({
@@ -71,6 +73,7 @@ export const tokenService = {
     const useMem = !(await dbAvailable());
 
     if (useMem) {
+      assertMemoryFallbackEnabled();
       const stored = memoryDb.findRefreshToken(tokenHash);
       if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
         return null;
@@ -103,6 +106,7 @@ export const tokenService = {
     const useMem = !(await dbAvailable());
 
     if (useMem) {
+      assertMemoryFallbackEnabled();
       return memoryDb.revokeRefreshToken(tokenHash);
     }
 
@@ -122,6 +126,7 @@ export const tokenService = {
     const useMem = !(await dbAvailable());
 
     if (useMem) {
+      assertMemoryFallbackEnabled();
       memoryDb.revokeAllRefreshTokens(userId);
       return;
     }

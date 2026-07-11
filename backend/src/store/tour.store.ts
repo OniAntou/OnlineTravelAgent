@@ -3,6 +3,7 @@ import { scheduleService } from "../services/schedule.service.js";
 import { attachRealReviews, generateId } from "./helpers.js";
 import { TripStatus } from "@prisma/client";
 import { mockTourPackages } from "../data/mock-data.js";
+import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
 
 export const tourStore = {
   async getTours() {
@@ -10,6 +11,7 @@ export const tourStore = {
       const tours = await prisma.tourPackage.findMany({ orderBy: { createdAt: "desc" } });
       return attachRealReviews(tours, "tour");
     } catch {
+      assertMemoryFallbackEnabled();
       return mockTourPackages;
     }
   },
@@ -21,6 +23,7 @@ export const tourStore = {
       const items = await attachRealReviews([tour], "tour");
       return items[0];
     } catch {
+      assertMemoryFallbackEnabled();
       return mockTourPackages.find((t) => t.id === id) || null;
     }
   },
@@ -37,6 +40,7 @@ export const tourStore = {
         },
       });
     } catch {
+      assertMemoryFallbackEnabled();
       return null;
     }
   },

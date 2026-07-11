@@ -2,6 +2,7 @@ import prisma from "../config/prisma.js";
 import { generateId } from "./helpers.js";
 import { mockDocuments } from "../data/mock-data.js";
 import { memoryDb } from "./memory-db.js";
+import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
 
 async function dbAvailable(): Promise<boolean> {
   try {
@@ -18,6 +19,7 @@ export const documentStore = {
 
     const useMem = !(await dbAvailable());
     if (useMem) {
+      assertMemoryFallbackEnabled();
       const docs = memoryDb.findDocumentsByUserId(userId);
       return docs.length > 0 ? docs : mockDocuments;
     }
@@ -25,6 +27,7 @@ export const documentStore = {
     try {
       return await prisma.documentItem.findMany({ where: { userId }, orderBy: { createdAt: "desc" } });
     } catch {
+      assertMemoryFallbackEnabled();
       return mockDocuments;
     }
   },
@@ -40,6 +43,7 @@ export const documentStore = {
 
     const useMem = !(await dbAvailable());
     if (useMem) {
+      assertMemoryFallbackEnabled();
       return memoryDb.createDocument({ id: generateId("doc"), title, description, icon, color, userId });
     }
 
@@ -52,7 +56,10 @@ export const documentStore = {
     if (!userId) return false;
 
     const useMem = !(await dbAvailable());
-    if (useMem) return memoryDb.deleteDocument(userId, id);
+    if (useMem) {
+      assertMemoryFallbackEnabled();
+      return memoryDb.deleteDocument(userId, id);
+    }
 
     const result = await prisma.documentItem.deleteMany({ where: { id, userId } });
     return result.count > 0;

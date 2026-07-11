@@ -3,6 +3,7 @@ import prisma from "../config/prisma.js";
 import { generateId, processTripStatus } from "./helpers.js";
 import { mockFlights, mockDestinations } from "../data/mock-data.js";
 import { memoryDb } from "./memory-db.js";
+import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
 
 async function dbAvailable(): Promise<boolean> {
   try {
@@ -25,6 +26,7 @@ export const tripStore = {
     const useMem = !(await dbAvailable());
 
     if (useMem) {
+      assertMemoryFallbackEnabled();
       if (requestId) {
         const existing = memoryDb.findTripByRequestId(userId, requestId);
         if (existing) return existing;
@@ -85,6 +87,7 @@ export const tripStore = {
     const useMem = !(await dbAvailable());
 
     if (useMem) {
+      assertMemoryFallbackEnabled();
       if (requestId) {
         const existing = memoryDb.findTripByRequestId(userId, requestId);
         if (existing) return existing;
@@ -135,6 +138,7 @@ export const tripStore = {
     const useMem = !(await dbAvailable());
 
     if (useMem) {
+      assertMemoryFallbackEnabled();
       const trip = memoryDb.findTripById(tripId);
       if (!trip || (userId && trip.userId !== userId)) return null;
       return memoryDb.updateTrip(tripId, { status: "CANCELLED", isUpcoming: false });
@@ -153,6 +157,7 @@ export const tripStore = {
     const useMem = !(await dbAvailable());
 
     if (useMem) {
+      assertMemoryFallbackEnabled();
       if (!userId) return [];
       return memoryDb.findTripsByUserId(userId, type).map(processTripStatus as any);
     }
@@ -174,6 +179,7 @@ export const tripStore = {
       if (arrival) where.arrival = { equals: arrival, mode: "insensitive" };
       return await prisma.flight.findMany({ where });
     } catch {
+      assertMemoryFallbackEnabled();
       let results = mockFlights;
       if (departure) results = results.filter((f) => f.departure.toLowerCase() === departure.toLowerCase());
       if (arrival) results = results.filter((f) => f.arrival.toLowerCase() === arrival.toLowerCase());

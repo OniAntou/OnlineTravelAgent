@@ -620,7 +620,11 @@ export const adminController = {
   }),
 
   deleteUser: asyncHandler(async (req: Request, res: Response) => {
-    await prisma.user.delete({ where: { id: req.params.id as string } });
+    const id = req.params.id as string;
+    await prisma.$transaction(async (tx) => {
+      await tx.review.deleteMany({ where: { userId: id } });
+      await tx.user.delete({ where: { id } });
+    });
     res.json({ ok: true });
   }),
 

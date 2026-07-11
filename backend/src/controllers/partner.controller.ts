@@ -94,7 +94,10 @@ export const partnerController = {
     const hotel = await prisma.hotel.findFirst({ where: { id, partnerId } });
     if (!hotel) return res.status(404).json({ message: "Not found or unauthorized" });
     
-    await prisma.hotel.delete({ where: { id } });
+    await prisma.$transaction(async (tx) => {
+      await tx.room.deleteMany({ where: { hotelId: id } });
+      await tx.hotel.delete({ where: { id } });
+    });
     res.json({ success: true });
   }),
 

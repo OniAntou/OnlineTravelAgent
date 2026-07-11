@@ -23,6 +23,7 @@ import { env } from "./config/env.js";
 import { UPLOAD_DIR, UploadValidationError } from "./middlewares/upload.js";
 import { adminAuth } from "./middlewares/auth.js";
 import { panelRateLimiter, panelStaticHeaders } from "./middlewares/panel.js";
+import { PersistentDataUnavailableError } from "./config/data-availability.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -131,6 +132,11 @@ import { ZodError } from "zod";
 
 // Global error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  if (err instanceof PersistentDataUnavailableError) {
+    res.status(503).json({ message: err.message });
+    return;
+  }
+
   if (
     err instanceof multer.MulterError ||
     err instanceof UploadValidationError

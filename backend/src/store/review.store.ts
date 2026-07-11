@@ -1,5 +1,6 @@
 import prisma from "../config/prisma.js";
 import { memoryDb } from "./memory-db.js";
+import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
 
 async function dbAvailable(): Promise<boolean> {
   try {
@@ -22,6 +23,7 @@ export const reviewStore = {
       const avgRating = total > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / total : 0;
       return { reviews, total, avgRating: Math.round(avgRating * 10) / 10 };
     } catch {
+      assertMemoryFallbackEnabled();
       const memReviews = memoryDb.findReviews(targetType, targetId);
       const total = memReviews.length;
       const avgRating = total > 0 ? memReviews.reduce((sum, r) => sum + r.rating, 0) / total : 0;
@@ -45,6 +47,7 @@ export const reviewStore = {
     const useMem = !(await dbAvailable());
 
     if (useMem) {
+      assertMemoryFallbackEnabled();
       const review = memoryDb.upsertReview(userId, targetType, targetId, rating, comment);
       const user = memoryDb.findUserById(userId);
       return { ...review, user: user ? { id: user.id, name: user.name } : { id: userId, name: "User" } };
@@ -62,7 +65,10 @@ export const reviewStore = {
     if (!userId) return null;
 
     const useMem = !(await dbAvailable());
-    if (useMem) return memoryDb.deleteReview(userId, reviewId);
+    if (useMem) {
+      assertMemoryFallbackEnabled();
+      return memoryDb.deleteReview(userId, reviewId);
+    }
 
     const review = await prisma.review.findUnique({ where: { id: reviewId } });
     if (!review || review.userId !== userId) return null;

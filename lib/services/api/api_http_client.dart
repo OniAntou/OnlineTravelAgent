@@ -29,7 +29,7 @@ class ApiHttpClient {
   String? userRole;
   late final Future<void> loadTokenFuture;
   void Function()? onAuthError;
-  bool _isRefreshing = false;
+  Future<bool>? _refreshFuture;
 
   static const String _tokenKey = 'auth_token';
   static const String _refreshTokenKey = 'auth_refresh_token';
@@ -54,19 +54,31 @@ class ApiHttpClient {
 
   static String _defaultBaseUrl() {
     const fromDefine = String.fromEnvironment('API_BASE_URL');
-    if (fromDefine.isNotEmpty) {
-      assert(
-        !kReleaseMode || fromDefine.startsWith('https://'),
-        'Production API URL must use HTTPS',
-      );
-      return fromDefine;
+    return resolveBaseUrl(
+      apiBaseUrl: fromDefine,
+      releaseMode: kReleaseMode,
+      isAndroid: !kIsWeb && defaultTargetPlatform == TargetPlatform.android,
+    );
+  }
+
+  @visibleForTesting
+  static String resolveBaseUrl({
+    required String apiBaseUrl,
+    required bool releaseMode,
+    required bool isAndroid,
+  }) {
+    if (apiBaseUrl.isNotEmpty) {
+      if (releaseMode && !apiBaseUrl.startsWith('https://')) {
+        throw StateError('Production API URL must use HTTPS');
+      }
+      return apiBaseUrl;
     }
-    if (kReleaseMode) {
+    if (releaseMode) {
       throw StateError(
         'API_BASE_URL must be set in release mode via --dart-define=API_BASE_URL=https://...',
       );
     }
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
+    if (isAndroid) {
       return 'http://10.0.2.2:3000';
     }
     return 'http://localhost:3000';
@@ -105,11 +117,24 @@ class ApiHttpClient {
         !path.startsWith('/api/auth/refresh');
   }
 
-  Future<bool> refreshAccessToken() async {
-    if (_isRefreshing) return false;
-    if (refreshToken == null || refreshToken!.isEmpty) return false;
+  Future<bool> refreshAccessToken() {
+    final refreshInFlight = _refreshFuture;
+    if (refreshInFlight != null) return refreshInFlight;
+    if (refreshToken == null || refreshToken!.isEmpty) {
+      return Future<bool>.value(false);
+    }
 
-    _isRefreshing = true;
+    late final Future<bool> refresh;
+    refresh = _performRefreshAccessToken().whenComplete(() {
+      if (identical(_refreshFuture, refresh)) {
+        _refreshFuture = null;
+      }
+    });
+    _refreshFuture = refresh;
+    return refresh;
+  }
+
+  Future<bool> _performRefreshAccessToken() async {
     try {
       final response = await http
           .post(
@@ -137,8 +162,6 @@ class ApiHttpClient {
     } catch (e) {
       debugPrint('Refresh token failed: $e');
       return false;
-    } finally {
-      _isRefreshing = false;
     }
   }
 

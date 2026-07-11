@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import prisma from "../config/prisma.js";
+import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
 
 export function generateId(prefix: string = ""): string {
   return prefix ? `${prefix}-${crypto.randomUUID()}` : crypto.randomUUID();
@@ -132,6 +133,7 @@ export async function attachRealReviews<T extends { id: string }>(
       });
     }
   } catch {
+    assertMemoryFallbackEnabled();
     // DB unavailable — return items with their existing rating/reviewsCount or defaults
   }
 

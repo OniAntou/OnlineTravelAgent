@@ -17,6 +17,7 @@ import {
   mockDocuments,
 } from "../data/mock-data.js";
 import { memoryDb } from "./memory-db.js";
+import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
 
 type ReviewedDestination = Awaited<
   ReturnType<typeof attachRealReviews<{
@@ -40,7 +41,7 @@ async function loadFromDb(): Promise<BootstrapBase | null> {
     const [categories, destinations, hotels, tourPackages, flights] = await Promise.all([
       prisma.category.findMany({ orderBy: { name: "asc" } }),
       prisma.destination.findMany(),
-      prisma.hotel.findMany(),
+      prisma.hotel.findMany({ include: { rooms: true } }),
       prisma.tourPackage.findMany({ orderBy: { createdAt: "desc" } }),
       prisma.flight.findMany(),
     ]);
@@ -68,6 +69,7 @@ async function loadFromDb(): Promise<BootstrapBase | null> {
       flights,
     };
   } catch {
+    assertMemoryFallbackEnabled();
     return null;
   }
 }
@@ -88,7 +90,12 @@ export const bootstrapStore = {
 
     if (!cachedBase) {
       const dbData = await loadFromDb();
-      cachedBase = dbData ?? loadMockData();
+      if (dbData) {
+        cachedBase = dbData;
+      } else {
+        assertMemoryFallbackEnabled();
+        cachedBase = loadMockData();
+      }
       appCache.set(BOOTSTRAP_BASE_KEY, cachedBase);
     }
 
@@ -105,6 +112,7 @@ export const bootstrapStore = {
           prisma.documentItem.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }),
         ]);
       } catch {
+        assertMemoryFallbackEnabled();
         favoriteDestinationIds = memoryDb.getFavoriteDestinationIds(userId);
         trips = memoryDb.findTripsByUserId(userId);
         documents = memoryDb.findDocumentsByUserId(userId);
@@ -142,6 +150,7 @@ export const bootstrapStore = {
       }));
       return attachRealReviews(destinations, "destination");
     } catch {
+      assertMemoryFallbackEnabled();
       // Memory DB fallback
       const favIds = memoryDb.getFavoriteDestinationIds(userId);
       const allDests = mockDestinations as any[];
@@ -158,31 +167,32 @@ export const bootstrapStore = {
     // Try real DB first
     try {
       const dbDest = await prisma.destination.findUnique({ where: { id: destinationId } });
-      if (dbDest) {
-        const existing = await prisma.userFavoriteDestination.findUnique({
+      if (!dbDest) return null;
+
+      const existing = await prisma.userFavoriteDestination.findUnique({
+        where: { userId_destinationId: { userId, destinationId } },
+      });
+      const newFavorite = typeof isFavorite === "boolean" ? isFavorite : !existing;
+
+      if (newFavorite) {
+        await prisma.userFavoriteDestination.upsert({
           where: { userId_destinationId: { userId, destinationId } },
+          update: {},
+          create: { userId, destinationId },
         });
-        const newFavorite = typeof isFavorite === "boolean" ? isFavorite : !existing;
-
-        if (newFavorite) {
-          await prisma.userFavoriteDestination.upsert({
-            where: { userId_destinationId: { userId, destinationId } },
-            update: {},
-            create: { userId, destinationId },
-          });
-        } else {
-          await prisma.userFavoriteDestination.deleteMany({
-            where: { userId, destinationId },
-          });
-        }
-
-        const [withReviews] = await attachRealReviews(
-          [{ ...dbDest, isFavorite: newFavorite }],
-          "destination",
-        );
-        return withReviews;
+      } else {
+        await prisma.userFavoriteDestination.deleteMany({
+          where: { userId, destinationId },
+        });
       }
+
+      const [withReviews] = await attachRealReviews(
+        [{ ...dbDest, isFavorite: newFavorite }],
+        "destination",
+      );
+      return withReviews;
     } catch {
+      assertMemoryFallbackEnabled();
       // Fall through to memory DB
     }
 
