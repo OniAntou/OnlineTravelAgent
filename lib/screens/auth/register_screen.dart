@@ -306,12 +306,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen>
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
       ),
-      child: TextField(
+      child: TextFormField(
         controller: controller,
         obscureText: obscure,
         keyboardType: keyboardType,
+        autofillHints: keyboardType == TextInputType.emailAddress
+            ? const [AutofillHints.email]
+            : obscure
+            ? const [AutofillHints.password]
+            : const [AutofillHints.name],
+        textInputAction: obscure ? TextInputAction.done : TextInputAction.next,
+        onFieldSubmitted: obscure ? (_) => _handleRegister() : null,
         style: const TextStyle(fontSize: 15, color: Colors.white),
         decoration: InputDecoration(
+          labelText: hint,
+          labelStyle: const TextStyle(color: Colors.white70, fontSize: 15),
           hintText: hint,
           hintStyle: const TextStyle(color: Colors.white70, fontSize: 15),
           prefixIcon: Icon(icon, color: Colors.white, size: 22),

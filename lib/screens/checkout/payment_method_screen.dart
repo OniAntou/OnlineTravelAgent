@@ -8,7 +8,6 @@ import '../../providers/api_provider.dart';
 import '../../utils/api_exception.dart';
 import '../../utils/app_utils.dart';
 import 'bank_transfer_screen.dart';
-import 'vnpay_payment_screen.dart';
 
 class PaymentMethod {
   final String id;
@@ -61,13 +60,6 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
         type: 'vnpay',
         description: 'Thanh toán qua mã QR, thẻ ATM, Visa',
         logo: _buildVnpayLogo(),
-      ),
-      PaymentMethod(
-        id: 'momo',
-        name: 'Ví MoMo',
-        type: 'momo',
-        description: 'Thanh toán qua ví MoMo',
-        logo: _buildMomoLogo(),
       ),
       PaymentMethod(
         id: 'mastercard',
@@ -127,26 +119,6 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
       alignment: Alignment.center,
       child: const Text(
         'VNPAY',
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-          fontSize: 9,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMomoLogo() {
-    return Container(
-      width: 44,
-      height: 28,
-      decoration: BoxDecoration(
-        color: const Color(0xFFA50064),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      alignment: Alignment.center,
-      child: const Text(
-        'MoMo',
         style: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.bold,
@@ -318,11 +290,6 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
         return;
       }
 
-      if (selectedMethod.type == 'momo') {
-        await _handleDigitalPayment('momo');
-        return;
-      }
-
       if (selectedMethod.type == 'bank_transfer') {
         await _handleBankTransfer();
         return;
@@ -335,35 +302,45 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
         _showSuccessDialog(tripId);
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Thanh toán thất bại, vui lòng thử lại')),
+          const SnackBar(
+            content: Text('Thanh toán thất bại, vui lòng thử lại'),
+          ),
         );
       }
     } on AuthException catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
       }
     } on ApiException catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
       }
     } on NetworkException catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
       }
     } on TimeoutApiException catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message)));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(getErrorMessage(e))),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(getErrorMessage(e))));
       }
     }
   }
@@ -399,7 +376,9 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Vui lòng hoàn tất thanh toán trên cổng VNPAY, sau đó quay lại kiểm tra'),
+              content: Text(
+                'Vui lòng hoàn tất thanh toán trên cổng VNPAY, sau đó quay lại kiểm tra',
+              ),
             ),
           );
         }
@@ -413,9 +392,9 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
       }
     }
   }
@@ -439,101 +418,13 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
       final confirmed = await Navigator.push<bool>(
         context,
         MaterialPageRoute(
-          builder: (context) => BankTransferScreen(
-            amount: widget.totalPrice,
-            tripId: tripId,
-          ),
+          builder: (context) =>
+              BankTransferScreen(amount: widget.totalPrice, tripId: tripId),
         ),
       );
 
       if (confirmed == true && mounted) {
         _showSuccessDialog(tripId);
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Lỗi: $e')),
-        );
-      }
-    }
-  }
-
-  Future<void> _handleDigitalPayment(String method) async {
-    try {
-      final tripId = await widget.onPaymentSuccess();
-      if (tripId == null) {
-        if (mounted) {
-          setState(() => _isProcessing = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Không thể tạo đơn hàng')),
-          );
-        }
-        return;
-      }
-
-      final api = ref.read(apiProvider);
-
-      if (method == 'vnpay') {
-        final result = await api.createVnpayPayment(
-          tripId: tripId,
-          amount: widget.totalPrice,
-        );
-
-        if (!mounted) return;
-        setState(() => _isProcessing = false);
-
-        final paymentUrl = result['paymentUrl'] as String;
-        final txnRef = result['txnRef'] as String;
-
-        final paymentSuccess = await Navigator.push<bool>(
-          context,
-          MaterialPageRoute(
-            builder: (context) => VnpayPaymentScreen(
-              tripId: tripId,
-              amount: widget.totalPrice,
-              paymentUrl: paymentUrl,
-              txnRef: txnRef,
-            ),
-          ),
-        );
-
-        if (paymentSuccess == true && mounted) {
-          _showSuccessDialog(tripId);
-        } else if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Thanh toán VNPAY chưa hoàn tất')),
-          );
-        }
-      } else if (method == 'momo') {
-        final result = await api.createMomoPayment(
-          tripId: tripId,
-          amount: widget.totalPrice,
-        );
-
-        if (!mounted) return;
-        setState(() => _isProcessing = false);
-
-        final payUrl = result['payUrl'] as String?;
-        if (payUrl != null) {
-          final uri = Uri.parse(payUrl);
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Vui lòng thanh toán qua MoMo, sau đó quay lại kiểm tra',
-                ),
-              ),
-            );
-          }
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Không thể tạo thanh toán MoMo')),
-            );
-          }
-        }
       }
     } catch (e) {
       if (mounted) {
@@ -770,8 +661,6 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
     final isSelected = _selectedMethodId == method.id;
     final selectedColor = method.type == 'vnpay'
         ? const Color(0xFFDA251D)
-        : method.type == 'momo'
-        ? const Color(0xFFA50064)
         : AppTheme.primaryBlue;
 
     return Container(

@@ -215,7 +215,7 @@ function paymentResultHtml(
         <h2>${success ? `Thanh toan ${provider} thanh cong` : `Thanh toan ${provider} that bai`}</h2>
         <p>${success ? "Cam on ban da thanh toan. Vui long quay lai ung dung de kiem tra chuyen di." : "Thanh toan khong hop le hoac da that bai. Vui long thu lai."}</p>
         <p style="font-size:12px;color:#999;">Ma tham chieu: ${reference}</p>
-        <a href="/" class="btn">Quay ve trang chu</a>
+        <p class="btn" role="status">Quay lai ung dung OTA</p>
       </div>
     </body>
     </html>

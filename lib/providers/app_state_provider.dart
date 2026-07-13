@@ -7,6 +7,15 @@ import 'api_provider.dart';
 import 'auth_provider.dart';
 import 'profile_provider.dart';
 
+class BootstrapUnavailableException implements Exception {
+  const BootstrapUnavailableException(this.cause);
+
+  final Object cause;
+
+  @override
+  String toString() => 'BootstrapUnavailableException: $cause';
+}
+
 final bootstrapProvider = FutureProvider<BootstrapData>((ref) async {
   final api = ref.watch(apiProvider);
   final syncService = ref.watch(syncServiceProvider);
@@ -27,9 +36,26 @@ final bootstrapProvider = FutureProvider<BootstrapData>((ref) async {
   } catch (error, stackTrace) {
     // API failed, log error and use cached data
     debugPrint('Failed to fetch bootstrap data: $error\n$stackTrace');
+    if (!_hasCachedBootstrapData(scopedCached)) {
+      Error.throwWithStackTrace(
+        BootstrapUnavailableException(error),
+        stackTrace,
+      );
+    }
     return scopedCached;
   }
 });
+
+bool _hasCachedBootstrapData(BootstrapData data) {
+  return data.categories.isNotEmpty ||
+      data.destinations.isNotEmpty ||
+      data.recommended.isNotEmpty ||
+      data.trips.isNotEmpty ||
+      data.documents.isNotEmpty ||
+      data.hotels.isNotEmpty ||
+      data.tourPackages.isNotEmpty ||
+      data.flights.isNotEmpty;
+}
 
 BootstrapData _withoutUserOwnedData(BootstrapData data) {
   return BootstrapData(

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/app_state_provider.dart';
 import '../../providers/destination_provider.dart';
+import '../../widgets/status/availability_state_view.dart';
 
 import '../dashboard/dashboard_screen.dart';
 import '../destination_detail/destination_detail_screen.dart';
@@ -61,36 +62,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     return bootstrapAsync.when(
       loading: () => const Scaffold(body: SafeArea(child: _SkeletonLoading())),
       error: (error, stack) => Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.wifi_off, size: 64, color: Colors.grey),
-              const SizedBox(height: 16),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 32),
-                child: Text(
-                  'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại mạng.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () => ref.refresh(bootstrapProvider),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Thử lại'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryBlue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                ),
-              ),
-            ],
-          ),
+        body: AvailabilityStateView(
+          title: 'Không thể tải dữ liệu',
+          message: 'Kiểm tra kết nối mạng rồi thử lại.',
+          actionLabel: 'Thử lại',
+          onRetry: () => ref.invalidate(bootstrapProvider),
         ),
       ),
       data: (_) => Scaffold(

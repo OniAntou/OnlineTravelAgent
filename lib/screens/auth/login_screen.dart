@@ -177,6 +177,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                                 icon: Icons.lock_outline_rounded,
                                 obscure: _obscurePassword,
                                 suffixIcon: IconButton(
+                                  tooltip: _obscurePassword
+                                      ? 'Hiển thị mật khẩu'
+                                      : 'Ẩn mật khẩu',
                                   icon: Icon(
                                     _obscurePassword
                                         ? Icons.visibility_off_rounded
@@ -300,12 +303,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
       ),
-      child: TextField(
+      child: TextFormField(
         controller: controller,
         obscureText: obscure,
         keyboardType: keyboardType,
+        autofillHints: keyboardType == TextInputType.emailAddress
+            ? const [AutofillHints.email]
+            : obscure
+            ? const [AutofillHints.password]
+            : null,
+        textInputAction: obscure ? TextInputAction.done : TextInputAction.next,
+        onFieldSubmitted: obscure ? (_) => _handleLogin() : null,
         style: const TextStyle(fontSize: 15, color: Colors.white),
         decoration: InputDecoration(
+          labelText: hint,
+          labelStyle: const TextStyle(color: Colors.white70, fontSize: 15),
           hintText: hint,
           hintStyle: const TextStyle(color: Colors.white70, fontSize: 15),
           prefixIcon: Icon(icon, color: Colors.white, size: 22),

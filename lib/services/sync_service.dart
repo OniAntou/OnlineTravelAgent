@@ -54,7 +54,6 @@ class SyncService {
     }
 
     _isSyncing = true;
-    _lastSync = DateTime.now();
 
     try {
       await _flushOfflineQueue();
@@ -83,6 +82,8 @@ class SyncService {
           debugPrint('Sync schedules batch error: $e\n$st');
         }
       }
+
+      _lastSync = DateTime.now();
     } catch (e, st) {
       debugPrint('SyncAll error: $e\n$st');
     } finally {

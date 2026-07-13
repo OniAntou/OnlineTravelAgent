@@ -27,6 +27,7 @@ class VnpayPaymentScreen extends ConsumerStatefulWidget {
 
 class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
   String _status = 'pending';
+  String? _statusCheckError;
   bool _isChecking = false;
   Timer? _pollTimer;
   int _pollCount = 0;
@@ -59,11 +60,20 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
       final result = await api.checkPaymentStatus(widget.tripId);
       if (!mounted) return;
       final paymentStatus = result['paymentStatus'] as String? ?? 'PENDING';
-      setState(() => _status = paymentStatus);
+      setState(() {
+        _status = paymentStatus;
+        _statusCheckError = null;
+      });
       if (paymentStatus == 'SUCCESS') {
         _pollTimer?.cancel();
       }
-    } catch (_) {}
+    } catch (_) {
+      if (!mounted) return;
+      setState(
+        () => _statusCheckError =
+            'Không thể kiểm tra trạng thái thanh toán. Vui lòng thử lại.',
+      );
+    }
   }
 
   Future<void> _openVnpayGateway() async {
@@ -79,8 +89,10 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
   }
 
   Future<void> _checkNow() async {
+    if (!mounted) return;
     setState(() => _isChecking = true);
     await _checkStatus();
+    if (!mounted) return;
     setState(() => _isChecking = false);
 
     if (_status == 'SUCCESS' && mounted) {
@@ -110,12 +122,20 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 18),
+          icon: const Icon(
+            Icons.arrow_back_ios_new,
+            color: Colors.black,
+            size: 18,
+          ),
           onPressed: () => Navigator.pop(context, false),
         ),
         title: const Text(
           'Thanh toán VNPAY',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
         centerTitle: true,
       ),
@@ -124,7 +144,10 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
           children: [
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 children: [
                   if (isPaid)
                     _buildSuccessBanner()
@@ -132,6 +155,11 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
                     _buildFailedBanner()
                   else
                     _buildPendingBanner(),
+
+                  if (_statusCheckError != null) ...[
+                    const SizedBox(height: 16),
+                    _buildStatusCheckError(),
+                  ],
 
                   const SizedBox(height: 24),
 
@@ -182,7 +210,11 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
           Expanded(
             child: Text(
               'Nhấn nút bên dưới để mở cổng VNPAY. Sau khi thanh toán xong, quay lại đây nhấn "Đã thanh toán xong".',
-              style: TextStyle(color: Color(0xFF795548), fontSize: 13, height: 1.3),
+              style: TextStyle(
+                color: Color(0xFF795548),
+                fontSize: 13,
+                height: 1.3,
+              ),
             ),
           ),
         ],
@@ -205,7 +237,12 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
           Expanded(
             child: Text(
               'Thanh toán thành công! Chuyến đi của bạn đã được xác nhận.',
-              style: TextStyle(color: Color(0xFF2E7D32), fontSize: 13, height: 1.3, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                color: Color(0xFF2E7D32),
+                fontSize: 13,
+                height: 1.3,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
         ],
@@ -228,7 +265,39 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
           Expanded(
             child: Text(
               'Thanh toán thất bại. Vui lòng thử lại hoặc chọn phương thức khác.',
-              style: TextStyle(color: Color(0xFFC53030), fontSize: 13, height: 1.3, fontWeight: FontWeight.w500),
+              style: TextStyle(
+                color: Color(0xFFC53030),
+                fontSize: 13,
+                height: 1.3,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusCheckError() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFDE8E8),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF8C8C8)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.wifi_off_rounded, color: Color(0xFFC53030)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              _statusCheckError!,
+              style: const TextStyle(
+                color: Color(0xFFC53030),
+                fontSize: 13,
+                height: 1.3,
+              ),
             ),
           ),
         ],
@@ -246,7 +315,10 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
       ),
       child: Column(
         children: [
-          const Text('Số tiền thanh toán', style: TextStyle(color: Colors.grey, fontSize: 14)),
+          const Text(
+            'Số tiền thanh toán',
+            style: TextStyle(color: Colors.grey, fontSize: 14),
+          ),
           const SizedBox(height: 8),
           Text(
             formatVND(widget.amount),
@@ -354,11 +426,20 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
       child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Hướng dẫn:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Text(
+            'Hướng dẫn:',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
           SizedBox(height: 8),
           _InstructionStep(step: '1', text: 'Nhấn "Mở cổng VNPAY" bên dưới'),
-          _InstructionStep(step: '2', text: 'Thanh toán trên trang VNPAY (QR, ATM, Visa...)'),
-          _InstructionStep(step: '3', text: 'Quay lại app, nhấn "Đã thanh toán xong"'),
+          _InstructionStep(
+            step: '2',
+            text: 'Thanh toán trên trang VNPAY (QR, ATM, Visa...)',
+          ),
+          _InstructionStep(
+            step: '3',
+            text: 'Quay lại app, nhấn "Đã thanh toán xong"',
+          ),
         ],
       ),
     );
@@ -373,7 +454,9 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF176FF2),
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           elevation: 0,
         ),
         icon: const Icon(Icons.open_in_new),
@@ -394,7 +477,9 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppTheme.primaryBlue,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           elevation: 0,
         ),
         child: const Text(
@@ -417,7 +502,9 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppTheme.primaryBlue,
           side: const BorderSide(color: AppTheme.primaryBlue),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
         icon: const Icon(Icons.refresh),
         label: const Text(
@@ -449,14 +536,19 @@ class _VnpayPaymentScreenState extends ConsumerState<VnpayPaymentScreen> {
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.primaryBlue,
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             elevation: 0,
           ),
           child: _isChecking
               ? const SizedBox(
                   width: 24,
                   height: 24,
-                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2.5,
+                  ),
                 )
               : const Text(
                   'Đã thanh toán xong',
@@ -483,13 +575,30 @@ class _InstructionStep extends StatelessWidget {
           Container(
             width: 22,
             height: 22,
-            decoration: const BoxDecoration(color: AppTheme.primaryBlue, shape: BoxShape.circle),
+            decoration: const BoxDecoration(
+              color: AppTheme.primaryBlue,
+              shape: BoxShape.circle,
+            ),
             alignment: Alignment.center,
-            child: Text(step, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+            child: Text(
+              step,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(text, style: const TextStyle(color: Color(0xFF475569), fontSize: 13, height: 1.3)),
+            child: Text(
+              text,
+              style: const TextStyle(
+                color: Color(0xFF475569),
+                fontSize: 13,
+                height: 1.3,
+              ),
+            ),
           ),
         ],
       ),
