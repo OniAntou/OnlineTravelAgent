@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import crypto from "crypto";
-import { asyncHandler } from "../utils/asyncHandler.js";
-import prisma from "../config/prisma.js";
+import { asyncHandler } from "../core/utils/asyncHandler.js";
+import prisma from "../infrastructure/database/prisma.js";
 
 export const partnerController = {
   getHotels: asyncHandler(async (req: Request, res: Response) => {

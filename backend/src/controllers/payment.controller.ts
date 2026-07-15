@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import crypto from "crypto";
-import prisma from "../config/prisma.js";
+import prisma from "../infrastructure/database/prisma.js";
 import { vnpayService } from "../services/vnpay.service.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import { asyncHandler } from "../core/utils/asyncHandler.js";
 import { PaymentStatus, Prisma, TripStatus } from "@prisma/client";
-import { memoryDb } from "../store/memory-db.js";
+import { memoryDb } from "../infrastructure/fallback/memory-db.js";
 
 const MOMO_PARTNER_CODE = process.env.MOMO_PARTNER_CODE ?? "MOMO";
 const MOMO_ACCESS_KEY = process.env.MOMO_ACCESS_KEY ?? "";

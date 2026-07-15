@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { describe, expect, it } from "vitest";
-import { memoryDb } from "../src/store/memory-db.js";
+import { memoryDb } from "../src/infrastructure/fallback/memory-db.js";
 
 describe("trip idempotency fallback", () => {
   it("scopes an idempotency key to its booking owner", () => {

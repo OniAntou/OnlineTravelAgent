@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   destinationDelete: vi.fn(),
 }));
 
-vi.mock("../src/config/prisma.js", () => ({
+vi.mock("../src/infrastructure/database/prisma.js", () => ({
   default: {
     user: { create: mocks.userCreate },
     destination: { delete: mocks.destinationDelete },
@@ -14,7 +14,7 @@ vi.mock("../src/config/prisma.js", () => ({
 }));
 
 import { app } from "../src/app.js";
-import { env } from "../src/config/env.js";
+import { env } from "../src/core/config/env.js";
 
 const adminAuth = `Basic ${Buffer.from(`admin:${env.adminPassword}`).toString("base64")}`;
 

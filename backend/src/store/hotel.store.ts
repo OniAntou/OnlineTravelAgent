@@ -1,10 +1,10 @@
 import { Prisma } from "@prisma/client";
-import prisma from "../config/prisma.js";
-import { attachRealReviews, formatSearchQuery, generateId } from "./helpers.js";
+import prisma from "../infrastructure/database/prisma.js";
+import { attachRealReviews, formatSearchQuery, generateId } from "../core/data/store-helpers.js";
 import { TripStatus } from "@prisma/client";
-import { mockHotels } from "../data/mock-data.js";
-import { memoryDb } from "./memory-db.js";
-import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
+import { mockHotels } from "../infrastructure/fallback/mock-data.js";
+import { memoryDb } from "../infrastructure/fallback/memory-db.js";
+import { assertMemoryFallbackEnabled } from "../core/config/data-availability.js";
 import {
   findIdempotentTrip,
   recoverIdempotentTrip,

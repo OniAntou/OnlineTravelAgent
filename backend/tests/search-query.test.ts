@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatSearchQuery } from "../src/store/helpers.js";
+import { formatSearchQuery } from "../src/core/data/store-helpers.js";
 
 describe("formatSearchQuery", () => {
   it("removes PostgreSQL tsquery operators supplied by the user", () => {

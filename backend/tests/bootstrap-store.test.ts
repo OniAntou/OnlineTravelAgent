@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   reviewGroupBy: vi.fn(),
 }));
 
-vi.mock("../src/config/prisma.js", () => ({
+vi.mock("../src/infrastructure/database/prisma.js", () => ({
   default: {
     category: { findMany: mocks.categoryFindMany },
     destination: { findMany: mocks.destinationFindMany },
@@ -20,7 +20,7 @@ vi.mock("../src/config/prisma.js", () => ({
   },
 }));
 
-import { appCache } from "../src/config/cache.js";
+import { appCache } from "../src/core/config/cache.js";
 import { bootstrapStore } from "../src/store/bootstrap.store.js";
 
 describe("bootstrap hotel data", () => {

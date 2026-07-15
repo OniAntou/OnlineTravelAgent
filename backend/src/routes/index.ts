@@ -5,8 +5,8 @@ import { adminRouter } from "./admin.routes.js";
 import { authRouter } from "./auth.routes.js";
 import { partnerRouter } from "./partner.routes.js";
 import { paymentRouter } from "./payment.routes.js";
-import { adminAuth, partnerAuth } from "../middlewares/auth.js";
-import { invalidateBootstrapCacheOnMutation } from "../config/cache.js";
+import { adminAuth, partnerAuth } from "../core/middleware/auth.js";
+import { invalidateBootstrapCacheOnMutation } from "../core/config/cache.js";
 
 export const routes = Router();
 

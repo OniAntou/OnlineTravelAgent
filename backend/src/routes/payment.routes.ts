@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { paymentController } from "../controllers/payment.controller.js";
-import { clientAuth } from "../middlewares/auth.js";
+import { clientAuth } from "../core/middleware/auth.js";
 
 export const paymentRouter = Router();
 

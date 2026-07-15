@@ -1,5 +1,5 @@
-import prisma from "../config/prisma.js";
-import { appCache, BOOTSTRAP_BASE_KEY } from "../config/cache.js";
+import prisma from "../infrastructure/database/prisma.js";
+import { appCache, BOOTSTRAP_BASE_KEY } from "../core/config/cache.js";
 import {
   applyFavoriteState,
   attachRealReviews,
@@ -7,7 +7,7 @@ import {
   normalizeCategoryName,
   orderCategoryNames,
   processTripStatus,
-} from "./helpers.js";
+} from "../core/data/store-helpers.js";
 import {
   mockCategories,
   mockDestinations,
@@ -15,9 +15,9 @@ import {
   mockFlights,
   mockTourPackages,
   mockDocuments,
-} from "../data/mock-data.js";
-import { memoryDb } from "./memory-db.js";
-import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
+} from "../infrastructure/fallback/mock-data.js";
+import { memoryDb } from "../infrastructure/fallback/memory-db.js";
+import { assertMemoryFallbackEnabled } from "../core/config/data-availability.js";
 
 type ReviewedDestination = Awaited<
   ReturnType<typeof attachRealReviews<{

@@ -1,7 +1,7 @@
-import prisma from "../config/prisma.js";
-import { attachRealReviews, formatSearchQuery } from "./helpers.js";
-import { mockHotels, mockTourPackages, mockDestinations } from "../data/mock-data.js";
-import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
+import prisma from "../infrastructure/database/prisma.js";
+import { attachRealReviews, formatSearchQuery } from "../core/data/store-helpers.js";
+import { mockHotels, mockTourPackages, mockDestinations } from "../infrastructure/fallback/mock-data.js";
+import { assertMemoryFallbackEnabled } from "../core/config/data-availability.js";
 
 export const searchStore = {
   async globalSearch(query: string) {

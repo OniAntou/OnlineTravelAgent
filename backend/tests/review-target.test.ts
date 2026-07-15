@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   reviewUpsert: vi.fn(),
 }));
 
-vi.mock("../src/config/prisma.js", () => ({
+vi.mock("../src/infrastructure/database/prisma.js", () => ({
   default: {
     $queryRaw: mocks.queryRaw,
     destination: { findUnique: mocks.destinationFindUnique },

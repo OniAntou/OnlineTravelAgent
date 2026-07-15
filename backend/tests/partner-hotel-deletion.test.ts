@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
   transaction: vi.fn(),
 }));
 
-vi.mock("../src/config/prisma.js", () => ({
+vi.mock("../src/infrastructure/database/prisma.js", () => ({
   default: {
     hotel: {
       findFirst: mocks.hotelFindFirst,
@@ -25,7 +25,7 @@ vi.mock("../src/config/prisma.js", () => ({
 }));
 
 import { app } from "../src/app.js";
-import { env } from "../src/config/env.js";
+import { env } from "../src/core/config/env.js";
 
 const partnerToken = jwt.sign(
   { userId: "partner-1", role: "PARTNER" },

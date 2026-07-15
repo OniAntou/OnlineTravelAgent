@@ -8,7 +8,7 @@ const mocks = vi.hoisted(() => ({
   reviewGroupBy: vi.fn(),
 }));
 
-vi.mock("../src/config/prisma.js", () => ({
+vi.mock("../src/infrastructure/database/prisma.js", () => ({
   default: {
     destination: { findUnique: mocks.destinationFindUnique },
     userFavoriteDestination: {

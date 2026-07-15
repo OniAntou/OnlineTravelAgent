@@ -5,7 +5,7 @@ import helmet from "helmet";
 import multer from "multer";
 import compression from "compression";
 import winston from "winston";
-import prisma from "./config/prisma.js";
+import prisma from "./infrastructure/database/prisma.js";
 
 export const logger = winston.createLogger({
   level: "info",
@@ -19,12 +19,12 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import { routes } from "./routes/index.js";
 import { Request, Response, NextFunction } from "express";
-import { env } from "./config/env.js";
-import { UPLOAD_DIR, UploadValidationError } from "./middlewares/upload.js";
-import { adminAuth } from "./middlewares/auth.js";
-import { panelRateLimiter, panelStaticHeaders } from "./middlewares/panel.js";
-import { PersistentDataUnavailableError } from "./config/data-availability.js";
-import { HttpError } from "./utils/http-error.js";
+import { env } from "./core/config/env.js";
+import { UPLOAD_DIR, UploadValidationError } from "./core/middleware/upload.js";
+import { adminAuth } from "./core/middleware/auth.js";
+import { panelRateLimiter, panelStaticHeaders } from "./core/middleware/panel.js";
+import { PersistentDataUnavailableError } from "./core/config/data-availability.js";
+import { HttpError } from "./core/utils/http-error.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

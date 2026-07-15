@@ -1,13 +1,13 @@
-import prisma from "../config/prisma.js";
-import { memoryDb } from "./memory-db.js";
-import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
+import prisma from "../infrastructure/database/prisma.js";
+import { memoryDb } from "../infrastructure/fallback/memory-db.js";
+import { assertMemoryFallbackEnabled } from "../core/config/data-availability.js";
 import {
   mockDestinations,
   mockFlights,
   mockHotels,
   mockTourPackages,
-} from "../data/mock-data.js";
-import { HttpError } from "../utils/http-error.js";
+} from "../infrastructure/fallback/mock-data.js";
+import { HttpError } from "../core/utils/http-error.js";
 
 async function dbAvailable(): Promise<boolean> {
   try {

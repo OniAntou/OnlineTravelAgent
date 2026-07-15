@@ -17,7 +17,7 @@ const tx = {
   },
 };
 
-vi.mock("../src/config/prisma.js", () => ({
+vi.mock("../src/infrastructure/database/prisma.js", () => ({
   default: {
     $queryRaw: mocks.queryRaw,
     $transaction: mocks.transaction,

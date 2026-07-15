@@ -1,4 +1,4 @@
-import prisma from "../config/prisma.js";
+import prisma from "../infrastructure/database/prisma.js";
 
 export const promoStore = {
   async checkPromoCode(code: string) {

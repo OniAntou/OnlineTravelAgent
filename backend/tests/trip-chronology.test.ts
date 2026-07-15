@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TripStatus } from "@prisma/client";
-import { processTripStatus } from "../src/store/helpers.js";
+import { processTripStatus } from "../src/core/data/store-helpers.js";
 import { parseTripStartDate } from "../src/services/schedule.service.js";
 
 const trip = (date: string, isUpcoming = true) => ({

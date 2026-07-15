@@ -1,13 +1,13 @@
 import crypto from "crypto";
 import { Request, Response } from "express";
-import prisma from "../config/prisma.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import prisma from "../infrastructure/database/prisma.js";
+import { asyncHandler } from "../core/utils/asyncHandler.js";
 import {
   scheduleService,
   ScheduleTemplateInput,
 } from "../services/schedule.service.js";
 import { passwordService } from "../services/password.service.js";
-import { processTripStatus } from "../store/helpers.js";
+import { processTripStatus } from "../core/data/store-helpers.js";
 import { getTourScheduleRealtimeTarget } from "../services/schedule-realtime.js";
 import {
   CreateDestinationBody,
@@ -30,7 +30,7 @@ import {
   CreateScheduleDayBody,
   UpdateScheduleDayBody,
   CreateScheduleUpdateBody,
-} from "../types/index.js";
+} from "../core/types/index.js";
 
 function generateId(prefix: string = ""): string {
   return prefix ? `${prefix}-${crypto.randomUUID()}` : crypto.randomUUID();

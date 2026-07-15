@@ -1,10 +1,10 @@
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { Role } from "@prisma/client";
-import prisma from "../config/prisma.js";
-import { env } from "../config/env.js";
-import { memoryDb } from "../store/memory-db.js";
-import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
+import prisma from "../infrastructure/database/prisma.js";
+import { env } from "../core/config/env.js";
+import { memoryDb } from "../infrastructure/fallback/memory-db.js";
+import { assertMemoryFallbackEnabled } from "../core/config/data-availability.js";
 
 const ACCESS_TOKEN_TTL = "15m";
 const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;

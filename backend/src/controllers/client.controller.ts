@@ -1,15 +1,15 @@
 import { Request, Response } from "express";
-import { appCache } from "../config/cache.js";
+import { appCache } from "../core/config/cache.js";
 import { store } from "../store/index.js";
 import { scheduleService } from "../services/schedule.service.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
+import { asyncHandler } from "../core/utils/asyncHandler.js";
 import {
   BookTripBody,
   BookFlightBody,
   BookHotelBody,
   CreateDocumentBody,
   CreateReviewBody,
-} from "../types/index.js";
+} from "../core/types/index.js";
 import {
   bookTripSchema,
   bookFlightSchema,
@@ -17,7 +17,7 @@ import {
   bookTourSchema,
   createDocumentSchema,
   createReviewSchema,
-} from "../validators/index.js";
+} from "../core/validators/index.js";
 
 export const clientController = {
   getBootstrap: asyncHandler(async (req: Request, res: Response) => {

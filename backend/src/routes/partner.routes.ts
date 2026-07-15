@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { partnerController } from "../controllers/partner.controller.js";
-import { upload } from "../middlewares/upload.js";
-import { validate } from "../middlewares/validate.js";
+import { upload } from "../core/middleware/upload.js";
+import { validate } from "../core/middleware/validate.js";
 import { adminHotelSchema, adminRoomSchema, adminTourSchema } from "../schemas/admin.schema.js";
 
 export const partnerRouter = Router();

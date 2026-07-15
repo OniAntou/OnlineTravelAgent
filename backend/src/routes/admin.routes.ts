@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { adminController } from "../controllers/admin.controller.js";
-import { validate } from "../middlewares/validate.js";
+import { validate } from "../core/middleware/validate.js";
 import {
   adminDestinationSchema,
   adminHotelSchema,
@@ -14,7 +14,7 @@ import {
   adminScheduleTemplateSchema,
 } from "../schemas/admin.schema.js";
 
-import { upload } from "../middlewares/upload.js";
+import { upload } from "../core/middleware/upload.js";
 
 export const adminRouter = Router();
 

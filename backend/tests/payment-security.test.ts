@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   getTripPaymentStatus: vi.fn(),
 }));
 
-vi.mock("../src/config/prisma.js", () => ({
+vi.mock("../src/infrastructure/database/prisma.js", () => ({
   default: {
     trip: {
       findUnique: mocks.tripFindUnique,
@@ -31,7 +31,7 @@ vi.mock("../src/services/vnpay.service.js", () => ({
 
 import { app } from "../src/app.js";
 
-import { env } from "../src/config/env.js";
+import { env } from "../src/core/config/env.js";
 
 const tokenFor = (userId: string) =>
   jwt.sign({ userId, role: "USER" }, env.jwtSecret);

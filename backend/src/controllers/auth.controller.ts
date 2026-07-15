@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import { Role } from "@prisma/client";
-import prisma from "../config/prisma.js";
+import prisma from "../infrastructure/database/prisma.js";
 import { passwordService } from "../services/password.service.js";
 import { tokenService } from "../services/token.service.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { memoryDb } from "../store/memory-db.js";
-import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
+import { asyncHandler } from "../core/utils/asyncHandler.js";
+import { memoryDb } from "../infrastructure/fallback/memory-db.js";
+import { assertMemoryFallbackEnabled } from "../core/config/data-availability.js";
 
 type SafeUser = { id: string; name: string; email: string; role: Role; createdAt: Date; updatedAt: Date };
 

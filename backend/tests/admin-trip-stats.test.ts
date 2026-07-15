@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   tripFindMany: vi.fn(),
 }));
 
-vi.mock("../src/config/prisma.js", () => ({
+vi.mock("../src/infrastructure/database/prisma.js", () => ({
   default: {
     destination: { count: mocks.destinationCount },
     hotel: { count: mocks.hotelCount },
@@ -20,7 +20,7 @@ vi.mock("../src/config/prisma.js", () => ({
 }));
 
 import { app } from "../src/app.js";
-import { env } from "../src/config/env.js";
+import { env } from "../src/core/config/env.js";
 
 const adminAuth = `Basic ${Buffer.from(`admin:${env.adminPassword}`).toString("base64")}`;
 

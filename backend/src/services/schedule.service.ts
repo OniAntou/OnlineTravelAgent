@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
-import prisma from "../config/prisma.js";
-import { parseDateOnly } from "../store/helpers.js";
+import prisma from "../infrastructure/database/prisma.js";
+import { parseDateOnly } from "../core/data/store-helpers.js";
 
 export type ScheduleSourceType = "tour" | "destination";
 

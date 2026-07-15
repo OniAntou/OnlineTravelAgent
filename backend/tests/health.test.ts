@@ -3,7 +3,7 @@ import request from "supertest";
 
 const mocks = vi.hoisted(() => ({ queryRaw: vi.fn() }));
 
-vi.mock("../src/config/prisma.js", () => ({
+vi.mock("../src/infrastructure/database/prisma.js", () => ({
   default: { $queryRaw: mocks.queryRaw },
 }));
 

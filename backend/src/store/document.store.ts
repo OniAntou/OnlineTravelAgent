@@ -1,8 +1,8 @@
-import prisma from "../config/prisma.js";
-import { generateId } from "./helpers.js";
-import { mockDocuments } from "../data/mock-data.js";
-import { memoryDb } from "./memory-db.js";
-import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
+import prisma from "../infrastructure/database/prisma.js";
+import { generateId } from "../core/data/store-helpers.js";
+import { mockDocuments } from "../infrastructure/fallback/mock-data.js";
+import { memoryDb } from "../infrastructure/fallback/memory-db.js";
+import { assertMemoryFallbackEnabled } from "../core/config/data-availability.js";
 
 async function dbAvailable(): Promise<boolean> {
   try {

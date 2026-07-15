@@ -1,10 +1,10 @@
 import { Server as SocketIOServer } from "socket.io";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
-import prisma from "./config/prisma.js";
-import { env } from "./config/env.js";
+import prisma from "./infrastructure/database/prisma.js";
+import { env } from "./core/config/env.js";
 import { app } from "./app.js";
-import { memoryDb } from "./store/memory-db.js";
+import { memoryDb } from "./infrastructure/fallback/memory-db.js";
 
 memoryDb.init();
 

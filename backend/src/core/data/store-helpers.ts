@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import prisma from "../config/prisma.js";
+import prisma from "../../infrastructure/database/prisma.js";
 import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
 
 export function generateId(prefix: string = ""): string {

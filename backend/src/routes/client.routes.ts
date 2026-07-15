@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { clientController } from "../controllers/client.controller.js";
-import { validate } from "../middlewares/validate.js";
-import { optionalAuth, clientAuth } from "../middlewares/auth.js";
+import { validate } from "../core/middleware/validate.js";
+import { optionalAuth, clientAuth } from "../core/middleware/auth.js";
 import {
   bookTripSchema,
   bookFlightSchema,

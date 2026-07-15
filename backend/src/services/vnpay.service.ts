@@ -1,7 +1,7 @@
 import crypto from "crypto";
-import prisma from "../config/prisma.js";
+import prisma from "../infrastructure/database/prisma.js";
 import { PaymentStatus } from "@prisma/client";
-import { memoryDb } from "../store/memory-db.js";
+import { memoryDb } from "../infrastructure/fallback/memory-db.js";
 
 const VNP_URL = process.env.VNP_URL ?? "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
 const VNP_RETURN_URL = process.env.VNP_RETURN_URL ?? "http://localhost:3000/api/payment/vnpay/return";

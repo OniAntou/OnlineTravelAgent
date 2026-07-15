@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   findUpdates: vi.fn(),
 }));
 
-vi.mock("../src/config/prisma.js", () => ({
+vi.mock("../src/infrastructure/database/prisma.js", () => ({
   default: {
     trip: { findUnique: mocks.findTrip },
     tripScheduleDay: { findMany: mocks.findDays },
