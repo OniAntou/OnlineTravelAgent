@@ -95,24 +95,7 @@ flutter analyze
 flutter test
 ```
 
-## Docker Backend
-
-Build image:
-
-```bash
-docker build -t online-travel-agent-backend ./backend
-```
-
-Run container:
-
-```bash
-docker run --rm -p 3000:3000 \
-  -e DATABASE_URL="postgresql://user:password@host:5432/online_travel_agent?schema=public" \
-  -e JWT_SECRET="change-me" \
-  -e ADMIN_PASSWORD="change-me" \
-  -e CORS_ORIGINS="http://localhost:3000" \
-  online-travel-agent-backend
-```
+## Backend deployment
 
 Chạy migration trước khi deploy production:
 
@@ -125,7 +108,7 @@ npm run db:migrate
 
 GitHub Actions chạy:
 
-- Backend: `npm ci`, Prisma generate/validate, TypeScript build, Vitest, npm audit, Docker build
+- Backend: `npm ci`, Prisma generate/validate, TypeScript build, Vitest, npm audit
 - Flutter: `flutter pub get`, `flutter analyze`, `flutter test`
 
 ## Lưu Ý
