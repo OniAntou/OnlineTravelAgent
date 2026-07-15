@@ -59,6 +59,7 @@ lib/
     tours/
     hotels/
     flights/
+    food/
     booking/
     trips/
     profile/
