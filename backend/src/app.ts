@@ -17,7 +17,7 @@ export const logger = winston.createLogger({
 });
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-import { routes } from "./routes/index.js";
+import { routes } from "./modules/routes.js";
 import { Request, Response, NextFunction } from "express";
 import { env } from "./core/config/env.js";
 import { UPLOAD_DIR, UploadValidationError } from "./core/middleware/upload.js";
