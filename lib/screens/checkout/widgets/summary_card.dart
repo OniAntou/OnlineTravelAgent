@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../utils/app_utils.dart';
+import '../../../core/utils/app_utils.dart';
 
 class SummaryCard extends StatelessWidget {
   final int adults;

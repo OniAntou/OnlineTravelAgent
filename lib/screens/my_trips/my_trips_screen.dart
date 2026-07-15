@@ -6,13 +6,13 @@ import '../../core/router/app_routes.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../models/trip.dart';
-import '../../providers/app_state_provider.dart';
+import '../../app/state/app_state_provider.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/auth_provider.dart';
 import 'place_trip_detail_screen.dart';
 import 'tour_trip_detail_screen.dart';
 import 'widgets/trip_card.dart';
-import '../../widgets/app_placeholder_card.dart';
+import '../../shared/widgets/app_placeholder_card.dart';
 
 class MyTripsScreen extends ConsumerStatefulWidget {
   const MyTripsScreen({super.key});

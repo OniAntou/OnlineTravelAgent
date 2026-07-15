@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../utils/app_utils.dart';
+import '../../../core/utils/app_utils.dart';
 
 class TourBookingBottomBar extends StatelessWidget {
   final double originalPrice;

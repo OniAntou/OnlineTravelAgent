@@ -4,9 +4,9 @@ import 'package:easy_localization/easy_localization.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
-import 'providers/app_state_provider.dart';
-import 'services/sync_service.dart';
-import 'services/connectivity_service.dart';
+import 'app/state/app_state_provider.dart';
+import 'data/services/sync_service.dart';
+import 'data/services/connectivity_service.dart';
 
 import 'dart:ui';
 

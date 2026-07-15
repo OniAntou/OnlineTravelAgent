@@ -2,11 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
 import '../models/trip.dart';
-import '../utils/api_exception.dart';
-import 'api_provider.dart';
-import 'app_state_provider.dart';
+import '../core/utils/api_exception.dart';
+import '../data/services/api_provider.dart';
+import '../app/state/app_state_provider.dart';
 
-import '../utils/trip_validator.dart';
+import '../core/utils/trip_validator.dart';
 
 class TripNotifier extends Notifier<List<Trip>> {
   @override

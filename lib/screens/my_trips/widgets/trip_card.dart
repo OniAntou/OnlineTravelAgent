@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../models/trip.dart';
-import '../../../widgets/app_image.dart';
+import '../../../shared/widgets/app_image.dart';
 
 class TripCard extends StatelessWidget {
   final Trip trip;

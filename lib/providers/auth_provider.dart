@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_profile.dart';
-import '../utils/api_exception.dart';
-import 'api_provider.dart';
+import '../core/utils/api_exception.dart';
+import '../data/services/api_provider.dart';
 import 'profile_provider.dart';
 
 class AuthState {

@@ -6,15 +6,15 @@ import '../../models/destination.dart';
 import '../../models/hotel.dart';
 import '../../models/tour_package.dart';
 
-import '../../providers/api_provider.dart';
-import '../../utils/app_utils.dart';
+import '../../data/services/api_provider.dart';
+import '../../core/utils/app_utils.dart';
 
 import '../tours/tour_detail_screen.dart';
 import '../destination_detail/destination_detail_screen.dart';
 import '../hotels/hotel_detail_screen.dart';
 import '../dashboard/widgets/popular_destination_card.dart';
 import '../dashboard/widgets/recommended_tour_card.dart';
-import '../../widgets/place_grid_card.dart';
+import '../../shared/widgets/place_grid_card.dart';
 
 // Search provider
 class GlobalSearchQueryNotifier extends Notifier<String> {

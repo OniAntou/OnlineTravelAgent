@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../utils/app_utils.dart';
+import '../../../core/utils/app_utils.dart';
 import '../../../models/tour_package.dart';
-import '../../../widgets/app_image.dart';
+import '../../../shared/widgets/app_image.dart';
 
 class RecommendedTourCard extends StatelessWidget {
   final TourPackage tour;

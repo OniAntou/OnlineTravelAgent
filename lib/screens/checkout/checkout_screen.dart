@@ -5,15 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/destination.dart';
 import '../../providers/trip_provider.dart';
-import '../../widgets/guest_counter.dart';
-import '../../widgets/app_image.dart';
+import '../../shared/widgets/guest_counter.dart';
+import '../../shared/widgets/app_image.dart';
 import 'payment_method_screen.dart';
 import 'widgets/summary_card.dart';
 import 'widgets/transport_selection.dart';
 import 'widgets/guide_option.dart';
-import '../../utils/api_exception.dart';
-import '../../utils/app_utils.dart';
-import '../../providers/api_provider.dart';
+import '../../core/utils/api_exception.dart';
+import '../../core/utils/app_utils.dart';
+import '../../data/services/api_provider.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   final Destination destination;

@@ -3,7 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../utils/app_utils.dart';
+import '../../../core/utils/app_utils.dart';
 
 class TourMapSection extends StatelessWidget {
   final List<LatLng> coordinates;

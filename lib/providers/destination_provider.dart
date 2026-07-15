@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/destination.dart';
-import '../services/sync_service.dart';
-import '../utils/api_exception.dart';
-import 'api_provider.dart';
-import 'app_state_provider.dart';
+import '../data/services/sync_service.dart';
+import '../core/utils/api_exception.dart';
+import '../data/services/api_provider.dart';
+import '../app/state/app_state_provider.dart';
 
 // 1. Destinations Notifier (Mutable due to favorites)
 class DestinationsNotifier extends Notifier<List<Destination>> {

@@ -9,12 +9,12 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
-import '../../utils/app_utils.dart';
-import '../../utils/dialog_utils.dart';
-import '../../widgets/review_section.dart';
-import '../../widgets/app_image.dart';
+import '../../core/utils/app_utils.dart';
+import '../../core/utils/dialog_utils.dart';
+import '../../shared/widgets/review_section.dart';
+import '../../shared/widgets/app_image.dart';
 import '../../providers/destination_provider.dart';
-import '../../providers/app_state_provider.dart';
+import '../../app/state/app_state_provider.dart';
 
 class DestinationDetailScreen extends ConsumerStatefulWidget {
   final Destination destination;

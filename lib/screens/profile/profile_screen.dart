@@ -9,7 +9,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/profile_provider.dart';
 import 'widgets/document_card.dart';
 import 'contact_special_screen.dart';
-import '../../widgets/app_placeholder_card.dart';
+import '../../shared/widgets/app_placeholder_card.dart';
 
 import 'widgets/profile_bottom_sheets.dart';
 

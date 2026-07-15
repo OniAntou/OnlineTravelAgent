@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/user_profile.dart';
 import '../models/document_item.dart';
-import 'api_provider.dart';
+import '../data/services/api_provider.dart';
 import 'package:flutter/foundation.dart';
 
 class ProfileNotifier extends Notifier<UserProfile> {

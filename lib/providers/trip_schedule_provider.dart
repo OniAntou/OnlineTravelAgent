@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/trip_schedule.dart';
-import 'api_provider.dart';
+import '../data/services/api_provider.dart';
 
 final tripScheduleProvider = FutureProvider.autoDispose
     .family<TripSchedule, String>((ref, tripId) async {

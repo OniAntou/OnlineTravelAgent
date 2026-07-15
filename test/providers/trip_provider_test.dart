@@ -2,10 +2,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:online_travel_agent/models/trip.dart';
 import 'package:online_travel_agent/providers/trip_provider.dart';
-import 'package:online_travel_agent/providers/api_provider.dart';
-import 'package:online_travel_agent/providers/app_state_provider.dart';
-import 'package:online_travel_agent/services/travel_api_service.dart';
-import 'package:online_travel_agent/utils/api_exception.dart';
+import 'package:online_travel_agent/data/services/api_provider.dart';
+import 'package:online_travel_agent/app/state/app_state_provider.dart';
+import 'package:online_travel_agent/data/services/travel_api_service.dart';
+import 'package:online_travel_agent/core/utils/api_exception.dart';
 import '../helpers/test_helpers.dart';
 
 BootstrapData emptyBootstrap() => BootstrapData(

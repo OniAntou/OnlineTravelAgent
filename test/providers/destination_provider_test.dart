@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:async';
 import 'package:online_travel_agent/models/destination.dart';
 import 'package:online_travel_agent/providers/destination_provider.dart';
-import 'package:online_travel_agent/providers/api_provider.dart';
-import 'package:online_travel_agent/providers/app_state_provider.dart';
-import 'package:online_travel_agent/services/travel_api_service.dart';
-import 'package:online_travel_agent/services/sync_service.dart';
+import 'package:online_travel_agent/data/services/api_provider.dart';
+import 'package:online_travel_agent/app/state/app_state_provider.dart';
+import 'package:online_travel_agent/data/services/travel_api_service.dart';
+import 'package:online_travel_agent/data/services/sync_service.dart';
 import '../helpers/test_helpers.dart';
 
 class FakeSyncService implements SyncService {

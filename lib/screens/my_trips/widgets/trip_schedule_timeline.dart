@@ -6,8 +6,8 @@ import '../../../core/theme/app_theme.dart';
 import '../../../models/trip.dart';
 import '../../../models/trip_schedule.dart';
 import '../../../providers/trip_schedule_provider.dart';
-import '../../../utils/trip_schedule_status.dart';
-import '../../../widgets/shimmer_loading.dart';
+import '../../../core/utils/trip_schedule_status.dart';
+import '../../../shared/widgets/shimmer_loading.dart';
 
 class TripScheduleTimeline extends ConsumerStatefulWidget {
   final Trip trip;

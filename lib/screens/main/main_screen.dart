@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
-import '../../providers/app_state_provider.dart';
+import '../../app/state/app_state_provider.dart';
 import '../../providers/destination_provider.dart';
-import '../../widgets/status/availability_state_view.dart';
+import '../../shared/widgets/status/availability_state_view.dart';
 
 import '../dashboard/dashboard_screen.dart';
 import '../destination_detail/destination_detail_screen.dart';

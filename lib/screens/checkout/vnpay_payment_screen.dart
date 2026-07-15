@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
-import '../../providers/api_provider.dart';
-import '../../utils/app_utils.dart';
+import '../../data/services/api_provider.dart';
+import '../../core/utils/app_utils.dart';
 
 class VnpayPaymentScreen extends ConsumerStatefulWidget {
   final String tripId;

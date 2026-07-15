@@ -6,14 +6,14 @@ import 'package:latlong2/latlong.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/trip.dart';
 import '../../models/destination.dart';
-import '../../widgets/app_image.dart';
+import '../../shared/widgets/app_image.dart';
 import '../../providers/destination_provider.dart';
 import 'widgets/booking_info_card.dart';
 import 'widgets/booking_status_timeline.dart';
 import 'widgets/trip_action_buttons.dart';
 import 'widgets/trip_section_header.dart';
 import 'widgets/trip_schedule_timeline.dart';
-import '../../utils/app_utils.dart';
+import '../../core/utils/app_utils.dart';
 import 'widgets/shared_trip_ui.dart';
 
 class PlaceTripDetailScreen extends ConsumerWidget {

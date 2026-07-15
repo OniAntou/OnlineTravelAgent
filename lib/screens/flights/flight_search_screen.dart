@@ -5,10 +5,10 @@ import 'package:intl/intl.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/flight.dart';
 import '../../providers/flight_provider.dart';
-import '../../widgets/app_placeholder_card.dart';
-import '../../widgets/app_image.dart';
-import '../../widgets/shimmer_loading.dart';
-import '../../utils/app_utils.dart';
+import '../../shared/widgets/app_placeholder_card.dart';
+import '../../shared/widgets/app_image.dart';
+import '../../shared/widgets/shimmer_loading.dart';
+import '../../core/utils/app_utils.dart';
 import 'flight_checkout_screen.dart';
 
 class FlightSearchScreen extends ConsumerStatefulWidget {

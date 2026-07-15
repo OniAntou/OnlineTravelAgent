@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/destination.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../widgets/app_image.dart';
+import '../../../shared/widgets/app_image.dart';
 
 class PopularDestinationCard extends StatelessWidget {
   final Destination destination;

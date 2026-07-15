@@ -4,10 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/hotel.dart';
 import '../../models/room.dart';
-import '../../providers/api_provider.dart';
-import '../../utils/api_exception.dart';
-import '../../utils/dialog_utils.dart';
-import '../../widgets/shimmer_loading.dart';
+import '../../data/services/api_provider.dart';
+import '../../core/utils/api_exception.dart';
+import '../../core/utils/dialog_utils.dart';
+import '../../shared/widgets/shimmer_loading.dart';
 import 'widgets/room_form_dialog.dart';
 
 class RoomManagerScreen extends ConsumerStatefulWidget {

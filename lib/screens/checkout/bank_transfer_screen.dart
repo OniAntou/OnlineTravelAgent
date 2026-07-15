@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../../core/theme/app_theme.dart';
-import '../../utils/app_utils.dart';
+import '../../core/utils/app_utils.dart';
 
 class BankTransferScreen extends ConsumerStatefulWidget {
   final double amount;

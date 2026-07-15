@@ -4,11 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/tour_package.dart';
 import '../../providers/tour_provider.dart';
-import '../../widgets/sort_bottom_sheet.dart';
-import '../../widgets/app_image.dart';
+import '../../shared/widgets/sort_bottom_sheet.dart';
+import '../../shared/widgets/app_image.dart';
 import 'tour_detail_screen.dart';
-import '../../providers/app_state_provider.dart';
-import '../../utils/app_utils.dart';
+import '../../app/state/app_state_provider.dart';
+import '../../core/utils/app_utils.dart';
 
 class ToursScreen extends ConsumerStatefulWidget {
   const ToursScreen({super.key});

@@ -14,10 +14,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:online_travel_agent/main.dart';
-import 'package:online_travel_agent/providers/api_provider.dart';
-import 'package:online_travel_agent/services/travel_api_service.dart';
-import 'package:online_travel_agent/services/sync_service.dart';
-import 'package:online_travel_agent/services/connectivity_service.dart';
+import 'package:online_travel_agent/data/services/api_provider.dart';
+import 'package:online_travel_agent/data/services/travel_api_service.dart';
+import 'package:online_travel_agent/data/services/sync_service.dart';
+import 'package:online_travel_agent/data/services/connectivity_service.dart';
 
 class FakeTravelApiService extends TravelApiService {
   @override

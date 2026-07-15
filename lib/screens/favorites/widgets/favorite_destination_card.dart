@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../models/destination.dart';
-import '../../../widgets/app_image.dart';
+import '../../../shared/widgets/app_image.dart';
 
 class FavoriteDestinationCard extends StatelessWidget {
   final Destination destination;

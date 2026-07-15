@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:online_travel_agent/models/document_item.dart';
 import 'package:online_travel_agent/models/user_profile.dart';
-import 'package:online_travel_agent/providers/api_provider.dart';
+import 'package:online_travel_agent/data/services/api_provider.dart';
 import 'package:online_travel_agent/providers/profile_provider.dart';
 
 import '../helpers/test_helpers.dart';

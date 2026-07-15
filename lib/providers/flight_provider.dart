@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../database/app_database.dart';
+import '../data/local/app_database.dart';
 import '../models/flight.dart';
-import 'api_provider.dart';
+import '../data/services/api_provider.dart';
 
 final flightsProvider = FutureProvider<List<Flight>>((ref) async {
   final db = AppDatabase.instance();

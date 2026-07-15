@@ -1,4 +1,4 @@
-import '../utils/json_number.dart';
+import '../core/utils/json_number.dart';
 
 class Room {
   final String id;

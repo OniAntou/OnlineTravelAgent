@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../providers/profile_provider.dart';
-import '../../../utils/snackbar_utils.dart';
-import '../../../widgets/custom_bottom_sheet.dart';
+import '../../../core/utils/snackbar_utils.dart';
+import '../../../shared/widgets/custom_bottom_sheet.dart';
 
 Future<void> showEditProfileSheet(BuildContext context, WidgetRef ref) async {
   final profile = ref.read(profileProvider);

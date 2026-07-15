@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../models/trip.dart';
-import '../../../utils/app_utils.dart';
+import '../../../core/utils/app_utils.dart';
 
 class BookingInfoCard extends StatelessWidget {
   final Trip trip;

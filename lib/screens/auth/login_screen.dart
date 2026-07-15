@@ -7,7 +7,7 @@ import 'package:easy_localization/easy_localization.dart';
 import '../../core/router/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../providers/auth_provider.dart';
-import '../../utils/dialog_utils.dart';
+import '../../core/utils/dialog_utils.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});

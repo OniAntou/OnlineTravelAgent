@@ -5,9 +5,9 @@ import 'package:latlong2/latlong.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../models/trip.dart';
-import '../../utils/app_utils.dart';
+import '../../core/utils/app_utils.dart';
 import '../../models/tour_package.dart';
-import '../../widgets/app_image.dart';
+import '../../shared/widgets/app_image.dart';
 import '../../providers/destination_provider.dart';
 import '../../providers/tour_provider.dart';
 import 'widgets/booking_info_card.dart';

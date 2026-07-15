@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
 import '../../providers/profile_provider.dart';
-import '../../utils/app_utils.dart';
+import '../../core/utils/app_utils.dart';
 
 class ContactSpecialScreen extends ConsumerStatefulWidget {
   const ContactSpecialScreen({super.key});

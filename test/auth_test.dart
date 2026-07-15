@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:online_travel_agent/services/travel_api_service.dart';
+import 'package:online_travel_agent/data/services/travel_api_service.dart';
 
 class FakeSecureStorage extends FlutterSecureStorage {
   final Map<String, String> data = {};

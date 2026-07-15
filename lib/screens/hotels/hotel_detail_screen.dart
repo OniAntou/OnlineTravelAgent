@@ -8,12 +8,12 @@ import '../../models/hotel.dart';
 import '../../models/room.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../utils/app_utils.dart';
-import '../../utils/dialog_utils.dart';
+import '../../core/utils/app_utils.dart';
+import '../../core/utils/dialog_utils.dart';
 import '../checkout/payment_method_screen.dart';
-import '../../widgets/review_section.dart';
-import '../../widgets/app_image.dart';
-import '../../providers/app_state_provider.dart';
+import '../../shared/widgets/review_section.dart';
+import '../../shared/widgets/app_image.dart';
+import '../../app/state/app_state_provider.dart';
 
 class HotelDetailScreen extends ConsumerStatefulWidget {
   final Hotel hotel;

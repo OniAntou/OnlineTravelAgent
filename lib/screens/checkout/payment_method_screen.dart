@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/router/app_routes.dart';
 import '../../core/theme/app_theme.dart';
-import '../../providers/api_provider.dart';
-import '../../utils/api_exception.dart';
-import '../../utils/app_utils.dart';
+import '../../data/services/api_provider.dart';
+import '../../core/utils/api_exception.dart';
+import '../../core/utils/app_utils.dart';
 import 'bank_transfer_screen.dart';
 // removed vnpay_webview_screen
 

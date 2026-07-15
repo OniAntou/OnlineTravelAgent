@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:online_travel_agent/services/travel_api_service.dart';
+import 'package:online_travel_agent/data/services/travel_api_service.dart';
 import 'package:online_travel_agent/models/destination.dart';
 import 'package:online_travel_agent/models/document_item.dart';
 import 'package:online_travel_agent/models/trip.dart';

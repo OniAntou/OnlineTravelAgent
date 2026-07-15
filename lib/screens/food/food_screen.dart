@@ -4,11 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/destination.dart';
 import '../../providers/destination_provider.dart';
-import '../../widgets/sort_bottom_sheet.dart';
+import '../../shared/widgets/sort_bottom_sheet.dart';
 import '../destination_detail/destination_detail_screen.dart';
-import '../../utils/app_utils.dart';
-import '../../widgets/app_placeholder_card.dart';
-import '../../widgets/place_grid_card.dart';
+import '../../core/utils/app_utils.dart';
+import '../../shared/widgets/app_placeholder_card.dart';
+import '../../shared/widgets/place_grid_card.dart';
 
 class FoodScreen extends ConsumerStatefulWidget {
   const FoodScreen({super.key});

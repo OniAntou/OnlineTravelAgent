@@ -3,10 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/router/app_routes.dart';
 import '../../models/destination.dart';
-import '../../providers/app_state_provider.dart';
+import '../../app/state/app_state_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/destination_provider.dart';
-import '../../widgets/app_placeholder_card.dart';
+import '../../shared/widgets/app_placeholder_card.dart';
 import 'widgets/favorite_destination_card.dart';
 
 class FavoritesScreen extends ConsumerWidget {

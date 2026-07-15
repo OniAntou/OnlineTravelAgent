@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:online_travel_agent/models/document_item.dart';
 import 'package:online_travel_agent/models/trip.dart';
-import 'package:online_travel_agent/providers/api_provider.dart';
-import 'package:online_travel_agent/providers/app_state_provider.dart';
+import 'package:online_travel_agent/data/services/api_provider.dart';
+import 'package:online_travel_agent/app/state/app_state_provider.dart';
 import 'package:online_travel_agent/providers/profile_provider.dart';
 import 'package:online_travel_agent/screens/notifications/notifications_screen.dart';
-import 'package:online_travel_agent/services/travel_api_service.dart';
+import 'package:online_travel_agent/data/services/travel_api_service.dart';
 
 import '../helpers/test_helpers.dart';
 
