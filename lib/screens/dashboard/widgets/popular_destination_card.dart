@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../models/destination.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../widgets/app_image.dart';
 
 class PopularDestinationCard extends StatelessWidget {
   final Destination destination;
@@ -28,7 +29,7 @@ class PopularDestinationCard extends StatelessWidget {
           children: [
             Hero(
               tag: 'dest_image_${destination.name}',
-              child: Image.asset(
+              child: AppImage(
                 destination.imagePath,
                 fit: BoxFit.cover,
                 width: double.infinity,

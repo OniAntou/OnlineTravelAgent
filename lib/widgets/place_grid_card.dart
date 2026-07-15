@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
+import 'app_image.dart';
 
 class PlaceGridCard extends StatelessWidget {
   final String heroTag;
@@ -56,7 +57,7 @@ class PlaceGridCard extends StatelessWidget {
                       ),
                       child: Hero(
                         tag: heroTag,
-                        child: Image.asset(
+                        child: AppImage(
                           imagePath,
                           fit: BoxFit.cover,
                           cacheWidth:

@@ -7,6 +7,7 @@ import '../../core/theme/app_theme.dart';
 import '../../models/trip.dart';
 import '../../utils/app_utils.dart';
 import '../../models/tour_package.dart';
+import '../../widgets/app_image.dart';
 import '../../providers/destination_provider.dart';
 import '../../providers/tour_provider.dart';
 import 'widgets/booking_info_card.dart';
@@ -152,7 +153,7 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                Image.asset(
+                AppImage(
                   widget.trip.imagePath,
                   fit: BoxFit.cover,
                   cacheWidth: heroCacheWidth,

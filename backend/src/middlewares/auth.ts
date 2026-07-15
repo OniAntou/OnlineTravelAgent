@@ -21,15 +21,18 @@ function timingSafeEqual(left: string, right: string): boolean {
 // Client Optional Auth (Sets req.userId if valid, but does not block if missing)
 export const optionalAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   const token = extractToken(req);
-  if (token) {
-    try {
-      const decoded = jwt.verify(token, env.jwtSecret) as { userId: string };
-      (req as any).userId = decoded.userId;
-    } catch (err) {
-      // ignore invalid token, proceed as guest
-    }
+  if (!token) {
+    next();
+    return;
   }
-  next();
+
+  try {
+    const decoded = jwt.verify(token, env.jwtSecret) as { userId: string };
+    (req as any).userId = decoded.userId;
+    next();
+  } catch {
+    res.status(401).json({ message: "Unauthorized - Invalid token" });
+  }
 };
 
 // Client Strict Auth (Requires valid JWT)

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../models/destination.dart';
+import '../../../widgets/app_image.dart';
 
 class FavoriteDestinationCard extends StatelessWidget {
   final Destination destination;
@@ -39,7 +40,7 @@ class FavoriteDestinationCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(24),
               child: RepaintBoundary(
-                child: Image.asset(
+                child: AppImage(
                   destination.imagePath,
                   width: 140,
                   height: double.infinity,

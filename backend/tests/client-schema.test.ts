@@ -28,7 +28,7 @@ describe("client request schemas", () => {
     expect(parsed.success).toBe(false);
   });
 
-  it("coerces numeric guest and rating values", () => {
+  it("accepts numeric or labeled positive guest counts and coerces rating values", () => {
     const tour = bookTourSchema.safeParse({
       tourId: "tour-1",
       date: "2026-08-01",
@@ -41,9 +41,15 @@ describe("client request schemas", () => {
       rating: "5",
       comment: "Good",
     });
+    const labeledGuests = bookTourSchema.safeParse({
+      tourId: "tour-1",
+      date: "01/08/2026",
+      guests: "2 Người",
+    });
 
     expect(tour.success).toBe(true);
     expect(review.success).toBe(true);
+    expect(labeledGuests.success).toBe(true);
   });
 
   it("accepts hotel dates sent as DD/MM/YYYY", () => {
@@ -73,5 +79,27 @@ describe("client request schemas", () => {
 
     expect(sameDay.success).toBe(false);
     expect(beforeCheckIn.success).toBe(false);
+  });
+
+  it("rejects invalid trip dates and non-positive guest counts", () => {
+    const invalidDate = bookTripSchema.safeParse({
+      destinationId: "dest-1",
+      date: "31/02/2026",
+      guests: "2",
+    });
+    const invalidGuests = bookTourSchema.safeParse({
+      tourId: "tour-1",
+      date: "2026-08-01",
+      guests: "0",
+    });
+    const invalidLabeledGuests = bookTourSchema.safeParse({
+      tourId: "tour-1",
+      date: "2026-08-01",
+      guests: "0 Người",
+    });
+
+    expect(invalidDate.success).toBe(false);
+    expect(invalidGuests.success).toBe(false);
+    expect(invalidLabeledGuests.success).toBe(false);
   });
 });

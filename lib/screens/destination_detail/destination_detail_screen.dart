@@ -12,6 +12,7 @@ import '../../providers/auth_provider.dart';
 import '../../utils/app_utils.dart';
 import '../../utils/dialog_utils.dart';
 import '../../widgets/review_section.dart';
+import '../../widgets/app_image.dart';
 import '../../providers/destination_provider.dart';
 import '../../providers/app_state_provider.dart';
 
@@ -125,7 +126,7 @@ class _DestinationDetailScreenState
               ],
               background: Hero(
                 tag: 'dest_image_${d.name}',
-                child: Image.asset(
+                child: AppImage(
                   d.imagePath,
                   fit: BoxFit.cover,
                   cacheWidth: heroCacheWidth,
@@ -330,7 +331,7 @@ class _DestinationDetailScreenState
                       separatorBuilder: (_, _) => const SizedBox(width: 12),
                       itemBuilder: (context, index) => ClipRRect(
                         borderRadius: BorderRadius.circular(16),
-                        child: Image.asset(
+                        child: AppImage(
                           d.imagePath,
                           width: 100,
                           height: 100,

@@ -6,6 +6,7 @@ import 'package:latlong2/latlong.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/trip.dart';
 import '../../models/destination.dart';
+import '../../widgets/app_image.dart';
 import '../../providers/destination_provider.dart';
 import 'widgets/booking_info_card.dart';
 import 'widgets/booking_status_timeline.dart';
@@ -69,7 +70,7 @@ class PlaceTripDetailScreen extends ConsumerWidget {
             left: 0,
             right: 0,
             height: screenHeight * 0.45,
-            child: Image.asset(
+            child: AppImage(
               trip.imagePath,
               fit: BoxFit.cover,
               cacheWidth: heroCacheWidth,

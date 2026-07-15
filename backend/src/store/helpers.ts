@@ -38,12 +38,38 @@ export function orderCategoryNames(categories: Array<{ name: string }>): string[
   ];
 }
 
-function parseDateStr(dateStr: string) {
-  const parts = dateStr.split("/");
-  if (parts.length === 3) {
-    return new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+export function parseDateOnly(value: string): Date | null {
+  const normalized = value.trim();
+  const vietnameseDate = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(normalized);
+  const isoDate = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(normalized);
+  const parts = vietnameseDate
+    ? {
+        day: Number(vietnameseDate[1]),
+        month: Number(vietnameseDate[2]),
+        year: Number(vietnameseDate[3]),
+      }
+    : isoDate
+      ? {
+          day: Number(isoDate[3]),
+          month: Number(isoDate[2]),
+          year: Number(isoDate[1]),
+        }
+      : null;
+  if (!parts) return null;
+
+  const date = new Date(Date.UTC(parts.year, parts.month - 1, parts.day));
+  if (
+    date.getUTCFullYear() !== parts.year ||
+    date.getUTCMonth() !== parts.month - 1 ||
+    date.getUTCDate() !== parts.day
+  ) {
+    return null;
   }
-  return new Date();
+  return date;
+}
+
+export function formatSearchQuery(query: string): string {
+  return (query.match(/[\p{L}\p{N}]+/gu) ?? []).join(" | ");
 }
 
 import { TripStatus } from "@prisma/client";
@@ -52,40 +78,25 @@ export function processTripStatus<T extends { status: TripStatus; isUpcoming: bo
   trip: T,
 ): T {
   if (trip.status === TripStatus.CANCELLED) {
-    return { ...trip };
+    return { ...trip, isUpcoming: false };
   }
 
   const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const today = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
+  const [startValue, endValue] = trip.date.split(/\s+-\s+/, 2);
+  const start = parseDateOnly(startValue ?? "");
+  const end = endValue ? parseDateOnly(endValue) : start;
+  if (!start || !end || end < start) return { ...trip };
 
-  try {
-    let isOngoing = false;
-    let isHistory = false;
-
-    if (trip.date.includes(" - ")) {
-      const [startStr, endStr] = trip.date.split(" - ");
-      const start = parseDateStr(startStr.trim());
-      const end = parseDateStr(endStr.trim());
-
-      if (today >= start && today <= end) isOngoing = true;
-      if (today > end) isHistory = true;
-    } else {
-      const date = parseDateStr(trip.date.trim());
-      if (today.getTime() === date.getTime()) isOngoing = true;
-      if (today > date) isHistory = true;
-    }
-
-    if (isOngoing) {
-      return { ...trip, status: TripStatus.ONGOING, isUpcoming: false };
-    }
-    if (isHistory) {
-      return { ...trip, status: TripStatus.COMPLETED, isUpcoming: false };
-    }
-
+  if (today < start) {
     return { ...trip, status: TripStatus.ONGOING, isUpcoming: true };
-  } catch {
-    return { ...trip };
   }
+  if (today > end) {
+    return { ...trip, status: TripStatus.COMPLETED, isUpcoming: false };
+  }
+  return { ...trip, status: TripStatus.ONGOING, isUpcoming: false };
 }
 
 export async function getFavoriteDestinationIds(userId?: string) {

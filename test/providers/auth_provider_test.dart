@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:online_travel_agent/providers/auth_provider.dart';
@@ -34,7 +36,10 @@ void main() {
         overrides: [apiProvider.overrideWithValue(fakeApi)],
       );
       final notifier = container.read(authProvider.notifier);
-      final error = await notifier.login(email: 'test@test.com', password: 'password123');
+      final error = await notifier.login(
+        email: 'test@test.com',
+        password: 'password123',
+      );
 
       expect(error, isNull);
       final state = container.read(authProvider);
@@ -53,7 +58,10 @@ void main() {
         overrides: [apiProvider.overrideWithValue(fakeApi)],
       );
       final notifier = container.read(authProvider.notifier);
-      final error = await notifier.login(email: 'test@test.com', password: 'wrong');
+      final error = await notifier.login(
+        email: 'test@test.com',
+        password: 'wrong',
+      );
 
       expect(error, isNotNull);
       expect(error, contains('Invalid credentials'));
@@ -98,7 +106,9 @@ void main() {
       expect(error, contains('Email already exists'));
     });
 
-    test('logout clears state', () async {
+    test('logout clears state immediately and exposes completion', () async {
+      final logoutGate = Completer<void>();
+      fakeApi = _DelayedLogoutApi(fakeStorage, logoutGate);
       container = ProviderContainer(
         overrides: [apiProvider.overrideWithValue(fakeApi)],
       );
@@ -109,11 +119,20 @@ void main() {
       expect(container.read(authProvider).isLoggedIn, true);
 
       // Logout
-      notifier.logout();
+      final logoutFuture = notifier.logout();
       final state = container.read(authProvider);
       expect(state.isLoggedIn, false);
       expect(state.token, isNull);
       expect(state.user, isNull);
+
+      var completed = false;
+      logoutFuture.then((_) => completed = true);
+      await Future<void>.delayed(Duration.zero);
+      expect(completed, false);
+
+      logoutGate.complete();
+      await logoutFuture;
+      expect(completed, true);
     });
 
     test('session restore from storage', () async {
@@ -142,4 +161,14 @@ void main() {
       expect(state.user?.name, 'SavedUser');
     });
   });
+}
+
+class _DelayedLogoutApi extends FakeTravelApiService {
+  _DelayedLogoutApi(FakeSecureStorage storage, this.gate)
+    : super(secureStorage: storage);
+
+  final Completer<void> gate;
+
+  @override
+  Future<void> logout() => gate.future;
 }

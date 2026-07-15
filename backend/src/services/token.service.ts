@@ -15,6 +15,14 @@ type AuthUser = {
   role: Role;
 };
 
+type TokenPairRecord = {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  tokenHash: string;
+  expiresAt: Date;
+};
+
 function hashToken(token: string): string {
   return crypto.createHash("sha256").update(token).digest("hex");
 }
@@ -27,6 +35,25 @@ function signAccessToken(user: AuthUser): string {
   return jwt.sign({ userId: user.id, role: user.role }, env.jwtSecret, {
     expiresIn: ACCESS_TOKEN_TTL,
   });
+}
+
+function buildTokenPair(user: AuthUser): TokenPairRecord {
+  const refreshToken = createRefreshTokenValue();
+  return {
+    accessToken: signAccessToken(user),
+    refreshToken,
+    expiresIn: ACCESS_TOKEN_EXPIRES_IN_SECONDS,
+    tokenHash: hashToken(refreshToken),
+    expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_MS),
+  };
+}
+
+function publicTokenPair(pair: TokenPairRecord) {
+  return {
+    accessToken: pair.accessToken,
+    refreshToken: pair.refreshToken,
+    expiresIn: pair.expiresIn,
+  };
 }
 
 async function dbAvailable(): Promise<boolean> {
@@ -42,30 +69,23 @@ export const tokenService = {
   accessTokenExpiresInSeconds: ACCESS_TOKEN_EXPIRES_IN_SECONDS,
 
   async issueTokenPair(user: AuthUser) {
-    const accessToken = signAccessToken(user);
-    const refreshToken = createRefreshTokenValue();
-    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_TTL_MS);
-    const tokenHash = hashToken(refreshToken);
+    const pair = buildTokenPair(user);
 
     const useMem = !(await dbAvailable());
     if (useMem) {
       assertMemoryFallbackEnabled();
-      memoryDb.createRefreshToken(user.id, tokenHash, expiresAt);
+      memoryDb.createRefreshToken(user.id, pair.tokenHash, pair.expiresAt);
     } else {
       await prisma.refreshToken.create({
         data: {
           userId: user.id,
-          tokenHash,
-          expiresAt,
+          tokenHash: pair.tokenHash,
+          expiresAt: pair.expiresAt,
         },
       });
     }
 
-    return {
-      accessToken,
-      refreshToken,
-      expiresIn: ACCESS_TOKEN_EXPIRES_IN_SECONDS,
-    };
+    return publicTokenPair(pair);
   },
 
   async rotateRefreshToken(refreshToken: string) {
@@ -84,21 +104,38 @@ export const tokenService = {
       return this.issueTokenPair({ id: user.id, role: user.role as Role });
     }
 
-    const stored = await prisma.refreshToken.findUnique({
-      where: { tokenHash },
-      include: { user: true },
+    return prisma.$transaction(async (tx) => {
+      const now = new Date();
+      const stored = await tx.refreshToken.findUnique({
+        where: { tokenHash },
+        include: { user: true },
+      });
+
+      if (!stored || stored.revokedAt || stored.expiresAt <= now) {
+        return null;
+      }
+
+      const revoked = await tx.refreshToken.updateMany({
+        where: {
+          id: stored.id,
+          revokedAt: null,
+          expiresAt: { gt: now },
+        },
+        data: { revokedAt: now },
+      });
+      if (revoked.count !== 1) return null;
+
+      const user = { id: stored.user.id, role: stored.user.role };
+      const pair = buildTokenPair(user);
+      await tx.refreshToken.create({
+        data: {
+          userId: user.id,
+          tokenHash: pair.tokenHash,
+          expiresAt: pair.expiresAt,
+        },
+      });
+      return publicTokenPair(pair);
     });
-
-    if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
-      return null;
-    }
-
-    await prisma.refreshToken.update({
-      where: { id: stored.id },
-      data: { revokedAt: new Date() },
-    });
-
-    return this.issueTokenPair({ id: stored.user.id, role: stored.user.role });
   },
 
   async revokeRefreshToken(refreshToken: string) {

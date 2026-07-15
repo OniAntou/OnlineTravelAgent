@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../models/tour_package.dart';
 import '../../providers/tour_provider.dart';
 import '../../widgets/sort_bottom_sheet.dart';
+import '../../widgets/app_image.dart';
 import 'tour_detail_screen.dart';
 import '../../providers/app_state_provider.dart';
 import '../../utils/app_utils.dart';
@@ -251,7 +252,7 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
                       ),
                       child: Hero(
                         tag: 'tour_image_${tour.name}',
-                        child: Image.asset(
+                        child: AppImage(
                           tour.imagePath,
                           fit: BoxFit.cover,
                           cacheWidth:

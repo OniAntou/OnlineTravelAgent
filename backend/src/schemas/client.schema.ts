@@ -8,6 +8,23 @@ const optionalText = z.preprocess(
   z.coerce.string().trim().min(1).optional(),
 );
 const requiredText = (field: string) => z.coerce.string().trim().min(1, `${field} is required`);
+const bookingDate = (field: string) =>
+  requiredText(field).refine(
+    (value) => {
+      const parts = value.split(/\s+-\s+/);
+      return parts.every((p) => parseDateInput(p) !== null);
+    },
+    {
+      message: `${field} must be a valid date or date range`,
+    },
+  );
+const guestCount = z
+  .union([z.number(), z.string()])
+  .transform((value) => String(value).trim())
+  .refine(
+    (value) => /^[1-9]\d*(?:\s+\S.*)?$/.test(value),
+    "guests must start with a positive whole-number count",
+  );
 const optionalMoney = z.preprocess(
   emptyToUndefined,
   z.coerce.number().finite().nonnegative().optional(),
@@ -48,16 +65,16 @@ const parseDateInput = (value: string) => {
 
 export const bookTripSchema = z.object({
   destinationId: requiredText("destinationId"),
-  date: requiredText("date"),
-  guests: requiredText("guests"),
+  date: bookingDate("date"),
+  guests: guestCount,
   totalPrice: optionalMoney,
   requestId: optionalText,
 });
 
 export const bookFlightSchema = z.object({
   flightId: requiredText("flightId"),
-  date: requiredText("date"),
-  guests: requiredText("guests"),
+  date: bookingDate("date"),
+  guests: guestCount,
   requestId: optionalText,
 });
 
@@ -73,7 +90,7 @@ export const bookHotelSchema = z
     roomId: requiredText("roomId"),
     checkIn: requiredText("checkIn"),
     checkOut: requiredText("checkOut"),
-    guests: requiredText("guests"),
+    guests: guestCount,
     requestId: optionalText,
   })
   .superRefine((value, ctx) => {
@@ -109,14 +126,14 @@ export const bookHotelSchema = z
 
 export const bookTourSchema = z.object({
   tourId: requiredText("tourId"),
-  date: requiredText("date"),
-  guests: requiredText("guests"),
+  date: bookingDate("date"),
+  guests: guestCount,
   totalPrice: optionalMoney,
   requestId: optionalText,
 });
 
 export const reviewSchema = z.object({
-  targetType: requiredText("targetType"),
+  targetType: z.enum(["destination", "hotel", "tour", "flight"]),
   targetId: requiredText("targetId"),
   rating: z.coerce.number().int().min(1).max(5, "rating must be 1-5"),
   comment: z.coerce.string().trim().min(1, "comment is required").max(1000),

@@ -12,6 +12,7 @@ import '../../providers/auth_provider.dart';
 import '../../utils/dialog_utils.dart';
 import '../../utils/app_utils.dart';
 import '../../widgets/review_section.dart';
+import '../../widgets/app_image.dart';
 import '../../widgets/shimmer_loading.dart';
 import '../../providers/app_state_provider.dart';
 import '../checkout/payment_method_screen.dart';
@@ -150,7 +151,7 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                     children: [
                       Hero(
                         tag: 'tour_image_${t.name}',
-                        child: Image.asset(
+                        child: AppImage(
                           t.imagePath,
                           fit: BoxFit.cover,
                           cacheWidth:

@@ -4,6 +4,11 @@ import { generateId, processTripStatus } from "./helpers.js";
 import { mockFlights, mockDestinations } from "../data/mock-data.js";
 import { memoryDb } from "./memory-db.js";
 import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
+import { scheduleService } from "../services/schedule.service.js";
+import {
+  findIdempotentTrip,
+  recoverIdempotentTrip,
+} from "./booking-idempotency.js";
 
 async function dbAvailable(): Promise<boolean> {
   try {
@@ -12,6 +17,15 @@ async function dbAvailable(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+function filterTripsByType<T extends { isUpcoming: boolean }>(
+  trips: T[],
+  type?: string,
+) {
+  if (type === "upcoming") return trips.filter((trip) => trip.isUpcoming);
+  if (type === "past") return trips.filter((trip) => !trip.isUpcoming);
+  return trips;
 }
 
 export const tripStore = {
@@ -50,31 +64,54 @@ export const tripStore = {
     }
 
     if (requestId) {
-      const existing = await prisma.trip.findFirst({ where: { userId, requestId } });
+      const existing = await findIdempotentTrip(prisma, userId, requestId);
       if (existing) return existing;
     }
 
-    const destination = await prisma.destination.findUnique({
-      where: { id: destinationId },
-    });
-    if (!destination) return null;
+    try {
+      return await prisma.$transaction(async (tx) => {
+        const destination = await tx.destination.findUnique({
+          where: { id: destinationId },
+        });
+        if (!destination) return null;
 
-    return prisma.trip.create({
-      data: {
-        id: generateId("trip-dest"),
+        const trip = await tx.trip.create({
+          data: {
+            id: generateId("trip-dest"),
+            userId,
+            destination: destination.name,
+            location: destination.location,
+            date,
+            guests,
+            status: TripStatus.ONGOING,
+            imagePath: destination.imagePath,
+            isUpcoming: true,
+            destinationId: destination.id,
+            totalPrice: totalPrice,
+            requestId,
+          },
+        });
+        await scheduleService.copyTemplateToTrip(
+          {
+            tripId: trip.id,
+            sourceType: "destination",
+            sourceId: destination.id,
+            tripDate: date,
+          },
+          tx,
+        );
+        return trip;
+      });
+    } catch (error) {
+      const existing = await recoverIdempotentTrip(
+        error,
+        prisma,
         userId,
-        destination: destination.name,
-        location: destination.location,
-        date,
-        guests,
-        status: TripStatus.ONGOING,
-        imagePath: destination.imagePath,
-        isUpcoming: true,
-        destinationId: destination.id,
-        totalPrice: totalPrice,
         requestId,
-      },
-    });
+      );
+      if (existing) return existing;
+      throw error;
+    }
   },
 
   async bookFlightTrip(
@@ -110,28 +147,39 @@ export const tripStore = {
     }
 
     if (requestId) {
-      const existing = await prisma.trip.findFirst({ where: { userId, requestId } });
+      const existing = await findIdempotentTrip(prisma, userId, requestId);
       if (existing) return existing;
     }
 
     const flight = await prisma.flight.findUnique({ where: { id: flightId } });
     if (!flight) return null;
 
-    return prisma.trip.create({
-      data: {
-        id: generateId("trip-flight"),
+    try {
+      return await prisma.trip.create({
+        data: {
+          id: generateId("trip-flight"),
+          userId,
+          destination: `${flight.departure} ✈ ${flight.arrival}`,
+          location: flight.airline,
+          date,
+          guests,
+          status: TripStatus.ONGOING,
+          imagePath: flight.airlineLogo,
+          isUpcoming: true,
+          flightId: flight.id,
+          requestId,
+        },
+      });
+    } catch (error) {
+      const existing = await recoverIdempotentTrip(
+        error,
+        prisma,
         userId,
-        destination: `${flight.departure} ✈ ${flight.arrival}`,
-        location: flight.airline,
-        date,
-        guests,
-        status: TripStatus.ONGOING,
-        imagePath: flight.airlineLogo,
-        isUpcoming: true,
-        flightId: flight.id,
         requestId,
-      },
-    });
+      );
+      if (existing) return existing;
+      throw error;
+    }
   },
 
   async cancelTrip(userId: string | undefined, tripId: string) {
@@ -159,17 +207,20 @@ export const tripStore = {
     if (useMem) {
       assertMemoryFallbackEnabled();
       if (!userId) return [];
-      return memoryDb.findTripsByUserId(userId, type).map(processTripStatus as any);
+      const trips = memoryDb
+        .findTripsByUserId(userId)
+        .map((trip) => processTripStatus(trip as any)) as Array<{
+        isUpcoming: boolean;
+      }>;
+      return filterTripsByType(trips, type);
     }
 
     const where: Prisma.TripWhereInput = userId ? { userId } : {};
-    if (type === "upcoming") where.isUpcoming = true;
-    if (type === "past") where.isUpcoming = false;
     const trips = await prisma.trip.findMany({
       where,
       orderBy: { createdAt: "desc" },
     });
-    return trips.map(processTripStatus);
+    return filterTripsByType(trips.map(processTripStatus), type);
   },
 
   async searchFlights(departure?: string, arrival?: string) {

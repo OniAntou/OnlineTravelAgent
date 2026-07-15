@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   hotelFindFirst: vi.fn(),
+  hotelFindMany: vi.fn(),
   hotelDelete: vi.fn(),
   roomDeleteMany: vi.fn(),
   transaction: vi.fn(),
@@ -13,6 +14,7 @@ vi.mock("../src/config/prisma.js", () => ({
   default: {
     hotel: {
       findFirst: mocks.hotelFindFirst,
+      findMany: mocks.hotelFindMany,
       delete: mocks.hotelDelete,
     },
     room: {
@@ -34,6 +36,7 @@ describe("partner hotel deletion", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.hotelFindFirst.mockResolvedValue({ id: "hotel-1" });
+    mocks.hotelFindMany.mockResolvedValue([{ id: "hotel-1", rooms: [] }]);
     mocks.roomDeleteMany.mockResolvedValue({ count: 2 });
     mocks.hotelDelete.mockResolvedValue({ id: "hotel-1" });
     mocks.transaction.mockImplementation(async (callback) =>
@@ -57,5 +60,17 @@ describe("partner hotel deletion", () => {
       where: { id: "hotel-1" },
     });
     expect(mocks.transaction).toHaveBeenCalledOnce();
+  });
+
+  it("includes rooms in the partner hotel list", async () => {
+    const res = await request(app)
+      .get("/api/partner/hotels")
+      .set("Authorization", `Bearer ${partnerToken}`);
+
+    expect(res.status).toBe(200);
+    expect(mocks.hotelFindMany).toHaveBeenCalledWith({
+      where: { partnerId: "partner-1" },
+      include: { rooms: true },
+    });
   });
 });

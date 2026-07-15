@@ -11,10 +11,7 @@ final tripScheduleProvider = FutureProvider.autoDispose
       final socket = apiService.socket;
 
       // Listen to this specific trip's room
-      socket.emit('join_trip_room', {
-        'tripId': tripId,
-        'token': apiService.token,
-      });
+      apiService.joinTripRoom(tripId);
 
       void onScheduleUpdated(dynamic data) {
         if (data is Map && data['tripId'] != null && data['tripId'] != tripId) {
@@ -27,7 +24,7 @@ final tripScheduleProvider = FutureProvider.autoDispose
 
       ref.onDispose(() {
         socket.off('schedule_updated', onScheduleUpdated);
-        socket.emit('leave_trip_room', tripId);
+        apiService.leaveTripRoom(tripId);
       });
 
       return apiService.fetchTripSchedule(tripId);

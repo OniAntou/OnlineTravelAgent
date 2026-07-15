@@ -1,10 +1,14 @@
 import { Prisma } from "@prisma/client";
 import prisma from "../config/prisma.js";
-import { attachRealReviews, generateId } from "./helpers.js";
+import { attachRealReviews, formatSearchQuery, generateId } from "./helpers.js";
 import { TripStatus } from "@prisma/client";
 import { mockHotels } from "../data/mock-data.js";
 import { memoryDb } from "./memory-db.js";
 import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
+import {
+  findIdempotentTrip,
+  recoverIdempotentTrip,
+} from "./booking-idempotency.js";
 
 export const hotelStore = {
   async getHotels(location?: string) {
@@ -42,7 +46,7 @@ export const hotelStore = {
   async searchHotels(query: string) {
     if (!query.trim()) return [];
     try {
-      const formattedQuery = query.trim().split(/\s+/).join(" | ");
+      const formattedQuery = formatSearchQuery(query) || "no_searchable_tokens";
       const hotels = await prisma.hotel.findMany({
         where: {
           OR: [
@@ -98,7 +102,7 @@ export const hotelStore = {
     }
 
     if (requestId) {
-      const existing = await prisma.trip.findFirst({ where: { userId, requestId } });
+      const existing = await findIdempotentTrip(prisma, userId, requestId);
       if (existing) return existing;
     }
 
@@ -108,22 +112,33 @@ export const hotelStore = {
     });
     if (!room) return null;
 
-    return prisma.trip.create({
-      data: {
-        id: generateId("trip-hotel"),
+    try {
+      return await prisma.trip.create({
+        data: {
+          id: generateId("trip-hotel"),
+          userId,
+          destination: room.hotel.name,
+          location: room.hotel.location,
+          date: `${checkIn} - ${checkOut}`,
+          guests,
+          status: TripStatus.ONGOING,
+          imagePath: room.hotel.imagePath,
+          isUpcoming: true,
+          hotelId: room.hotel.id,
+          roomId: room.id,
+          totalPrice: room.price,
+          requestId,
+        },
+      });
+    } catch (error) {
+      const existing = await recoverIdempotentTrip(
+        error,
+        prisma,
         userId,
-        destination: room.hotel.name,
-        location: room.hotel.location,
-        date: `${checkIn} - ${checkOut}`,
-        guests,
-        status: TripStatus.ONGOING,
-        imagePath: room.hotel.imagePath,
-        isUpcoming: true,
-        hotelId: room.hotel.id,
-        roomId: room.id,
-        totalPrice: room.price,
         requestId,
-      },
-    });
+      );
+      if (existing) return existing;
+      throw error;
+    }
   },
 };

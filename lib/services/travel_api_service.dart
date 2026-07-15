@@ -17,6 +17,7 @@ import 'api/trip_api_service.dart';
 import 'api/location_api_service.dart';
 import 'api/document_api_service.dart';
 import 'api/review_api_service.dart';
+import 'realtime_room_registry.dart';
 import 'api/payment_api_service.dart';
 import 'api/partner_api_service.dart';
 
@@ -67,6 +68,7 @@ class TravelApiService {
   }
 
   FlutterSecureStorage get secureStorage => _client.secureStorage;
+  String get baseUrl => _client.baseUrl;
   String? get token => _client.token;
   set token(String? value) => _client.token = value;
   String? get userName => _client.userName;
@@ -82,12 +84,39 @@ class TravelApiService {
   set onAuthError(void Function()? handler) => _client.onAuthError = handler;
 
   io.Socket? _socket;
+  final RealtimeRoomRegistry _realtimeRooms = RealtimeRoomRegistry();
   io.Socket get socket {
-    _socket ??= io.io(
-      _client.baseUrl,
-      io.OptionBuilder().setTransports(['websocket']).build(),
-    );
+    if (_socket == null) {
+      final created = io.io(
+        _client.baseUrl,
+        io.OptionBuilder().setTransports(['websocket']).build(),
+      );
+      created.on('connect', (_) {
+        _realtimeRooms.rejoin(token: token, emit: created.emit);
+      });
+      _socket = created;
+    }
     return _socket!;
+  }
+
+  void joinTripRoom(String tripId) {
+    _realtimeRooms.trackTrip(tripId);
+    _realtimeRooms.rejoin(token: token, emit: socket.emit);
+  }
+
+  void leaveTripRoom(String tripId) {
+    _realtimeRooms.untrackTrip(tripId);
+    _socket?.emit('leave_trip_room', tripId);
+  }
+
+  void joinTourRoom(String tourId) {
+    _realtimeRooms.trackTour(tourId);
+    _realtimeRooms.rejoin(token: token, emit: socket.emit);
+  }
+
+  void leaveTourRoom(String tourId) {
+    _realtimeRooms.untrackTour(tourId);
+    _socket?.emit('leave_tour_room', tourId);
   }
 
   Future<BootstrapData> fetchBootstrap() async {
@@ -116,7 +145,14 @@ class TravelApiService {
     required String email,
     required String password,
   }) => auth.register(name: name, email: email, password: password);
-  Future<void> logout() => auth.logout();
+  Future<void> logout() async {
+    _realtimeRooms.clear();
+    _socket?.disconnect();
+    _socket?.dispose();
+    _socket = null;
+    await auth.logout();
+  }
+
   Future<Map<String, dynamic>> becomePartner() => auth.becomePartner();
 
   // Delegated Location Methods

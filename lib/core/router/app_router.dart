@@ -10,12 +10,13 @@ import '../../screens/welcome/welcome_screen.dart';
 import '../../providers/auth_provider.dart';
 import 'app_routes.dart';
 
-final _rootNavigatorKey = GlobalKey<NavigatorState>();
+final rootNavigatorKeyProvider = Provider<GlobalKey<NavigatorState>>((ref) => GlobalKey<NavigatorState>());
 
 final appRouterProvider = Provider<GoRouter>((ref) {
+  final rootNavigatorKey = ref.watch(rootNavigatorKeyProvider);
   late final GoRouter router;
   router = GoRouter(
-    navigatorKey: _rootNavigatorKey,
+    navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.welcome,
     redirect: (context, state) {
       final authState = ref.read(authProvider);
@@ -70,5 +71,3 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   ref.listen(authProvider, (_, _) => router.refresh());
   return router;
 });
-
-GlobalKey<NavigatorState> get rootNavigatorKey => _rootNavigatorKey;

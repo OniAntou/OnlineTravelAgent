@@ -1,5 +1,5 @@
 import prisma from "../config/prisma.js";
-import { attachRealReviews } from "./helpers.js";
+import { attachRealReviews, formatSearchQuery } from "./helpers.js";
 import { mockHotels, mockTourPackages, mockDestinations } from "../data/mock-data.js";
 import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
 
@@ -7,7 +7,7 @@ export const searchStore = {
   async globalSearch(query: string) {
     if (!query.trim()) return { hotels: [], tours: [], destinations: [] };
     try {
-      const formattedQuery = query.trim().split(/\s+/).join(" | ");
+      const formattedQuery = formatSearchQuery(query) || "no_searchable_tokens";
       const [hotels, tours, destinations] = await Promise.all([
         prisma.hotel.findMany({
           where: {

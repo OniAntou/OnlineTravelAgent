@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../models/destination.dart';
 import '../../providers/trip_provider.dart';
 import '../../widgets/guest_counter.dart';
+import '../../widgets/app_image.dart';
 import 'payment_method_screen.dart';
 import 'widgets/summary_card.dart';
 import 'widgets/transport_selection.dart';
@@ -289,7 +290,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
+            child: AppImage(
               widget.destination.imagePath,
               width: 80,
               height: 80,

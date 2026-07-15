@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/destination.dart';
 import '../services/sync_service.dart';
@@ -7,6 +9,9 @@ import 'app_state_provider.dart';
 
 // 1. Destinations Notifier (Mutable due to favorites)
 class DestinationsNotifier extends Notifier<List<Destination>> {
+  final Map<String, Future<void>> _favoriteMutationTails = {};
+  final Map<String, bool> _confirmedFavoriteValues = {};
+
   @override
   List<Destination> build() {
     final bootstrap = ref.watch(bootstrapProvider).value;
@@ -19,42 +24,51 @@ class DestinationsNotifier extends Notifier<List<Destination>> {
 
     final current = state[index];
     final newValue = !current.isFavorite;
+    _confirmedFavoriteValues.putIfAbsent(id, () => current.isFavorite);
 
-    // Optimistic update
+    _setLocalFavorite(id, newValue);
+
+    final previous = _favoriteMutationTails[id] ?? Future<void>.value();
+    late final Future<void> mutation;
+    mutation = previous.then((_) async {
+      try {
+        await ref.read(apiProvider).setFavorite(id, newValue);
+        _confirmedFavoriteValues[id] = newValue;
+      } catch (error) {
+        ref
+            .read(destinationErrorProvider.notifier)
+            .setError(
+              error is ApiException
+                  ? error.message
+                  : getErrorMessage(error),
+            );
+        if (identical(_favoriteMutationTails[id], mutation)) {
+          _setLocalFavorite(
+            id,
+            _confirmedFavoriteValues[id] ?? current.isFavorite,
+          );
+        }
+      }
+    });
+    _favoriteMutationTails[id] = mutation;
+
+    await mutation;
+    if (identical(_favoriteMutationTails[id], mutation)) {
+      _favoriteMutationTails.remove(id);
+      _confirmedFavoriteValues.remove(id);
+    }
+  }
+
+  void _setLocalFavorite(String id, bool value) {
+    final index = state.indexWhere((destination) => destination.id == id);
+    if (index == -1) return;
+    final current = state[index];
     state = [
       for (int i = 0; i < state.length; i++)
-        if (i == index) current.copyWith(isFavorite: newValue) else state[i],
+        if (i == index) current.copyWith(isFavorite: value) else state[i],
     ];
-
-    // Sync to SQLite
-    ref.read(syncServiceProvider).syncFavorite(id, newValue);
-
-    try {
-      await ref.read(apiProvider).setFavorite(id, newValue);
-      ref.read(recommendedProvider.notifier).syncFavorite(id, newValue);
-    } on ApiException catch (e) {
-      state = [
-        for (int i = 0; i < state.length; i++)
-          if (i == index) current else state[i],
-      ];
-      ref.read(syncServiceProvider).syncFavorite(id, current.isFavorite);
-      ref
-          .read(recommendedProvider.notifier)
-          .syncFavorite(id, current.isFavorite);
-      ref.read(destinationErrorProvider.notifier).setError(e.message);
-      rethrow;
-    } catch (e) {
-      state = [
-        for (int i = 0; i < state.length; i++)
-          if (i == index) current else state[i],
-      ];
-      ref.read(syncServiceProvider).syncFavorite(id, current.isFavorite);
-      ref
-          .read(recommendedProvider.notifier)
-          .syncFavorite(id, current.isFavorite);
-      ref.read(destinationErrorProvider.notifier).setError(getErrorMessage(e));
-      rethrow;
-    }
+    unawaited(ref.read(syncServiceProvider).syncFavorite(id, value));
+    ref.read(recommendedProvider.notifier).syncFavorite(id, value);
   }
 }
 

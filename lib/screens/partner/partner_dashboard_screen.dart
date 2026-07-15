@@ -89,6 +89,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
     try {
       final api = ref.read(apiProvider);
       final data = await api.becomePartner();
+      if (!mounted) return;
       final newToken = data['token']?.toString();
       if (newToken != null) {
         api.token = newToken;
@@ -128,7 +129,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
       context: context,
       builder: (_) => HotelFormDialog(hotel: hotel),
     );
-    if (result == null) return;
+    if (result == null || !mounted) return;
     setState(() => _isLoading = true);
     try {
       final api = ref.read(apiProvider);
@@ -137,6 +138,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
       } else {
         await api.createPartnerHotel(result);
       }
+      if (!mounted) return;
       await _loadData();
     } catch (e) {
       if (mounted) {
@@ -147,7 +149,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
           ),
         );
       }
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -159,10 +161,11 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
       confirmText: 'Xóa',
       isDestructive: true,
     );
-    if (confirm != true) return;
+    if (confirm != true || !mounted) return;
     setState(() => _isLoading = true);
     try {
       await ref.read(apiProvider).deletePartnerHotel(hotel.id);
+      if (!mounted) return;
       await _loadData();
     } catch (e) {
       if (mounted) {
@@ -173,7 +176,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
           ),
         );
       }
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -184,7 +187,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
       context: context,
       builder: (_) => TourFormDialog(tour: tour),
     );
-    if (result == null) return;
+    if (result == null || !mounted) return;
     setState(() => _isLoading = true);
     try {
       final api = ref.read(apiProvider);
@@ -193,6 +196,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
       } else {
         await api.createPartnerTour(result);
       }
+      if (!mounted) return;
       await _loadData();
     } catch (e) {
       if (mounted) {
@@ -201,7 +205,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
           SnackBar(content: Text(msg), backgroundColor: Colors.red),
         );
       }
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -213,10 +217,11 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
       confirmText: 'Xóa',
       isDestructive: true,
     );
-    if (confirm != true) return;
+    if (confirm != true || !mounted) return;
     setState(() => _isLoading = true);
     try {
       await ref.read(apiProvider).deletePartnerTour(tour.id);
+      if (!mounted) return;
       await _loadData();
     } catch (e) {
       if (mounted) {
@@ -225,7 +230,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
           SnackBar(content: Text(msg), backgroundColor: Colors.red),
         );
       }
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -236,7 +241,8 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
       context,
       MaterialPageRoute(builder: (_) => RoomManagerScreen(hotel: hotel)),
     );
-    _loadData();
+    if (!mounted) return;
+    await _loadData();
   }
 
   // ── Build ───────────────────────────────────────────────────────────

@@ -8,6 +8,7 @@ import '../../providers/api_provider.dart';
 import '../../utils/api_exception.dart';
 import '../../utils/app_utils.dart';
 import 'bank_transfer_screen.dart';
+// removed vnpay_webview_screen
 
 class PaymentMethod {
   final String id;
@@ -369,25 +370,25 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
 
       final paymentUrl = result['paymentUrl'] as String;
 
-      // Open VNPAY gateway in browser directly
+      // Mở trình duyệt ngoài
       final uri = Uri.parse(paymentUrl);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Vui lòng hoàn tất thanh toán trên cổng VNPAY, sau đó quay lại kiểm tra',
-              ),
-            ),
-          );
-        }
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        throw Exception('Không thể mở trang thanh toán VNPAY');
+      }
+
+      if (!mounted) return;
+
+      // Bắt đầu polling chờ kết quả thanh toán
+      final isSuccess = await _pollPaymentStatus(tripId);
+
+      if (!mounted) return;
+
+      if (isSuccess == true) {
+        _showSuccessDialog(tripId);
       } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Không thể mở cổng VNPAY')),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Thanh toán VNPAY bị hủy hoặc thất bại')),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -397,6 +398,71 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
         ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
       }
     }
+  }
+
+  Future<bool> _pollPaymentStatus(String tripId) async {
+    final api = ref.read(apiProvider);
+    bool isCompleted = false;
+    bool isSuccess = false;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(color: AppTheme.primaryBlue),
+            const SizedBox(height: 16),
+            const Text(
+              'Đang chờ bạn thanh toán trên VNPAY...\n(Vui lòng không đóng màn hình này)',
+              textAlign: TextAlign.center,
+              style: TextStyle(height: 1.4, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: () {
+                isCompleted = true;
+                Navigator.pop(dialogContext);
+              },
+              child: const Text('Hủy bỏ', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            )
+          ],
+        ),
+      ),
+    );
+
+    int attempts = 0;
+    while (!isCompleted && attempts < 120) { // Timeout sau 10 phút
+      await Future.delayed(const Duration(seconds: 5));
+      if (isCompleted || !mounted) break;
+
+      try {
+        final statusRes = await api.checkPaymentStatus(tripId);
+        final status = statusRes['paymentStatus'] as String?;
+        if (status == 'PAID') {
+          isSuccess = true;
+          isCompleted = true;
+          if (mounted) Navigator.pop(context); // Đóng dialog
+          break;
+        } else if (status == 'FAILED' || status == 'CANCELLED') {
+          isSuccess = false;
+          isCompleted = true;
+          if (mounted) Navigator.pop(context);
+          break;
+        }
+      } catch (e) {
+        // Bỏ qua lỗi mạng khi polling
+      }
+      attempts++;
+    }
+
+    if (!isCompleted && mounted) {
+      Navigator.pop(context); // Đóng dialog nếu timeout
+    }
+
+    return isSuccess;
   }
 
   Future<void> _handleBankTransfer() async {

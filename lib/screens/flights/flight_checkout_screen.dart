@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/router/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/flight.dart';
+import '../../widgets/app_image.dart';
 import '../../providers/trip_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/app_utils.dart';
@@ -161,7 +162,7 @@ class _FlightCheckoutScreenState extends ConsumerState<FlightCheckoutScreen> {
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(4),
-                        child: Image.asset(
+                        child: AppImage(
                           widget.flight.airlineLogo,
                           width: 24,
                           height: 24,

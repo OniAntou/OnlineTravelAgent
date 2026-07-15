@@ -7,6 +7,8 @@ import {
   ScheduleTemplateInput,
 } from "../services/schedule.service.js";
 import { passwordService } from "../services/password.service.js";
+import { processTripStatus } from "../store/helpers.js";
+import { getTourScheduleRealtimeTarget } from "../services/schedule-realtime.js";
 import {
   CreateDestinationBody,
   UpdateDestinationBody,
@@ -53,6 +55,25 @@ function emitScheduleUpdated(req: Request, tripId: string) {
   }
 }
 
+function emitTourTemplateUpdated(
+  req: Request,
+  ...templates: Array<{
+    sourceType?: string | null;
+    tourPackageId?: string | null;
+  } | null>
+) {
+  const io = req.app.get("io");
+  if (!io) return;
+
+  const emittedRooms = new Set<string>();
+  for (const template of templates) {
+    const target = getTourScheduleRealtimeTarget(template);
+    if (!target || emittedRooms.has(target.room)) continue;
+    emittedRooms.add(target.room);
+    io.to(target.room).emit("schedule_updated", target.payload);
+  }
+}
+
 function validateScheduleItemUpdate(
   body: UpdateScheduleItemBody,
 ): string | null {
@@ -83,15 +104,19 @@ function validateScheduleItemUpdate(
 
 export const adminController = {
   getStats: asyncHandler(async (_: Request, res: Response) => {
-    const [destinations, hotels, flights, tours, tripsUpcoming, tripsHistory] =
+    const [destinations, hotels, flights, tours, trips] =
       await Promise.all([
         prisma.destination.count(),
         prisma.hotel.count(),
         prisma.flight.count(),
         prisma.tourPackage.count(),
-        prisma.trip.count({ where: { isUpcoming: true } }),
-        prisma.trip.count({ where: { isUpcoming: false } }),
+        prisma.trip.findMany({
+          select: { date: true, status: true, isUpcoming: true },
+        }),
       ]);
+    const normalizedTrips = trips.map(processTripStatus);
+    const tripsUpcoming = normalizedTrips.filter((trip) => trip.isUpcoming).length;
+    const tripsHistory = normalizedTrips.length - tripsUpcoming;
     res.json({
       destinations,
       hotels,
@@ -211,10 +236,11 @@ export const adminController = {
   }),
 
   deleteHotel: asyncHandler(async (req: Request, res: Response) => {
-    await prisma.room.deleteMany({
-      where: { hotelId: req.params.id as string },
+    const id = req.params.id as string;
+    await prisma.$transaction(async (tx) => {
+      await tx.room.deleteMany({ where: { hotelId: id } });
+      await tx.hotel.delete({ where: { id } });
     });
-    await prisma.hotel.delete({ where: { id: req.params.id as string } });
     res.json({ ok: true });
   }),
 
@@ -354,6 +380,7 @@ export const adminController = {
       const template = await scheduleService.createScheduleTemplate(
         req.body as ScheduleTemplateInput,
       );
+      emitTourTemplateUpdated(req, template);
       res.status(201).json(template);
     } catch (error) {
       res.status(400).json({
@@ -367,7 +394,7 @@ export const adminController = {
     const id = req.params.id as string;
     const existing = await prisma.scheduleTemplate.findUnique({
       where: { id },
-      select: { id: true },
+      select: { id: true, sourceType: true, tourPackageId: true },
     });
     if (!existing) {
       res.status(404).json({ message: "Schedule template not found" });
@@ -379,6 +406,7 @@ export const adminController = {
         id,
         req.body as ScheduleTemplateInput,
       );
+      emitTourTemplateUpdated(req, existing, template);
       res.json(template);
     } catch (error) {
       res.status(400).json({
@@ -392,7 +420,7 @@ export const adminController = {
     const id = req.params.id as string;
     const existing = await prisma.scheduleTemplate.findUnique({
       where: { id },
-      select: { id: true },
+      select: { id: true, sourceType: true, tourPackageId: true },
     });
     if (!existing) {
       res.status(404).json({ message: "Schedule template not found" });
@@ -400,6 +428,7 @@ export const adminController = {
     }
 
     await scheduleService.deleteScheduleTemplate(id);
+    emitTourTemplateUpdated(req, existing);
     res.json({ ok: true });
   }),
 

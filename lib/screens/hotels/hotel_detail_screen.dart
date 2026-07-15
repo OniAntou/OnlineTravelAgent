@@ -12,6 +12,7 @@ import '../../utils/app_utils.dart';
 import '../../utils/dialog_utils.dart';
 import '../checkout/payment_method_screen.dart';
 import '../../widgets/review_section.dart';
+import '../../widgets/app_image.dart';
 import '../../providers/app_state_provider.dart';
 
 class HotelDetailScreen extends ConsumerStatefulWidget {
@@ -118,7 +119,7 @@ class _HotelDetailScreenState extends ConsumerState<HotelDetailScreen> {
               background: Hero(
                 // Use hotel id in hero tag to avoid collisions when names are identical
                 tag: 'hotel_image_${h.id}',
-                child: Image.asset(
+                child: AppImage(
                   h.imagePath,
                   fit: BoxFit.cover,
                   cacheWidth:
@@ -420,7 +421,7 @@ class _HotelDetailScreenState extends ConsumerState<HotelDetailScreen> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
-              child: Image.asset(
+              child: AppImage(
                 room.imagePath,
                 width: 80,
                 height: 80,

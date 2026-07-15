@@ -23,9 +23,10 @@ class GlobalSearchQueryNotifier extends Notifier<String> {
   void update(String value) => state = value;
 }
 
-final globalSearchQueryProvider = NotifierProvider<GlobalSearchQueryNotifier, String>(
-  GlobalSearchQueryNotifier.new,
-);
+final globalSearchQueryProvider =
+    NotifierProvider.autoDispose<GlobalSearchQueryNotifier, String>(
+      GlobalSearchQueryNotifier.new,
+    );
 
 final globalSearchResultsProvider = FutureProvider.autoDispose<Map<String, List<dynamic>>>((ref) async {
   final query = ref.watch(globalSearchQueryProvider);

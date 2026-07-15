@@ -243,7 +243,10 @@ export const paymentController = {
       return;
     }
 
-    const ipAddr = req.ip ?? req.socket.remoteAddress ?? "127.0.0.1";
+    let ipAddr = req.ip ?? req.socket.remoteAddress ?? "127.0.0.1";
+    if (ipAddr === "::1" || ipAddr === "::ffff:127.0.0.1") {
+      ipAddr = "127.0.0.1";
+    }
     const locale = (req.body.locale as string) ?? "vn";
 
     let paymentUrl: string;

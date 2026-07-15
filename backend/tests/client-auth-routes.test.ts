@@ -3,6 +3,14 @@ import request from "supertest";
 import { app } from "../src/app.js";
 
 describe("client protected routes", () => {
+  it("rejects a supplied invalid token on an optional-auth route", async () => {
+    const res = await request(app)
+      .get("/api/bootstrap")
+      .set("Authorization", "Bearer invalid-token");
+
+    expect(res.status).toBe(401);
+  });
+
   it("requires authentication before reading a trip schedule", async () => {
     const res = await request(app).get("/api/trips/trip-1/schedule");
 

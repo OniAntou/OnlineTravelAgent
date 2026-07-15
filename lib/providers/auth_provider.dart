@@ -118,9 +118,9 @@ class AuthNotifier extends Notifier<AuthState> {
     }
   }
 
-  void logout() {
-    ref.read(apiProvider).logout();
+  Future<void> logout() async {
     state = const AuthState();
+    await ref.read(apiProvider).logout();
   }
 
   void updateToken(String newToken, {UserProfile? user}) {

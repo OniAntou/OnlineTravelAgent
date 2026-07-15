@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../models/trip.dart';
 import '../../../models/trip_schedule.dart';
 import '../../../providers/trip_schedule_provider.dart';
+import '../../../utils/trip_schedule_status.dart';
 import '../../../widgets/shimmer_loading.dart';
 
 class TripScheduleTimeline extends ConsumerStatefulWidget {
@@ -50,72 +51,22 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
     super.dispose();
   }
 
-  int _timeToMinutes(String timeStr) {
-    final parts = timeStr.split(':');
-    if (parts.length != 2) return 0;
-    final hr = int.tryParse(parts[0]) ?? 0;
-    final mn = int.tryParse(parts[1]) ?? 0;
-    return hr * 60 + mn;
-  }
-
-  DateTime? _parseScheduleDate(String? value) {
-    if (value == null || value.isEmpty) return null;
-    final parsed = DateTime.tryParse(value);
-    if (parsed == null) return null;
-    return DateTime(parsed.year, parsed.month, parsed.day);
-  }
-
   String _getMilestoneStatus(
     TripScheduleDay day,
     List<TripScheduleItem> items,
     int index,
   ) {
     final item = items[index];
-    if (item.statusOverride != null && item.statusOverride!.isNotEmpty) {
-      return item.statusOverride!;
-    }
-
-    final statusLower = widget.trip.status.toLowerCase();
-    if (statusLower == 'đã đi' ||
-        statusLower == 'hoàn thành' ||
-        statusLower == 'completed') {
-      return 'completed';
-    }
-    if (statusLower == 'sắp tới') {
-      return 'upcoming';
-    }
-
-    final scheduleDate = _parseScheduleDate(day.date);
-    if (scheduleDate != null) {
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-      if (scheduleDate.isBefore(today)) {
-        return 'completed';
-      }
-      if (scheduleDate.isAfter(today)) {
-        return 'upcoming';
-      }
-    }
-
-    final now = TimeOfDay.now();
-    final currentMinutes = now.hour * 60 + now.minute;
-
-    // Find the currently active index
-    int activeIndex = -1;
-    for (int i = 0; i < items.length; i++) {
-      final mMin = _timeToMinutes(items[i].startTime);
-      if (currentMinutes >= mMin) {
-        activeIndex = i;
-      }
-    }
-
-    if (index < activeIndex) {
-      return 'completed';
-    } else if (index == activeIndex) {
-      return 'ongoing';
-    } else {
-      return 'upcoming';
-    }
+    return deriveTripScheduleMilestoneStatus(
+      tripStatus: widget.trip.status,
+      scheduleDate: day.date,
+      startTime: item.startTime,
+      endTime: item.endTime,
+      nextStartTime: index + 1 < items.length
+          ? items[index + 1].startTime
+          : null,
+      statusOverride: item.statusOverride,
+    );
   }
 
   @override

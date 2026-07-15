@@ -24,6 +24,7 @@ import { UPLOAD_DIR, UploadValidationError } from "./middlewares/upload.js";
 import { adminAuth } from "./middlewares/auth.js";
 import { panelRateLimiter, panelStaticHeaders } from "./middlewares/panel.js";
 import { PersistentDataUnavailableError } from "./config/data-availability.js";
+import { HttpError } from "./utils/http-error.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -132,6 +133,10 @@ import { ZodError } from "zod";
 
 // Global error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  if (err instanceof HttpError) {
+    res.status(err.statusCode).json({ message: err.message });
+    return;
+  }
   if (err instanceof PersistentDataUnavailableError) {
     res.status(503).json({ message: err.message });
     return;
@@ -147,6 +152,20 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
   if (err instanceof ZodError) {
     res.status(400).json({ message: "Validation error", errors: err.issues });
+    return;
+  }
+
+  const prismaCode = (err as Error & { code?: unknown }).code;
+  if (prismaCode === "P2002") {
+    res.status(409).json({ message: "Resource already exists" });
+    return;
+  }
+  if (prismaCode === "P2025") {
+    res.status(404).json({ message: "Resource not found" });
+    return;
+  }
+  if (prismaCode === "P2003") {
+    res.status(409).json({ message: "Resource is still in use" });
     return;
   }
 

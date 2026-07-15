@@ -6,7 +6,10 @@ import prisma from "../config/prisma.js";
 export const partnerController = {
   getHotels: asyncHandler(async (req: Request, res: Response) => {
     const partnerId = (req as any).userId;
-    const hotels = await prisma.hotel.findMany({ where: { partnerId } });
+    const hotels = await prisma.hotel.findMany({
+      where: { partnerId },
+      include: { rooms: true },
+    });
     res.json(hotels);
   }),
 

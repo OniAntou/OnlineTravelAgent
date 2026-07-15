@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TripStatus } from "@prisma/client";
 
 export const adminDestinationSchema = z.object({
   id: z.string().optional(),
@@ -61,7 +62,7 @@ export const adminTourSchema = z.object({
 });
 
 export const adminTripSchema = z.object({
-  status: z.string().optional(),
+  status: z.nativeEnum(TripStatus).optional(),
   isUpcoming: z.boolean().optional(),
 });
 

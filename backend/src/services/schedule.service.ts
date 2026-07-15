@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import prisma from "../config/prisma.js";
+import { parseDateOnly } from "../store/helpers.js";
 
 export type ScheduleSourceType = "tour" | "destination";
 
@@ -33,6 +34,67 @@ export type ScheduleTemplateInput = {
   destinationId?: string | null;
   days?: ScheduleDayInput[];
 };
+
+type CopyTemplateParams = {
+  tripId: string;
+  sourceType: ScheduleSourceType;
+  sourceId: string;
+  tripDate?: string | null;
+};
+
+async function copyTemplateToTripWithClient(
+  tx: Prisma.TransactionClient,
+  params: CopyTemplateParams,
+) {
+  const existing = await tx.tripScheduleDay.count({
+    where: { tripId: params.tripId },
+  });
+  if (existing > 0) return;
+
+  const template = await tx.scheduleTemplate.findFirst({
+    where:
+      params.sourceType === "tour"
+        ? { sourceType: "tour", tourPackageId: params.sourceId }
+        : { sourceType: "destination", destinationId: params.sourceId },
+    include: {
+      days: {
+        orderBy: { dayNumber: "asc" },
+        include: {
+          items: { orderBy: [{ sortOrder: "asc" }, { startTime: "asc" }] },
+        },
+      },
+    },
+  });
+  if (!template) return;
+
+  const startDate = parseTripStartDate(params.tripDate);
+  for (const day of template.days) {
+    const createdDay = await tx.tripScheduleDay.create({
+      data: {
+        tripId: params.tripId,
+        dayNumber: day.dayNumber,
+        date: startDate ? addDays(startDate, day.dayNumber - 1) : null,
+        title: day.title,
+      },
+    });
+
+    for (const item of day.items) {
+      await tx.tripScheduleItem.create({
+        data: {
+          dayId: createdDay.id,
+          startTime: item.startTime,
+          endTime: item.endTime,
+          title: item.title,
+          description: item.description,
+          locationName: item.locationName,
+          latitude: item.latitude,
+          longitude: item.longitude,
+          sortOrder: item.sortOrder,
+        },
+      });
+    }
+  }
+}
 
 const allowedOverrides = new Set([
   "completed",
@@ -75,23 +137,7 @@ function toNullableDate(value?: string | null): Date | null {
 
 export function parseTripStartDate(value?: string | null): Date | null {
   if (!value) return null;
-  const match = value.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (!match) return null;
-
-  const day = Number.parseInt(match[1] ?? "", 10);
-  const month = Number.parseInt(match[2] ?? "", 10);
-  const year = Number.parseInt(match[3] ?? "", 10);
-  if (!day || !month || !year) return null;
-
-  const date = new Date(Date.UTC(year, month - 1, day));
-  if (
-    date.getUTCFullYear() !== year ||
-    date.getUTCMonth() !== month - 1 ||
-    date.getUTCDate() !== day
-  ) {
-    return null;
-  }
-  return date;
+  return parseDateOnly(value.split(/\s+-\s+/, 1)[0] ?? "");
 }
 
 function addDays(date: Date, days: number): Date {
@@ -267,62 +313,14 @@ export const scheduleService = {
     return { ok: true };
   },
 
-  async copyTemplateToTrip(params: {
-    tripId: string;
-    sourceType: ScheduleSourceType;
-    sourceId: string;
-    tripDate?: string | null;
-  }) {
-    const existing = await prisma.tripScheduleDay.count({
-      where: { tripId: params.tripId },
-    });
-    if (existing > 0) return;
-
-    const template = await prisma.scheduleTemplate.findFirst({
-      where:
-        params.sourceType === "tour"
-          ? { sourceType: "tour", tourPackageId: params.sourceId }
-          : { sourceType: "destination", destinationId: params.sourceId },
-      include: {
-        days: {
-          orderBy: { dayNumber: "asc" },
-          include: {
-            items: { orderBy: [{ sortOrder: "asc" }, { startTime: "asc" }] },
-          },
-        },
-      },
-    });
-    if (!template) return;
-
-    const startDate = parseTripStartDate(params.tripDate);
-    await prisma.$transaction(async (tx) => {
-      for (const day of template.days) {
-        const createdDay = await tx.tripScheduleDay.create({
-          data: {
-            tripId: params.tripId,
-            dayNumber: day.dayNumber,
-            date: startDate ? addDays(startDate, day.dayNumber - 1) : null,
-            title: day.title,
-          },
-        });
-
-        for (const item of day.items) {
-          await tx.tripScheduleItem.create({
-            data: {
-              dayId: createdDay.id,
-              startTime: item.startTime,
-              endTime: item.endTime,
-              title: item.title,
-              description: item.description,
-              locationName: item.locationName,
-              latitude: item.latitude,
-              longitude: item.longitude,
-              sortOrder: item.sortOrder,
-            },
-          });
-        }
-      }
-    });
+  async copyTemplateToTrip(
+    params: CopyTemplateParams,
+    transaction?: Prisma.TransactionClient,
+  ) {
+    if (transaction) {
+      return copyTemplateToTripWithClient(transaction, params);
+    }
+    return prisma.$transaction((tx) => copyTemplateToTripWithClient(tx, params));
   },
 
   async getTripSchedule(tripId: string, requesterUserId?: string) {

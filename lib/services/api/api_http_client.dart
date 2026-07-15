@@ -12,15 +12,27 @@ import '../../core/theme/app_theme.dart';
 import '../../database/app_database.dart';
 import '../../utils/api_exception.dart';
 
+typedef QueueRequestWriter =
+    Future<void> Function(
+      String method,
+      String path,
+      Map<String, dynamic>? body,
+    );
+
 class ApiHttpClient {
-  ApiHttpClient({String? baseUrl, FlutterSecureStorage? secureStorage})
-    : _baseUrl = baseUrl ?? _defaultBaseUrl(),
-      _secureStorage = secureStorage ?? const FlutterSecureStorage() {
+  ApiHttpClient({
+    String? baseUrl,
+    FlutterSecureStorage? secureStorage,
+    this.queueRequestWriter,
+  }) : _baseUrl = baseUrl ?? _defaultBaseUrl(),
+       _secureStorage = secureStorage ?? const FlutterSecureStorage() {
     loadTokenFuture = _loadToken();
   }
 
   final String _baseUrl;
   final FlutterSecureStorage _secureStorage;
+  @visibleForTesting
+  final QueueRequestWriter? queueRequestWriter;
   FlutterSecureStorage get secureStorage => _secureStorage;
   String? token;
   String? refreshToken;
@@ -30,6 +42,7 @@ class ApiHttpClient {
   late final Future<void> loadTokenFuture;
   void Function()? onAuthError;
   Future<bool>? _refreshFuture;
+  Future<void> _localLogoutFuture = Future<void>.value();
 
   static const String _tokenKey = 'auth_token';
   static const String _refreshTokenKey = 'auth_refresh_token';
@@ -49,6 +62,8 @@ class ApiHttpClient {
   Future<void> ensureTokenLoaded() async {
     await loadTokenFuture;
   }
+
+  Future<void> waitForLocalLogout() => _localLogoutFuture;
 
   String get baseUrl => _baseUrl;
 
@@ -169,7 +184,7 @@ class ApiHttpClient {
     String method,
     String path, [
     Map<String, dynamic>? body,
-    bool queueOnFailure = true,
+    bool? queueOnFailure,
   ]) async {
     await ensureTokenLoaded();
     return safeCall(
@@ -177,7 +192,7 @@ class ApiHttpClient {
       method,
       path,
       body,
-      queueOnFailure,
+      queueOnFailure ?? false,
     );
   }
 
@@ -234,21 +249,21 @@ class ApiHttpClient {
 
   Future<Map<String, dynamic>> getJson(String path) async {
     final response = await sendRequest('GET', path);
-    return jsonDecode(response.body) as Map<String, dynamic>;
+    return await compute(_decodeJsonMap, response.body);
   }
 
   Future<List<dynamic>> getList(String path) async {
     final response = await sendRequest('GET', path);
-    return jsonDecode(response.body) as List<dynamic>;
+    return await compute(_decodeJsonList, response.body);
   }
 
   Future<Map<String, dynamic>> postJson(
     String path,
     Map<String, dynamic> body, {
-    bool queueOnFailure = true,
+    bool? queueOnFailure,
   }) async {
     final response = await sendRequest('POST', path, body, queueOnFailure);
-    return jsonDecode(response.body) as Map<String, dynamic>;
+    return await compute(_decodeJsonMap, response.body);
   }
 
   Future<Map<String, dynamic>> patchJson(
@@ -256,7 +271,7 @@ class ApiHttpClient {
     Map<String, dynamic> body,
   ) async {
     final response = await sendRequest('PATCH', path, body);
-    return jsonDecode(response.body) as Map<String, dynamic>;
+    return await compute(_decodeJsonMap, response.body);
   }
 
   Future<Map<String, dynamic>> putJson(
@@ -264,7 +279,7 @@ class ApiHttpClient {
     Map<String, dynamic> body,
   ) async {
     final response = await sendRequest('PUT', path, body);
-    return jsonDecode(response.body) as Map<String, dynamic>;
+    return await compute(_decodeJsonMap, response.body);
   }
 
   Future<void> delete(String path) async {
@@ -314,12 +329,22 @@ class ApiHttpClient {
 
   Future<void> logout() async {
     final currentRefreshToken = refreshToken;
+    token = null;
+    refreshToken = null;
+    userName = null;
+    userEmail = null;
+    userRole = null;
+
+    final localClear = _clearLocalSession();
+    _localLogoutFuture = localClear;
+    await localClear;
+
     try {
       if (currentRefreshToken != null && currentRefreshToken.isNotEmpty) {
         await http
             .post(
               uri('/api/auth/logout'),
-              headers: headers,
+              headers: const {'Content-Type': 'application/json'},
               body: jsonEncode({'refreshToken': currentRefreshToken}),
             )
             .timeout(AppTheme.apiTimeout);
@@ -327,12 +352,9 @@ class ApiHttpClient {
     } catch (e) {
       debugPrint('Server logout failed: $e');
     }
+  }
 
-    token = null;
-    refreshToken = null;
-    userName = null;
-    userEmail = null;
-    userRole = null;
+  Future<void> _clearLocalSession() async {
     try {
       await _secureStorage.delete(key: _tokenKey);
       await _secureStorage.delete(key: _refreshTokenKey);
@@ -401,7 +423,7 @@ class ApiHttpClient {
     String? method,
     String? path,
     Map<String, dynamic>? body,
-    bool queueOnFailure = true,
+    bool queueOnFailure = false,
   ]) async {
     try {
       return await call();
@@ -441,6 +463,11 @@ class ApiHttpClient {
     String path,
     Map<String, dynamic>? body,
   ) async {
+    final writer = queueRequestWriter;
+    if (writer != null) {
+      await writer(method, path, body);
+      return;
+    }
     final db = AppDatabase.instance();
     await db.offlineQueueDao.insertItem(
       OfflineQueueTableCompanion.insert(
@@ -459,3 +486,6 @@ class ApiHttpClient {
     await sendRequest(method, path, body, false);
   }
 }
+
+Map<String, dynamic> _decodeJsonMap(String source) => jsonDecode(source) as Map<String, dynamic>;
+List<dynamic> _decodeJsonList(String source) => jsonDecode(source) as List<dynamic>;

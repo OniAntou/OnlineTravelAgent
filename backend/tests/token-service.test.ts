@@ -7,11 +7,13 @@ const mocks = vi.hoisted(() => ({
   refreshUpdate: vi.fn(),
   refreshUpdateMany: vi.fn(),
   queryRaw: vi.fn(),
+  transaction: vi.fn(),
 }));
 
 vi.mock("../src/config/prisma.js", () => ({
   default: {
     $queryRaw: mocks.queryRaw,
+    $transaction: mocks.transaction,
     refreshToken: {
       create: mocks.refreshCreate,
       findUnique: mocks.refreshFindUnique,
@@ -31,6 +33,15 @@ describe("tokenService", () => {
     mocks.refreshUpdate.mockResolvedValue({});
     mocks.refreshUpdateMany.mockResolvedValue({ count: 1 });
     mocks.queryRaw.mockResolvedValue([{ ok: 1 }]);
+    mocks.transaction.mockImplementation(async (run) =>
+      run({
+        refreshToken: {
+          create: mocks.refreshCreate,
+          findUnique: mocks.refreshFindUnique,
+          updateMany: mocks.refreshUpdateMany,
+        },
+      }),
+    );
   });
 
   it("issues access and refresh tokens", async () => {
@@ -56,8 +67,12 @@ describe("tokenService", () => {
     const result = await tokenService.rotateRefreshToken(refreshToken);
 
     expect(result?.accessToken).toBeTruthy();
-    expect(mocks.refreshUpdate).toHaveBeenCalledWith({
-      where: { id: "rt-1" },
+    expect(mocks.refreshUpdateMany).toHaveBeenCalledWith({
+      where: {
+        id: "rt-1",
+        revokedAt: null,
+        expiresAt: { gt: expect.any(Date) },
+      },
       data: { revokedAt: expect.any(Date) },
     });
     expect(mocks.refreshCreate).toHaveBeenCalledWith({
@@ -79,5 +94,20 @@ describe("tokenService", () => {
 
     const result = await tokenService.rotateRefreshToken("expired-token");
     expect(result).toBeNull();
+  });
+
+  it("rejects a refresh token already consumed by a concurrent rotation", async () => {
+    mocks.refreshFindUnique.mockResolvedValue({
+      id: "rt-1",
+      revokedAt: null,
+      expiresAt: new Date(Date.now() + 60_000),
+      user: { id: "user-1", role: "USER" },
+    });
+    mocks.refreshUpdateMany.mockResolvedValueOnce({ count: 0 });
+
+    const result = await tokenService.rotateRefreshToken("already-consumed");
+
+    expect(result).toBeNull();
+    expect(mocks.refreshCreate).not.toHaveBeenCalled();
   });
 });

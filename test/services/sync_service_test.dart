@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:online_travel_agent/database/app_database.dart';
 import 'package:online_travel_agent/models/destination.dart';
 import 'package:online_travel_agent/models/hotel.dart';
+import 'package:online_travel_agent/models/room.dart';
 import 'package:online_travel_agent/models/tour_package.dart';
 import 'package:online_travel_agent/models/document_item.dart';
 import 'package:online_travel_agent/models/trip.dart';
@@ -30,47 +31,87 @@ void main() {
         categories: ['Ẩm thực', 'Địa điểm'],
         destinations: [
           const Destination(
-            id: 'd1', name: 'Da Lat', location: 'Lam Dong',
-            rating: '4.5', duration: '3 ngày', imagePath: '',
-            description: 'Thành phố ngàn hoa', price: '500000',
+            id: 'd1',
+            name: 'Da Lat',
+            location: 'Lam Dong',
+            rating: '4.5',
+            duration: '3 ngày',
+            imagePath: '',
+            description: 'Thành phố ngàn hoa',
+            price: '500000',
             reviewsCount: '120',
           ),
         ],
         recommended: [
           const Destination(
-            id: 'd1', name: 'Da Lat', location: 'Lam Dong',
-            rating: '4.5', duration: '3 ngày', imagePath: '',
+            id: 'd1',
+            name: 'Da Lat',
+            location: 'Lam Dong',
+            rating: '4.5',
+            duration: '3 ngày',
+            imagePath: '',
           ),
         ],
         trips: [
           const Trip(
-            id: 't1', destination: 'Da Lat', location: 'Lam Dong',
-            date: '2026-08-01', guests: '2', status: 'Upcoming',
+            id: 't1',
+            destination: 'Da Lat',
+            location: 'Lam Dong',
+            date: '2026-08-01',
+            guests: '2',
+            status: 'Upcoming',
             imagePath: '',
           ),
         ],
         documents: [
           const DocumentItem(
-            id: 'doc1', title: 'Passport',
-            description: '', icon: Icons.description,
-            color: Colors.blue, iconName: 'description', colorHex: '#2196F3',
+            id: 'doc1',
+            title: 'Passport',
+            description: '',
+            icon: Icons.description,
+            color: Colors.blue,
+            iconName: 'description',
+            colorHex: '#2196F3',
           ),
         ],
         hotels: [
           const Hotel(
-            id: 'h1', name: 'Luxury Hotel', location: 'Da Nang',
-            latitude: 16.05, longitude: 108.22, rating: '4.8',
-            imagePath: '', description: 'Nice hotel',
-            address: '123 Beach', priceFrom: 1200000,
+            id: 'h1',
+            name: 'Luxury Hotel',
+            location: 'Da Nang',
+            latitude: 16.05,
+            longitude: 108.22,
+            rating: '4.8',
+            imagePath: '',
+            description: 'Nice hotel',
+            address: '123 Beach',
+            priceFrom: 1200000,
             amenities: [],
+            rooms: [
+              Room(
+                id: 'r1',
+                hotelId: 'h1',
+                name: 'Ocean View',
+                description: 'Sea-facing room',
+                price: 1500000,
+                capacity: 2,
+                imagePath: '',
+                amenities: ['Wi-Fi'],
+              ),
+            ],
           ),
         ],
         tourPackages: [
           const TourPackage(
-            id: 'tp1', name: 'Ha Giang Loop', duration: '4N3Đ',
-            price: 4500000, destinations: ['Ha Giang'],
-            includes: ['Xe máy'], departure: 'Ha Noi',
-            description: '', imagePath: '',
+            id: 'tp1',
+            name: 'Ha Giang Loop',
+            duration: '4N3Đ',
+            price: 4500000,
+            destinations: ['Ha Giang'],
+            includes: ['Xe máy'],
+            departure: 'Ha Noi',
+            description: '',
+            imagePath: '',
           ),
         ],
       ),
@@ -129,14 +170,21 @@ void main() {
       final emptyApi = FakeTravelApiService(
         secureStorage: FakeSecureStorage(),
         bootstrapData: BootstrapData(
-          categories: [], destinations: [], recommended: [],
-          trips: [], documents: [], hotels: [], tourPackages: [],
+          categories: [],
+          destinations: [],
+          recommended: [],
+          trips: [],
+          documents: [],
+          hotels: [],
+          tourPackages: [],
         ),
       );
-      final c = ProviderContainer(overrides: [
-        apiProvider.overrideWithValue(emptyApi),
-        syncServiceProvider.overrideWith((ref) => SyncService(ref, db: db)),
-      ]);
+      final c = ProviderContainer(
+        overrides: [
+          apiProvider.overrideWithValue(emptyApi),
+          syncServiceProvider.overrideWith((ref) => SyncService(ref, db: db)),
+        ],
+      );
       await c.read(syncServiceProvider).syncAll();
 
       expect(await db.destinationsDao.getAll(), isEmpty);
@@ -149,12 +197,89 @@ void main() {
       c.dispose();
     });
 
+    test(
+      'removes rows that are absent from a successful server snapshot',
+      () async {
+        await db.documentsDao.insertDocument(
+          DocumentsTableCompanion.insert(
+            id: 'stale-doc',
+            title: 'Old document',
+          ),
+        );
+        await db.tripsDao.insertTrip(
+          TripsTableCompanion.insert(id: 'stale-trip', destination: 'Old trip'),
+        );
+        await db.hotelsDao.insertAll(
+          [
+            HotelsTableCompanion.insert(
+              id: 'stale-hotel',
+              name: 'Old hotel',
+              location: 'Old city',
+            ),
+          ],
+          [
+            RoomsTableCompanion.insert(
+              id: 'stale-room',
+              hotelId: 'stale-hotel',
+              name: 'Old room',
+            ),
+          ],
+        );
+
+        await syncService.syncAll();
+
+        expect(
+          (await db.documentsDao.getAll()).map((row) => row.id),
+          isNot(contains('stale-doc')),
+        );
+        expect(
+          (await db.tripsDao.getAll()).map((row) => row.id),
+          isNot(contains('stale-trip')),
+        );
+        expect(
+          (await db.hotelsDao.getAll()).map((row) => row.id),
+          isNot(contains('stale-hotel')),
+        );
+        expect(await db.hotelsDao.getRoomsByHotel('stale-hotel'), isEmpty);
+      },
+    );
+
+    test('rehydrates persisted rooms with their owning hotel', () async {
+      await syncService.syncAll();
+
+      final cached = await syncService.loadBootstrapFromSQLite();
+
+      expect(cached.hotels.single.rooms, hasLength(1));
+      expect(cached.hotels.single.rooms.single.name, 'Ocean View');
+    });
+
+    test(
+      'discards legacy queued mutations instead of replaying credentials',
+      () async {
+        await db.offlineQueueDao.insertItem(
+          OfflineQueueTableCompanion.insert(
+            endpoint: '/api/auth/login',
+            method: 'POST',
+            bodyJson: const Value(
+              '{"email":"user@example.com","password":"secret"}',
+            ),
+          ),
+        );
+
+        await syncService.syncAll();
+
+        expect(await db.offlineQueueDao.getAll(), isEmpty);
+      },
+    );
+
     test('handles API error gracefully', () async {
       final errorApi = _ErrorApiService();
-      final c = ProviderContainer(overrides: [
-        apiProvider.overrideWithValue(errorApi),
-        syncServiceProvider.overrideWith((ref) => SyncService(ref, db: db)),
-      ]);
+      final c = ProviderContainer(
+        overrides: [
+          apiProvider.overrideWithValue(errorApi),
+          syncServiceProvider.overrideWith((ref) => SyncService(ref, db: db)),
+        ],
+      );
 
       await c.read(syncServiceProvider).syncAll();
       c.dispose();
@@ -163,10 +288,12 @@ void main() {
     test('prevents concurrent syncs', () async {
       var callCount = 0;
       final slowApi = _SlowApiService(() => callCount++);
-      final c = ProviderContainer(overrides: [
-        apiProvider.overrideWithValue(slowApi),
-        syncServiceProvider.overrideWith((ref) => SyncService(ref, db: db)),
-      ]);
+      final c = ProviderContainer(
+        overrides: [
+          apiProvider.overrideWithValue(slowApi),
+          syncServiceProvider.overrideWith((ref) => SyncService(ref, db: db)),
+        ],
+      );
       final s = c.read(syncServiceProvider);
 
       final f1 = s.syncAll();
@@ -204,9 +331,7 @@ void main() {
 
       fakeApi.tripSchedules['t1'] = TripSchedule(
         tripId: 't1',
-        days: [
-          TripScheduleDay(id: 'day-new', dayNumber: 1, items: []),
-        ],
+        days: [TripScheduleDay(id: 'day-new', dayNumber: 1, items: [])],
         updates: [],
       );
       container.dispose();
@@ -241,7 +366,11 @@ void main() {
   group('syncFavorite', () {
     test('updates favorite status in database', () async {
       await db.destinationsDao.insertAll([
-        DestinationsTableCompanion.insert(id: 'd1', name: 'Da Lat', location: 'Lam Dong'),
+        DestinationsTableCompanion.insert(
+          id: 'd1',
+          name: 'Da Lat',
+          location: 'Lam Dong',
+        ),
       ]);
 
       await syncService.syncFavorite('d1', true);
@@ -257,8 +386,12 @@ void main() {
   group('syncTrip', () {
     test('inserts trip to database', () async {
       const trip = Trip(
-        id: 't1', destination: 'Da Lat', location: 'Lam Dong',
-        date: '2026-08-01', guests: '2', status: 'Upcoming',
+        id: 't1',
+        destination: 'Da Lat',
+        location: 'Lam Dong',
+        date: '2026-08-01',
+        guests: '2',
+        status: 'Upcoming',
         imagePath: '',
       );
 
@@ -270,15 +403,23 @@ void main() {
 
     test('updates existing trip on conflict', () async {
       const trip1 = Trip(
-        id: 't1', destination: 'Da Lat', location: 'Lam Dong',
-        date: '2026-08-01', guests: '2', status: 'Upcoming',
+        id: 't1',
+        destination: 'Da Lat',
+        location: 'Lam Dong',
+        date: '2026-08-01',
+        guests: '2',
+        status: 'Upcoming',
         imagePath: '',
       );
       await syncService.syncTrip(trip1);
 
       const trip2 = Trip(
-        id: 't1', destination: 'Ha Noi', location: 'Ha Noi',
-        date: '2026-09-01', guests: '3', status: 'Upcoming',
+        id: 't1',
+        destination: 'Ha Noi',
+        location: 'Ha Noi',
+        date: '2026-09-01',
+        guests: '3',
+        status: 'Upcoming',
         imagePath: '',
       );
       await syncService.syncTrip(trip2);
@@ -291,14 +432,17 @@ void main() {
 
   group('syncTripStatus', () {
     test('updates trip status', () async {
-      await db.tripsDao.insertTrip(TripsTableCompanion.insert(
-        id: 't1', destination: 'Da Lat',
-        location: const Value('Lam Dong'),
-        date: const Value('2026-08-01'),
-        guests: const Value('2'),
-        status: const Value('Upcoming'),
-        imagePath: const Value(''),
-      ));
+      await db.tripsDao.insertTrip(
+        TripsTableCompanion.insert(
+          id: 't1',
+          destination: 'Da Lat',
+          location: const Value('Lam Dong'),
+          date: const Value('2026-08-01'),
+          guests: const Value('2'),
+          status: const Value('Upcoming'),
+          imagePath: const Value(''),
+        ),
+      );
 
       await syncService.syncTripStatus('t1', 'completed');
       final trip = await db.tripsDao.getById('t1');
@@ -315,8 +459,7 @@ void main() {
 }
 
 class _ErrorApiService extends FakeTravelApiService {
-  _ErrorApiService()
-      : super(secureStorage: FakeSecureStorage());
+  _ErrorApiService() : super(secureStorage: FakeSecureStorage());
 
   @override
   Future<BootstrapData> fetchBootstrap() async {

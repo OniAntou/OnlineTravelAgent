@@ -36,12 +36,7 @@ final tourScheduleProvider = FutureProvider.autoDispose
 
       // Real-time WebSocket updates
       final socket = apiService.socket;
-      final token = apiService.token;
-
-      // Listen to this specific tour's room
-      if (token != null && token.isNotEmpty) {
-        socket.emit('join_tour_room', {'tourId': tourId, 'token': token});
-      }
+      apiService.joinTourRoom(tourId);
 
       void onScheduleUpdated(dynamic data) {
         if (data is Map && data['tourId'] != null && data['tourId'] != tourId) {
@@ -54,7 +49,7 @@ final tourScheduleProvider = FutureProvider.autoDispose
 
       ref.onDispose(() {
         socket.off('schedule_updated', onScheduleUpdated);
-        socket.emit('leave_tour_room', tourId);
+        apiService.leaveTourRoom(tourId);
       });
 
       return apiService.fetchTourSchedule(tourId);

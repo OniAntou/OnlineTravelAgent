@@ -39,10 +39,14 @@ export const vnpayService = {
       throw new Error("VNPAY is not configured");
     }
 
+    const formatVNTime = (date: Date) => {
+      const vnTime = new Date(date.getTime() + 7 * 60 * 60 * 1000);
+      return vnTime.toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
+    };
+
     const txnRef = `${params.tripId}-${Date.now()}`;
-    const createDate = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
-    const expireDate = new Date(Date.now() + 15 * 60 * 1000)
-      .toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
+    const createDate = formatVNTime(new Date());
+    const expireDate = formatVNTime(new Date(Date.now() + 15 * 60 * 1000));
 
     const vnpParams: Record<string, string> = {
       vnp_Version: "2.1.0",

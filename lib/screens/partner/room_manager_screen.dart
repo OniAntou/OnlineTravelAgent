@@ -34,6 +34,7 @@ class _RoomManagerScreenState extends ConsumerState<RoomManagerScreen> {
       final rooms = await ref
           .read(apiProvider)
           .getPartnerHotelRooms(widget.hotel.id);
+      if (!mounted) return;
       setState(() => _rooms = rooms);
     } catch (e) {
       if (mounted) {
@@ -43,7 +44,7 @@ class _RoomManagerScreenState extends ConsumerState<RoomManagerScreen> {
         );
       }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -52,7 +53,7 @@ class _RoomManagerScreenState extends ConsumerState<RoomManagerScreen> {
       context: context,
       builder: (_) => RoomFormDialog(room: room),
     );
-    if (result == null) return;
+    if (result == null || !mounted) return;
     setState(() => _isLoading = true);
     try {
       final api = ref.read(apiProvider);
@@ -61,6 +62,7 @@ class _RoomManagerScreenState extends ConsumerState<RoomManagerScreen> {
       } else {
         await api.createPartnerRoom(widget.hotel.id, result);
       }
+      if (!mounted) return;
       await _loadRooms();
     } catch (e) {
       if (mounted) {
@@ -69,7 +71,7 @@ class _RoomManagerScreenState extends ConsumerState<RoomManagerScreen> {
           SnackBar(content: Text(msg), backgroundColor: Colors.red),
         );
       }
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -81,10 +83,11 @@ class _RoomManagerScreenState extends ConsumerState<RoomManagerScreen> {
       confirmText: 'Xóa',
       isDestructive: true,
     );
-    if (confirm != true) return;
+    if (confirm != true || !mounted) return;
     setState(() => _isLoading = true);
     try {
       await ref.read(apiProvider).deletePartnerRoom(widget.hotel.id, room.id);
+      if (!mounted) return;
       await _loadRooms();
     } catch (e) {
       if (mounted) {
@@ -93,7 +96,7 @@ class _RoomManagerScreenState extends ConsumerState<RoomManagerScreen> {
           SnackBar(content: Text(msg), backgroundColor: Colors.red),
         );
       }
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 

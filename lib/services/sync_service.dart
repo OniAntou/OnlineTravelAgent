@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../database/database.dart';
 import '../models/destination.dart';
 import '../models/hotel.dart';
+import '../models/room.dart';
 import '../models/tour_package.dart';
 import '../models/document_item.dart';
 import '../models/flight.dart';
@@ -61,13 +62,18 @@ class SyncService {
       final api = _ref.read(apiProvider);
       final data = await api.fetchBootstrap();
 
-      await _syncDestinations(data.destinations, data.recommended);
-      await _syncCategories(data.categories);
-      await _syncHotels(data.hotels);
-      await _syncTours(data.tourPackages);
-      await _syncFlights(data.flights);
-      await _syncDocuments(data.documents);
-      await _syncTrips(data.trips);
+      await db.transaction(() async {
+        await _removePreviousSnapshot(
+          data.trips.map((trip) => trip.id).toSet(),
+        );
+        await _syncDestinations(data.destinations, data.recommended);
+        await _syncCategories(data.categories);
+        await _syncHotels(data.hotels);
+        await _syncTours(data.tourPackages);
+        await _syncFlights(data.flights);
+        await _syncDocuments(data.documents);
+        await _syncTrips(data.trips);
+      });
 
       if (data.trips.isNotEmpty) {
         try {
@@ -95,18 +101,35 @@ class SyncService {
     final queue = await db.offlineQueueDao.getAll();
     if (queue.isEmpty) return;
 
-    final api = _ref.read(apiProvider);
-    for (final item in queue) {
-      try {
-        final body = item.bodyJson != null
-            ? jsonDecode(item.bodyJson!) as Map<String, dynamic>
-            : null;
-        await api.flushRequest(item.method, item.endpoint, body);
-        await db.offlineQueueDao.deleteItem(item.id);
-      } catch (e, st) {
-        debugPrint('Failed to flush queue item ${item.id}: $e\n$st');
+    // Queueing used to be the default for every mutation, including auth and
+    // non-idempotent requests. Those legacy rows cannot be replayed safely or
+    // associated with the user session that created them.
+    await db.offlineQueueDao.clearQueue();
+  }
+
+  Future<void> _removePreviousSnapshot(Set<String> nextTripIds) async {
+    final existingTrips = await db.tripsDao.getAll();
+    final staleTripIds = existingTrips
+        .map((trip) => trip.id)
+        .where((id) => !nextTripIds.contains(id));
+
+    for (final tripId in staleTripIds) {
+      final days = await db.tripScheduleDaysDao.getByTripId(tripId);
+      for (final day in days) {
+        await db.tripScheduleItemsDao.deleteByDayId(day.id);
       }
+      await db.tripScheduleUpdatesDao.deleteByTripId(tripId);
+      await db.tripScheduleDaysDao.deleteByTripId(tripId);
     }
+
+    await db.delete(db.roomsTable).go();
+    await db.delete(db.hotelsTable).go();
+    await db.delete(db.destinationsTable).go();
+    await db.delete(db.categoriesTable).go();
+    await db.delete(db.tourPackagesTable).go();
+    await db.delete(db.flightsTable).go();
+    await db.delete(db.documentsTable).go();
+    await db.delete(db.tripsTable).go();
   }
 
   Future<void> _syncDestinations(
@@ -406,23 +429,43 @@ class SyncService {
         )
         .toList();
 
-    final hotels = hotelRows.map((h) {
-      return Hotel(
-        id: h.id,
-        name: h.name,
-        location: h.location,
-        latitude: h.latitude,
-        longitude: h.longitude,
-        rating: h.rating,
-        imagePath: h.imagePath,
-        description: h.description,
-        priceFrom: h.priceFrom,
-        address: h.address,
-        amenities: List<String>.from(
-          jsonDecode(h.amenities as String? ?? '[]'),
+    final hotels = <Hotel>[];
+    for (final h in hotelRows) {
+      final roomRows = await db.hotelsDao.getRoomsByHotel(h.id);
+      hotels.add(
+        Hotel(
+          id: h.id,
+          name: h.name,
+          location: h.location,
+          latitude: h.latitude,
+          longitude: h.longitude,
+          rating: h.rating,
+          imagePath: h.imagePath,
+          description: h.description,
+          priceFrom: h.priceFrom,
+          address: h.address,
+          amenities: List<String>.from(
+            jsonDecode(h.amenities as String? ?? '[]'),
+          ),
+          rooms: roomRows
+              .map(
+                (room) => Room(
+                  id: room.id,
+                  hotelId: room.hotelId,
+                  name: room.name,
+                  description: room.description,
+                  price: room.price,
+                  capacity: room.capacity,
+                  imagePath: room.imagePath,
+                  amenities: List<String>.from(
+                    jsonDecode(room.amenities as String? ?? '[]'),
+                  ),
+                ),
+              )
+              .toList(growable: false),
         ),
       );
-    }).toList();
+    }
 
     final tours = tourRows
         .map(

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
 import 'package:online_travel_agent/models/destination.dart';
 import 'package:online_travel_agent/providers/destination_provider.dart';
 import 'package:online_travel_agent/providers/api_provider.dart';
@@ -14,6 +15,22 @@ class FakeSyncService implements SyncService {
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+class ControlledFavoriteApi extends FakeTravelApiService {
+  final requests = <({bool value, Completer<Destination> completer})>[];
+
+  ControlledFavoriteApi({required super.secureStorage});
+
+  @override
+  Future<Destination> setFavorite(
+    String destinationId,
+    bool isFavorite,
+  ) {
+    final completer = Completer<Destination>();
+    requests.add((value: isFavorite, completer: completer));
+    return completer.future;
+  }
 }
 
 ProviderContainer createContainer({FakeTravelApiService? api}) {
@@ -76,6 +93,44 @@ void main() {
       final state = container.read(destinationsProvider);
       expect(state.length, 1);
       expect(state.first.isFavorite, false);
+    });
+
+    test('serializes rapid favorite writes in tap order', () async {
+      final api = ControlledFavoriteApi(secureStorage: FakeSecureStorage());
+      container = createContainer(api: api);
+      final notifier = container.read(destinationsProvider.notifier);
+      notifier.state = [
+        const Destination(
+          id: '1', name: 'Da Lat', location: 'Lam Dong',
+          rating: '4.5', duration: '3 ngày', imagePath: '',
+        ),
+      ];
+
+      final first = notifier.toggleFavorite('1');
+      final second = notifier.toggleFavorite('1');
+      await Future<void>.delayed(Duration.zero);
+
+      expect(container.read(destinationsProvider).first.isFavorite, false);
+      expect(api.requests.map((request) => request.value), [true]);
+
+      api.requests.first.completer.complete(
+        const Destination(
+          id: '1', name: 'Da Lat', location: 'Lam Dong',
+          rating: '4.5', duration: '3 ngày', imagePath: '', isFavorite: true,
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+      expect(api.requests.map((request) => request.value), [true, false]);
+
+      api.requests.last.completer.complete(
+        const Destination(
+          id: '1', name: 'Da Lat', location: 'Lam Dong',
+          rating: '4.5', duration: '3 ngày', imagePath: '',
+        ),
+      );
+      await Future.wait([first, second]);
+
+      expect(container.read(destinationsProvider).first.isFavorite, false);
     });
   });
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../models/trip.dart';
+import '../../../widgets/app_image.dart';
 
 class TripCard extends StatelessWidget {
   final Trip trip;
@@ -41,7 +42,7 @@ class TripCard extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: RepaintBoundary(
-                      child: Image.asset(
+                      child: AppImage(
                         trip.imagePath,
                         fit: BoxFit.cover,
                         cacheWidth: cacheWidth,

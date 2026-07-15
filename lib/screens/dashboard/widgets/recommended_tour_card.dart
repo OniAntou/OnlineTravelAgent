@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../utils/app_utils.dart';
 import '../../../models/tour_package.dart';
+import '../../../widgets/app_image.dart';
 
 class RecommendedTourCard extends StatelessWidget {
   final TourPackage tour;
@@ -44,7 +45,7 @@ class RecommendedTourCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     child: Hero(
                       tag: 'tour_image_${tour.name}',
-                      child: Image.asset(
+                      child: AppImage(
                         tour.imagePath,
                         height: 96,
                         width: double.infinity,

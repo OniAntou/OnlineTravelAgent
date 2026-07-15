@@ -6,6 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../models/flight.dart';
 import '../../providers/flight_provider.dart';
 import '../../widgets/app_placeholder_card.dart';
+import '../../widgets/app_image.dart';
 import '../../widgets/shimmer_loading.dart';
 import '../../utils/app_utils.dart';
 import 'flight_checkout_screen.dart';
@@ -439,7 +440,7 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(4),
-                            child: Image.asset(
+                            child: AppImage(
                               flight.airlineLogo,
                               width: 24,
                               height: 24,

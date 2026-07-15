@@ -25,7 +25,6 @@ class ProfileScreen extends ConsumerWidget {
     return parts.first[0].toUpperCase();
   }
 
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(profileProvider);
@@ -112,11 +111,15 @@ class ProfileScreen extends ConsumerWidget {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: IconButton(
-                                onPressed: () {
+                                onPressed: () async {
                                   if (isLoggedIn) {
-                                    ref.read(authProvider.notifier).logout();
+                                    await ref
+                                        .read(authProvider.notifier)
+                                        .logout();
                                   } else {
-                                    context.push(AppRoutes.login);
+                                    if (context.mounted) {
+                                      context.push(AppRoutes.login);
+                                    }
                                   }
                                 },
                                 icon: Icon(
@@ -200,8 +203,7 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                         if (isLoggedIn)
                           IconButton(
-                            onPressed: () =>
-                                showEditProfileSheet(context, ref),
+                            onPressed: () => showEditProfileSheet(context, ref),
                             icon: Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(

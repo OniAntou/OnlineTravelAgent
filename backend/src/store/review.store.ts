@@ -1,6 +1,13 @@
 import prisma from "../config/prisma.js";
 import { memoryDb } from "./memory-db.js";
 import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
+import {
+  mockDestinations,
+  mockFlights,
+  mockHotels,
+  mockTourPackages,
+} from "../data/mock-data.js";
+import { HttpError } from "../utils/http-error.js";
 
 async function dbAvailable(): Promise<boolean> {
   try {
@@ -9,6 +16,52 @@ async function dbAvailable(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+async function reviewTargetExists(targetType: string, targetId: string) {
+  switch (targetType) {
+    case "destination":
+      return Boolean(
+        await prisma.destination.findUnique({
+          where: { id: targetId },
+          select: { id: true },
+        }),
+      );
+    case "hotel":
+      return Boolean(
+        await prisma.hotel.findUnique({
+          where: { id: targetId },
+          select: { id: true },
+        }),
+      );
+    case "tour":
+      return Boolean(
+        await prisma.tourPackage.findUnique({
+          where: { id: targetId },
+          select: { id: true },
+        }),
+      );
+    case "flight":
+      return Boolean(
+        await prisma.flight.findUnique({
+          where: { id: targetId },
+          select: { id: true },
+        }),
+      );
+    default:
+      return false;
+  }
+}
+
+function memoryReviewTargetExists(targetType: string, targetId: string) {
+  const targets = {
+    destination: mockDestinations,
+    hotel: mockHotels,
+    tour: mockTourPackages,
+    flight: mockFlights,
+  } as const;
+  const items = targets[targetType as keyof typeof targets];
+  return Boolean(items?.some((item) => item.id === targetId));
 }
 
 export const reviewStore = {
@@ -48,9 +101,16 @@ export const reviewStore = {
 
     if (useMem) {
       assertMemoryFallbackEnabled();
+      if (!memoryReviewTargetExists(targetType, targetId)) {
+        throw new HttpError(404, "Review target not found");
+      }
       const review = memoryDb.upsertReview(userId, targetType, targetId, rating, comment);
       const user = memoryDb.findUserById(userId);
       return { ...review, user: user ? { id: user.id, name: user.name } : { id: userId, name: "User" } };
+    }
+
+    if (!(await reviewTargetExists(targetType, targetId))) {
+      throw new HttpError(404, "Review target not found");
     }
 
     return prisma.review.upsert({

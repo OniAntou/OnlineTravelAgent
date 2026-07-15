@@ -1,5 +1,6 @@
 import { Server as SocketIOServer } from "socket.io";
 import jwt from "jsonwebtoken";
+import { z } from "zod";
 import prisma from "./config/prisma.js";
 import { env } from "./config/env.js";
 import { app } from "./app.js";
@@ -46,11 +47,11 @@ const server = app.listen(env.port, () => {
 
   io.on("connection", (socket) => {
     socket.on("join_trip_room", async (payload) => {
-      const tripId = typeof payload === "string" ? payload : payload?.tripId;
-      const token = typeof payload === "object" ? payload?.token : undefined;
-      if (!tripId || !token) return;
-
       try {
+        const parsed = z.object({ tripId: z.string(), token: z.string() }).safeParse(payload);
+        if (!parsed.success) return;
+        const { tripId, token } = parsed.data;
+
         const decoded = jwt.verify(token, env.jwtSecret) as { userId: string };
         const trip = await prisma.trip.findUnique({
           where: { id: tripId },
@@ -59,8 +60,8 @@ const server = app.listen(env.port, () => {
         if (trip?.userId === decoded.userId) {
           socket.join(`trip_${tripId}`);
         }
-      } catch {
-        // Ignore unauthorized room join attempts.
+      } catch (err) {
+        console.error("Error in join_trip_room:", err);
       }
     });
     socket.on("leave_trip_room", (tripId) => {
@@ -69,11 +70,12 @@ const server = app.listen(env.port, () => {
       }
     });
     socket.on("join_tour_room", async (payload) => {
-      const tourId = typeof payload === "string" ? payload : payload?.tourId;
-      const decoded = verifySocketToken(payload);
-      if (!tourId || typeof tourId !== "string" || !decoded) return;
-
       try {
+        const parsed = z.object({ tourId: z.string(), token: z.string() }).safeParse(payload);
+        if (!parsed.success) return;
+        const { tourId, token } = parsed.data;
+
+        const decoded = jwt.verify(token, env.jwtSecret) as { userId: string };
         const hasPurchased = await prisma.trip.findFirst({
           where: {
             userId: decoded.userId,
@@ -85,8 +87,8 @@ const server = app.listen(env.port, () => {
         if (hasPurchased) {
           socket.join(`tour_${tourId}`);
         }
-      } catch {
-        // Ignore invalid tour room join attempts.
+      } catch (err) {
+        console.error("Error in join_tour_room:", err);
       }
     });
     socket.on("leave_tour_room", (tourId) => {
