@@ -1,8 +1,11 @@
-import { Prisma } from "@prisma/client";
+import {
+  Prisma,
+  ScheduleSourceType as PrismaScheduleSourceType,
+} from "@prisma/client";
 import prisma from "../../infrastructure/database/prisma.js";
 import { parseDateOnly } from "../../core/data/store-helpers.js";
 
-export type ScheduleSourceType = "tour" | "destination";
+export type ScheduleSourceType = PrismaScheduleSourceType;
 
 export type ScheduleItemInput = {
   id?: string;
@@ -53,9 +56,15 @@ async function copyTemplateToTripWithClient(
 
   const template = await tx.scheduleTemplate.findFirst({
     where:
-      params.sourceType === "tour"
-        ? { sourceType: "tour", tourPackageId: params.sourceId }
-        : { sourceType: "destination", destinationId: params.sourceId },
+      params.sourceType === PrismaScheduleSourceType.tour
+        ? {
+            sourceType: PrismaScheduleSourceType.tour,
+            tourPackageId: params.sourceId,
+          }
+        : {
+            sourceType: PrismaScheduleSourceType.destination,
+            destinationId: params.sourceId,
+          },
     include: {
       days: {
         orderBy: { dayNumber: "asc" },
@@ -117,10 +126,16 @@ function assertClockTime(value: string, field: string) {
 function assertSource(input: ScheduleTemplateInput) {
   const hasTour = Boolean(input.tourPackageId);
   const hasDestination = Boolean(input.destinationId);
-  if (input.sourceType === "tour" && (!hasTour || hasDestination)) {
+  if (
+    input.sourceType === PrismaScheduleSourceType.tour &&
+    (!hasTour || hasDestination)
+  ) {
     throw new Error("tour template requires tourPackageId only");
   }
-  if (input.sourceType === "destination" && (!hasDestination || hasTour)) {
+  if (
+    input.sourceType === PrismaScheduleSourceType.destination &&
+    (!hasDestination || hasTour)
+  ) {
     throw new Error("destination template requires destinationId only");
   }
 }

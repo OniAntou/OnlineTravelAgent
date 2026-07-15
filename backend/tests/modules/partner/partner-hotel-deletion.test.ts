@@ -6,12 +6,14 @@ const mocks = vi.hoisted(() => ({
   hotelFindFirst: vi.fn(),
   hotelFindMany: vi.fn(),
   hotelDelete: vi.fn(),
+  reviewDeleteMany: vi.fn(),
   roomDeleteMany: vi.fn(),
   transaction: vi.fn(),
 }));
 
 vi.mock("../../../src/infrastructure/database/prisma.js", () => ({
   default: {
+    review: { deleteMany: mocks.reviewDeleteMany },
     hotel: {
       findFirst: mocks.hotelFindFirst,
       findMany: mocks.hotelFindMany,
@@ -37,22 +39,27 @@ describe("partner hotel deletion", () => {
     vi.clearAllMocks();
     mocks.hotelFindFirst.mockResolvedValue({ id: "hotel-1" });
     mocks.hotelFindMany.mockResolvedValue([{ id: "hotel-1", rooms: [] }]);
+    mocks.reviewDeleteMany.mockResolvedValue({ count: 1 });
     mocks.roomDeleteMany.mockResolvedValue({ count: 2 });
     mocks.hotelDelete.mockResolvedValue({ id: "hotel-1" });
     mocks.transaction.mockImplementation(async (callback) =>
       callback({
+        review: { deleteMany: mocks.reviewDeleteMany },
         room: { deleteMany: mocks.roomDeleteMany },
         hotel: { delete: mocks.hotelDelete },
       }),
     );
   });
 
-  it("removes a partner hotel's rooms before deleting the hotel", async () => {
+  it("removes a partner hotel's reviews and rooms before deleting the hotel", async () => {
     const res = await request(app)
       .delete("/api/partner/hotels/hotel-1")
       .set("Authorization", `Bearer ${partnerToken}`);
 
     expect(res.status).toBe(200);
+    expect(mocks.reviewDeleteMany).toHaveBeenCalledWith({
+      where: { targetType: "hotel", targetId: "hotel-1" },
+    });
     expect(mocks.roomDeleteMany).toHaveBeenCalledWith({
       where: { hotelId: "hotel-1" },
     });

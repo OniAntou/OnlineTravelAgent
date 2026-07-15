@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import crypto from "crypto";
+import { ReviewTargetType } from "@prisma/client";
 import { asyncHandler } from "../../core/utils/asyncHandler.js";
 import prisma from "../../infrastructure/database/prisma.js";
 
@@ -98,6 +99,9 @@ export const partnerController = {
     if (!hotel) return res.status(404).json({ message: "Not found or unauthorized" });
     
     await prisma.$transaction(async (tx) => {
+      await tx.review.deleteMany({
+        where: { targetType: ReviewTargetType.hotel, targetId: id },
+      });
       await tx.room.deleteMany({ where: { hotelId: id } });
       await tx.hotel.delete({ where: { id } });
     });
@@ -124,7 +128,12 @@ export const partnerController = {
     const tour = await prisma.tourPackage.findFirst({ where: { id, partnerId } });
     if (!tour) return res.status(404).json({ message: "Not found or unauthorized" });
     
-    await prisma.tourPackage.delete({ where: { id } });
+    await prisma.$transaction(async (tx) => {
+      await tx.review.deleteMany({
+        where: { targetType: ReviewTargetType.tour, targetId: id },
+      });
+      await tx.tourPackage.delete({ where: { id } });
+    });
     res.json({ success: true });
   }),
 

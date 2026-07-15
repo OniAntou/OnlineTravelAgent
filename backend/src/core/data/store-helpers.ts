@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import { ReviewTargetType } from "@prisma/client";
 import prisma from "../../infrastructure/database/prisma.js";
 import { assertMemoryFallbackEnabled } from "../config/data-availability.js";
 
@@ -121,7 +122,7 @@ export function applyFavoriteState<T extends { id: string }>(
 
 export async function attachRealReviews<T extends { id: string }>(
   items: T[],
-  targetType: string,
+  targetType: ReviewTargetType,
 ) {
   if (!items.length) return items;
 

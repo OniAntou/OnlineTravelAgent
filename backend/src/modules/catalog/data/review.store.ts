@@ -1,3 +1,4 @@
+import { ReviewTargetType } from "@prisma/client";
 import prisma from "../../../infrastructure/database/prisma.js";
 import { memoryDb } from "../../../infrastructure/fallback/memory-db.js";
 import { assertMemoryFallbackEnabled } from "../../../core/config/data-availability.js";
@@ -18,30 +19,33 @@ async function dbAvailable(): Promise<boolean> {
   }
 }
 
-async function reviewTargetExists(targetType: string, targetId: string) {
+async function reviewTargetExists(
+  targetType: ReviewTargetType,
+  targetId: string,
+) {
   switch (targetType) {
-    case "destination":
+    case ReviewTargetType.destination:
       return Boolean(
         await prisma.destination.findUnique({
           where: { id: targetId },
           select: { id: true },
         }),
       );
-    case "hotel":
+    case ReviewTargetType.hotel:
       return Boolean(
         await prisma.hotel.findUnique({
           where: { id: targetId },
           select: { id: true },
         }),
       );
-    case "tour":
+    case ReviewTargetType.tour:
       return Boolean(
         await prisma.tourPackage.findUnique({
           where: { id: targetId },
           select: { id: true },
         }),
       );
-    case "flight":
+    case ReviewTargetType.flight:
       return Boolean(
         await prisma.flight.findUnique({
           where: { id: targetId },
@@ -53,7 +57,10 @@ async function reviewTargetExists(targetType: string, targetId: string) {
   }
 }
 
-function memoryReviewTargetExists(targetType: string, targetId: string) {
+function memoryReviewTargetExists(
+  targetType: ReviewTargetType,
+  targetId: string,
+) {
   const targets = {
     destination: mockDestinations,
     hotel: mockHotels,
@@ -65,7 +72,7 @@ function memoryReviewTargetExists(targetType: string, targetId: string) {
 }
 
 export const reviewStore = {
-  async getReviews(targetType: string, targetId: string) {
+  async getReviews(targetType: ReviewTargetType, targetId: string) {
     try {
       const reviews = await prisma.review.findMany({
         where: { targetType, targetId },
@@ -90,7 +97,7 @@ export const reviewStore = {
 
   async createReview(
     userId: string | undefined,
-    targetType: string,
+    targetType: ReviewTargetType,
     targetId: string,
     rating: number,
     comment: string,

@@ -1,7 +1,9 @@
 import crypto from "crypto";
+import { Prisma, ReviewTargetType } from "@prisma/client";
 import { Request, Response } from "express";
 import prisma from "../../infrastructure/database/prisma.js";
 import { asyncHandler } from "../../core/utils/asyncHandler.js";
+import { HttpError } from "../../core/utils/http-error.js";
 import {
   scheduleService,
   ScheduleTemplateInput,
@@ -34,6 +36,14 @@ import {
 
 function generateId(prefix: string = ""): string {
   return prefix ? `${prefix}-${crypto.randomUUID()}` : crypto.randomUUID();
+}
+
+async function deleteTargetReviews(
+  tx: Prisma.TransactionClient,
+  targetType: ReviewTargetType,
+  targetId: string,
+) {
+  await tx.review.deleteMany({ where: { targetType, targetId } });
 }
 
 const allowedScheduleStatuses = new Set([
@@ -182,7 +192,11 @@ export const adminController = {
   }),
 
   deleteDestination: asyncHandler(async (req: Request, res: Response) => {
-    await prisma.destination.delete({ where: { id: req.params.id as string } });
+    const id = req.params.id as string;
+    await prisma.$transaction(async (tx) => {
+      await deleteTargetReviews(tx, ReviewTargetType.destination, id);
+      await tx.destination.delete({ where: { id } });
+    });
     res.json({ ok: true });
   }),
 
@@ -238,6 +252,7 @@ export const adminController = {
   deleteHotel: asyncHandler(async (req: Request, res: Response) => {
     const id = req.params.id as string;
     await prisma.$transaction(async (tx) => {
+      await deleteTargetReviews(tx, ReviewTargetType.hotel, id);
       await tx.room.deleteMany({ where: { hotelId: id } });
       await tx.hotel.delete({ where: { id } });
     });
@@ -287,7 +302,11 @@ export const adminController = {
   }),
 
   deleteFlight: asyncHandler(async (req: Request, res: Response) => {
-    await prisma.flight.delete({ where: { id: req.params.id as string } });
+    const id = req.params.id as string;
+    await prisma.$transaction(async (tx) => {
+      await deleteTargetReviews(tx, ReviewTargetType.flight, id);
+      await tx.flight.delete({ where: { id } });
+    });
     res.json({ ok: true });
   }),
 
@@ -346,7 +365,11 @@ export const adminController = {
   }),
 
   deleteTour: asyncHandler(async (req: Request, res: Response) => {
-    await prisma.tourPackage.delete({ where: { id: req.params.id as string } });
+    const id = req.params.id as string;
+    await prisma.$transaction(async (tx) => {
+      await deleteTargetReviews(tx, ReviewTargetType.tour, id);
+      await tx.tourPackage.delete({ where: { id } });
+    });
     res.json({ ok: true });
   }),
 
@@ -626,7 +649,21 @@ export const adminController = {
   }),
 
   deleteCategory: asyncHandler(async (req: Request, res: Response) => {
-    await prisma.category.delete({ where: { id: req.params.id as string } });
+    const id = req.params.id as string;
+    const category = await prisma.category.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        _count: { select: { destinations: true } },
+      },
+    });
+    if (!category) {
+      throw new HttpError(404, "Category not found");
+    }
+    if (category._count.destinations > 0) {
+      throw new HttpError(409, "Category is still assigned to destinations");
+    }
+    await prisma.category.delete({ where: { id } });
     res.json({ ok: true });
   }),
 

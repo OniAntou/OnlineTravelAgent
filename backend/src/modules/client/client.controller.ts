@@ -1,3 +1,4 @@
+import { ReviewTargetType } from "@prisma/client";
 import { Request, Response } from "express";
 import { appCache } from "../../core/config/cache.js";
 import { store } from "./data/index.js";
@@ -140,13 +141,19 @@ export const clientController = {
 
   // --- Reviews ---
   getReviews: asyncHandler(async (req: Request, res: Response) => {
-    const targetType = req.query.targetType as string;
-    const targetId = req.query.targetId as string;
+    const targetType =
+      typeof req.query.targetType === "string" ? req.query.targetType : "";
+    const targetId =
+      typeof req.query.targetId === "string" ? req.query.targetId : "";
     if (!targetType || !targetId) {
       res.status(400).json({ message: "targetType and targetId are required" });
       return;
     }
-    const data = await store.getReviews(targetType, targetId);
+    if (!Object.values(ReviewTargetType).includes(targetType as ReviewTargetType)) {
+      res.status(400).json({ message: "invalid targetType" });
+      return;
+    }
+    const data = await store.getReviews(targetType as ReviewTargetType, targetId);
     res.json(data);
   }),
 
