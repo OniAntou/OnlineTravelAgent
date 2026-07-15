@@ -1,5 +1,9 @@
 # PostgreSQL Backup Design
 
+> **Status (2026-07-15): Superseded.** The user chose a one-off, manually
+> verified backup and explicitly declined scheduled automation. No backup
+> script or Windows Scheduled Task is to be implemented from this design.
+
 ## Goal
 
 Protect the local `online_travel_agent` PostgreSQL database from accidental
