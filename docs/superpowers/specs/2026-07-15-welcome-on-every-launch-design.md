@@ -8,7 +8,7 @@ Always show the Welcome screen first when the Flutter application starts or is r
 
 ## Behavior
 
-1. `GoRouter` continues to start at `AppRoutes.welcome` (`/`).
+1. `GoRouter` starts at `AppRoutes.welcome` (`/`) and gives that location priority over a platform-provided initial route.
 2. Restoring a saved token updates authentication state, but does not redirect a user away from Welcome.
 3. The existing Welcome Explore action continues to navigate to `AppRoutes.main`.
 4. A successful login or registration continues to navigate to the requested protected route when `from` is supplied, otherwise to Main.
@@ -16,7 +16,7 @@ Always show the Welcome screen first when the Flutter application starts or is r
 
 ## Implementation boundary
 
-Remove only the logged-in-Welcome redirect from `lib/core/router/app_router.dart`:
+Remove the logged-in-Welcome redirect from `lib/core/router/app_router.dart`:
 
 ```dart
 if (authState.isLoggedIn && location == AppRoutes.welcome) {
@@ -24,7 +24,7 @@ if (authState.isLoggedIn && location == AppRoutes.welcome) {
 }
 ```
 
-Do not add a persisted onboarding flag, alter token storage, change Welcome visuals, or relax Partner Dashboard authorization.
+Set `overridePlatformDefaultLocation: true` so Android cannot restore a previously-open route such as Main ahead of Welcome. Do not add a persisted onboarding flag, alter token storage, change Welcome visuals, or relax Partner Dashboard authorization.
 
 ## Expected flow
 

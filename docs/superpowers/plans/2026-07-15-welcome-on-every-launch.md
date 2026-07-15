@@ -4,7 +4,7 @@
 
 **Goal:** Keep the Welcome screen visible at application launch even after a saved authenticated session is restored.
 
-**Architecture:** Move the router redirect decision into a small pure top-level function so it can be tested without secure storage or widget setup. Keep the GoRouter initial location at Welcome, call that function from the existing redirect callback, and intentionally omit the logged-in-Welcome redirect while preserving login/register and Partner Dashboard rules.
+**Architecture:** Move the router redirect decision into a small pure top-level function so it can be tested without secure storage or widget setup. Make GoRouter's Welcome initial location override the platform route restored by Android, call the resolver from the existing redirect callback, and intentionally omit the logged-in-Welcome redirect while preserving login/register and Partner Dashboard rules.
 
 **Tech Stack:** Flutter, Dart, GoRouter 16, Riverpod, flutter_test.
 
@@ -16,7 +16,7 @@
 - Create: `test/core/router/app_router_test.dart`
 - Modify: `lib/core/router/app_router.dart`
 
-- [ ] **Step 1: Create the failing redirect test**
+- [x] **Step 1: Create the failing redirect test**
 
 ```dart
 import 'package:flutter_test/flutter_test.dart';
@@ -94,7 +94,7 @@ void main() {
 }
 ```
 
-- [ ] **Step 2: Run the new test and confirm it fails because the redirect function does not exist**
+- [x] **Step 2: Run the new test and confirm it fails because the redirect function does not exist**
 
 Run:
 
@@ -110,7 +110,7 @@ Expected: compilation failure mentioning `resolveAppRedirect`.
 - Modify: `lib/core/router/app_router.dart`
 - Test: `test/core/router/app_router_test.dart`
 
-- [ ] **Step 1: Add the pure redirect resolver above `appRouterProvider`**
+- [x] **Step 1: Add the pure redirect resolver above `appRouterProvider`**
 
 ```dart
 String? resolveAppRedirect({
@@ -136,7 +136,7 @@ String? resolveAppRedirect({
 }
 ```
 
-- [ ] **Step 2: Replace the inline `redirect` body with the resolver call**
+- [x] **Step 2: Replace the inline `redirect` body with the resolver call**
 
 ```dart
 redirect: (context, state) => resolveAppRedirect(
@@ -148,7 +148,17 @@ redirect: (context, state) => resolveAppRedirect(
 
 Remove the existing condition that redirects a logged-in Welcome route to `AppRoutes.main`.
 
-- [ ] **Step 3: Run the focused router test**
+- [x] **Step 3: Make Welcome override the platform's restored initial route**
+
+Set this GoRouter option next to `initialLocation`:
+
+```dart
+overridePlatformDefaultLocation: true,
+```
+
+Android may otherwise provide the route last restored by the app (for example `/main`), which takes priority over `initialLocation` by default.
+
+- [x] **Step 4: Run the focused router test**
 
 Run:
 
@@ -162,8 +172,9 @@ Expected: all six tests pass.
 
 **Files:**
 - Modify: `docs/superpowers/plans/2026-07-15-welcome-on-every-launch.md`
+- Modify: `docs/superpowers/specs/2026-07-15-welcome-on-every-launch-design.md`
 
-- [ ] **Step 1: Run static analysis and the auth regression test**
+- [x] **Step 1: Run static analysis and the auth regression test**
 
 Run:
 
@@ -174,11 +185,11 @@ flutter test test/core/router/app_router_test.dart test/features/auth/auth_provi
 
 Expected: analysis reports no issues and all selected tests pass.
 
-- [ ] **Step 2: Perform an emulator smoke check**
+- [x] **Step 2: Perform an emulator smoke check**
 
-Start the installed application on `emulator-5554`, wait for saved-session restoration, and confirm Welcome remains on screen. Tap Explore and confirm the Main screen opens. Do not clear secure storage or log out during this check.
+Force-stop and reopen the installed application on `emulator-5554`, wait for saved-session restoration, and confirm Welcome remains on screen. Tap Explore and confirm the Main screen opens. Do not clear secure storage or log out during this check.
 
-- [ ] **Step 3: Mark completed plan items and review the final diff**
+- [x] **Step 3: Mark completed plan items and review the final diff**
 
 Run:
 
@@ -187,9 +198,9 @@ git diff --check
 git status --short
 ```
 
-Expected: no whitespace errors and only the router, router test, and this plan changed.
+Expected: no whitespace errors and only the router, router test, approved design spec, and this plan changed.
 
-- [ ] **Step 4: Commit the behavioral change**
+- [x] **Step 4: Commit the behavioral change**
 
 Run:
 
@@ -202,8 +213,9 @@ Expected: one focused commit containing the router behavior and regression test.
 
 ## Acceptance criteria
 
-- [ ] A saved token no longer redirects `/` away from Welcome.
-- [ ] Welcome still sends the user to Main when Explore is tapped.
-- [ ] Logged-out Partner Dashboard navigation still redirects to Login with `from`.
-- [ ] Logged-in Login/Register navigation still reaches `from` or Main.
-- [ ] Flutter analysis and focused router/auth tests pass.
+- [x] A saved token no longer redirects `/` away from Welcome.
+- [x] A platform-restored route cannot override Welcome at launch.
+- [x] Welcome still sends the user to Main when Explore is tapped.
+- [x] Logged-out Partner Dashboard navigation still redirects to Login with `from`.
+- [x] Logged-in Login/Register navigation still reaches `from` or Main.
+- [x] Flutter analysis and focused router/auth tests pass.

@@ -10,7 +10,31 @@ import '../../features/welcome/presentation/welcome_screen.dart';
 import '../../features/auth/application/auth_provider.dart';
 import 'app_routes.dart';
 
-final rootNavigatorKeyProvider = Provider<GlobalKey<NavigatorState>>((ref) => GlobalKey<NavigatorState>());
+String? resolveAppRedirect({
+  required bool isLoggedIn,
+  required String location,
+  required Map<String, String> queryParameters,
+}) {
+  final isAuthRoute =
+      location == AppRoutes.login || location == AppRoutes.register;
+  final isProtectedRoute = location.startsWith(AppRoutes.partnerDashboard);
+
+  if (!isLoggedIn && isProtectedRoute) {
+    return '${AppRoutes.login}?from=${Uri.encodeComponent(location)}';
+  }
+
+  if (isLoggedIn && isAuthRoute) {
+    final from = queryParameters['from'];
+    if (from != null && from.isNotEmpty) return from;
+    return AppRoutes.main;
+  }
+
+  return null;
+}
+
+final rootNavigatorKeyProvider = Provider<GlobalKey<NavigatorState>>(
+  (ref) => GlobalKey<NavigatorState>(),
+);
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final rootNavigatorKey = ref.watch(rootNavigatorKeyProvider);
@@ -18,33 +42,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   router = GoRouter(
     navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.welcome,
-    redirect: (context, state) {
-      final authState = ref.read(authProvider);
-      final location = state.uri.path;
-      final isAuthRoute =
-          location == AppRoutes.login || location == AppRoutes.register;
-          
-      final protectedPrefixes = [
-        AppRoutes.partnerDashboard,
-      ];
-      final isProtectedRoute = protectedPrefixes.any(location.startsWith);
-
-      if (!authState.isLoggedIn && isProtectedRoute) {
-        return '${AppRoutes.login}?from=${Uri.encodeComponent(location)}';
-      }
-
-      if (authState.isLoggedIn && isAuthRoute) {
-        final from = state.uri.queryParameters['from'];
-        if (from != null && from.isNotEmpty) return from;
-        return AppRoutes.main;
-      }
-
-      if (authState.isLoggedIn && location == AppRoutes.welcome) {
-        return AppRoutes.main;
-      }
-
-      return null;
-    },
+    overridePlatformDefaultLocation: true,
+    redirect: (context, state) => resolveAppRedirect(
+      isLoggedIn: ref.read(authProvider).isLoggedIn,
+      location: state.uri.path,
+      queryParameters: state.uri.queryParameters,
+    ),
     routes: [
       GoRoute(
         path: AppRoutes.welcome,
