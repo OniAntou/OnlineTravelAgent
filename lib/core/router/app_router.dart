@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../screens/auth/login_screen.dart';
-import '../../screens/auth/register_screen.dart';
-import '../../screens/main/main_screen.dart';
-import '../../screens/partner/partner_dashboard_screen.dart';
-import '../../screens/welcome/welcome_screen.dart';
-import '../../providers/auth_provider.dart';
+import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/register_screen.dart';
+import '../../app/shell/main_screen.dart';
+import '../../features/partner/presentation/partner_dashboard_screen.dart';
+import '../../features/welcome/presentation/welcome_screen.dart';
+import '../../features/auth/application/auth_provider.dart';
 import 'app_routes.dart';
 
 final rootNavigatorKeyProvider = Provider<GlobalKey<NavigatorState>>((ref) => GlobalKey<NavigatorState>());

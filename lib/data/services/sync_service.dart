@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../local/database.dart';
-import '../../models/destination.dart';
-import '../../models/hotel.dart';
-import '../../models/room.dart';
-import '../../models/tour_package.dart';
-import '../../models/document_item.dart';
-import '../../models/flight.dart';
-import '../../models/trip.dart';
-import '../../models/trip_schedule.dart';
+import '../../features/destinations/domain/destination.dart';
+import '../../features/hotels/domain/hotel.dart';
+import '../../features/hotels/domain/room.dart';
+import '../../features/tours/domain/tour_package.dart';
+import '../../features/profile/domain/document_item.dart';
+import '../../features/flights/domain/flight.dart';
+import '../../features/trips/domain/trip.dart';
+import '../../features/trips/domain/trip_schedule.dart';
 import './travel_api_service.dart';
 import './api_provider.dart';
 

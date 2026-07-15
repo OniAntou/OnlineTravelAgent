@@ -1,6 +1,6 @@
 import 'package:uuid/uuid.dart';
-import '../../models/trip.dart';
-import '../../models/trip_schedule.dart';
+import '../../features/trips/domain/trip.dart';
+import '../../features/trips/domain/trip_schedule.dart';
 import 'api_http_client.dart';
 
 class TripApiService {

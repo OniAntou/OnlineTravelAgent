@@ -1,4 +1,4 @@
-import '../../models/document_item.dart';
+import '../../features/profile/domain/document_item.dart';
 import 'api_http_client.dart';
 
 class DocumentApiService {

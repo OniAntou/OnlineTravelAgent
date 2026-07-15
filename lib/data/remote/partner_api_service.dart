@@ -1,6 +1,6 @@
-import '../../models/hotel.dart';
-import '../../models/room.dart';
-import '../../models/tour_package.dart';
+import '../../features/hotels/domain/hotel.dart';
+import '../../features/hotels/domain/room.dart';
+import '../../features/tours/domain/tour_package.dart';
 import 'api_http_client.dart';
 
 class PartnerApiService {

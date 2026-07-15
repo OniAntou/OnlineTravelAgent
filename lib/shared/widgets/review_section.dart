@@ -5,9 +5,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
-import '../../models/review.dart';
+import '../models/review.dart';
 import './star_rating.dart';
-import '../../providers/auth_provider.dart';
+import '../../features/auth/application/auth_provider.dart';
 import '../../data/services/api_provider.dart';
 import '../../core/utils/app_utils.dart';
 import 'shimmer_loading.dart';

@@ -1,4 +1,4 @@
-import '../../models/review.dart';
+import '../../shared/models/review.dart';
 import 'api_http_client.dart';
 
 class ReviewApiService {

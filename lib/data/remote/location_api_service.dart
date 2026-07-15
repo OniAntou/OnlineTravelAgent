@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../../core/theme/app_theme.dart';
-import '../../models/destination.dart';
-import '../../models/flight.dart';
-import '../../models/hotel.dart';
-import '../../models/tour_package.dart';
+import '../../features/destinations/domain/destination.dart';
+import '../../features/flights/domain/flight.dart';
+import '../../features/hotels/domain/hotel.dart';
+import '../../features/tours/domain/tour_package.dart';
 import 'api_http_client.dart';
 
 class LocationApiService {

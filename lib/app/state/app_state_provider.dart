@@ -4,8 +4,8 @@ import '../../core/constants/app_constants.dart';
 import '../../data/services/sync_service.dart';
 import '../../data/services/travel_api_service.dart';
 import '../../data/services/api_provider.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/profile_provider.dart';
+import '../../features/auth/application/auth_provider.dart';
+import '../../features/profile/application/profile_provider.dart';
 
 class BootstrapUnavailableException implements Exception {
   const BootstrapUnavailableException(this.cause);

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:online_travel_agent/data/services/travel_api_service.dart';
-import 'package:online_travel_agent/models/destination.dart';
-import 'package:online_travel_agent/models/document_item.dart';
-import 'package:online_travel_agent/models/trip.dart';
-import 'package:online_travel_agent/models/trip_schedule.dart';
+import 'package:online_travel_agent/features/destinations/domain/destination.dart';
+import 'package:online_travel_agent/features/profile/domain/document_item.dart';
+import 'package:online_travel_agent/features/trips/domain/trip.dart';
+import 'package:online_travel_agent/features/trips/domain/trip_schedule.dart';
 
 class FakeSecureStorage extends FlutterSecureStorage {
   final Map<String, String> data = {};

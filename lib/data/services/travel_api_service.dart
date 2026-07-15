@@ -1,15 +1,15 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
-import '../../models/destination.dart';
-import '../../models/document_item.dart';
-import '../../models/flight.dart';
-import '../../models/hotel.dart';
-import '../../models/review.dart';
-import '../../models/room.dart';
-import '../../models/tour_package.dart';
-import '../../models/trip.dart';
-import '../../models/trip_schedule.dart';
+import '../../features/destinations/domain/destination.dart';
+import '../../features/profile/domain/document_item.dart';
+import '../../features/flights/domain/flight.dart';
+import '../../features/hotels/domain/hotel.dart';
+import '../../shared/models/review.dart';
+import '../../features/hotels/domain/room.dart';
+import '../../features/tours/domain/tour_package.dart';
+import '../../features/trips/domain/trip.dart';
+import '../../features/trips/domain/trip_schedule.dart';
 import '../remote/api_http_client.dart';
 
 import '../remote/auth_api_service.dart';
