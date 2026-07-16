@@ -11,6 +11,7 @@ import {
 import { passwordService } from "../auth/password.service.js";
 import { processTripStatus } from "../../core/data/store-helpers.js";
 import { getTourScheduleRealtimeTarget } from "../trips/schedule-realtime.js";
+import { deleteManagedPublicImages } from "../../core/storage/supabase-storage.js";
 import {
   CreateDestinationBody,
   UpdateDestinationBody,
@@ -44,6 +45,10 @@ async function deleteTargetReviews(
   targetId: string,
 ) {
   await tx.review.deleteMany({ where: { targetType, targetId } });
+}
+
+function replacedImagePath(previous: string, next: string | undefined): string[] {
+  return next !== undefined && next !== previous ? [previous] : [];
 }
 
 const allowedScheduleStatuses = new Set([
@@ -170,6 +175,10 @@ export const adminController = {
 
   updateDestination: asyncHandler(async (req: Request, res: Response) => {
     const body = req.body as UpdateDestinationBody;
+    const previous = await prisma.destination.findUnique({
+      where: { id: req.params.id as string },
+      select: { imagePath: true },
+    });
     const dest = await prisma.destination.update({
       where: { id: req.params.id as string },
       data: {
@@ -188,15 +197,21 @@ export const adminController = {
         longitude: body.longitude,
       },
     });
+    await deleteManagedPublicImages(replacedImagePath(previous?.imagePath ?? "", body.imagePath));
     res.json(dest);
   }),
 
   deleteDestination: asyncHandler(async (req: Request, res: Response) => {
     const id = req.params.id as string;
+    const previous = await prisma.destination.findUnique({
+      where: { id },
+      select: { imagePath: true },
+    });
     await prisma.$transaction(async (tx) => {
       await deleteTargetReviews(tx, ReviewTargetType.destination, id);
       await tx.destination.delete({ where: { id } });
     });
+    await deleteManagedPublicImages([previous?.imagePath ?? ""]);
     res.json({ ok: true });
   }),
 
@@ -231,6 +246,10 @@ export const adminController = {
 
   updateHotel: asyncHandler(async (req: Request, res: Response) => {
     const body = req.body as UpdateHotelBody;
+    const previous = await prisma.hotel.findUnique({
+      where: { id: req.params.id as string },
+      select: { imagePath: true },
+    });
     const hotel = await prisma.hotel.update({
       where: { id: req.params.id as string },
       data: {
@@ -246,16 +265,25 @@ export const adminController = {
         longitude: body.longitude,
       },
     });
+    await deleteManagedPublicImages(replacedImagePath(previous?.imagePath ?? "", body.imagePath));
     res.json(hotel);
   }),
 
   deleteHotel: asyncHandler(async (req: Request, res: Response) => {
     const id = req.params.id as string;
+    const previous = await prisma.hotel.findUnique({
+      where: { id },
+      select: { imagePath: true, rooms: { select: { imagePath: true } } },
+    });
     await prisma.$transaction(async (tx) => {
       await deleteTargetReviews(tx, ReviewTargetType.hotel, id);
       await tx.room.deleteMany({ where: { hotelId: id } });
       await tx.hotel.delete({ where: { id } });
     });
+    await deleteManagedPublicImages([
+      previous?.imagePath ?? "",
+      ...(previous?.rooms.map((room) => room.imagePath) ?? []),
+    ]);
     res.json({ ok: true });
   }),
 
@@ -285,6 +313,10 @@ export const adminController = {
 
   updateFlight: asyncHandler(async (req: Request, res: Response) => {
     const body = req.body as UpdateFlightBody;
+    const previous = await prisma.flight.findUnique({
+      where: { id: req.params.id as string },
+      select: { airlineLogo: true },
+    });
     const flight = await prisma.flight.update({
       where: { id: req.params.id as string },
       data: {
@@ -298,15 +330,21 @@ export const adminController = {
         duration: body.duration,
       },
     });
+    await deleteManagedPublicImages(replacedImagePath(previous?.airlineLogo ?? "", body.airlineLogo));
     res.json(flight);
   }),
 
   deleteFlight: asyncHandler(async (req: Request, res: Response) => {
     const id = req.params.id as string;
+    const previous = await prisma.flight.findUnique({
+      where: { id },
+      select: { airlineLogo: true },
+    });
     await prisma.$transaction(async (tx) => {
       await deleteTargetReviews(tx, ReviewTargetType.flight, id);
       await tx.flight.delete({ where: { id } });
     });
+    await deleteManagedPublicImages([previous?.airlineLogo ?? ""]);
     res.json({ ok: true });
   }),
 
@@ -343,6 +381,10 @@ export const adminController = {
 
   updateTour: asyncHandler(async (req: Request, res: Response) => {
     const body = req.body as UpdateTourBody;
+    const previous = await prisma.tourPackage.findUnique({
+      where: { id: req.params.id as string },
+      select: { imagePath: true },
+    });
     const tour = await prisma.tourPackage.update({
       where: { id: req.params.id as string },
       data: {
@@ -361,15 +403,21 @@ export const adminController = {
         guideFee: body.guideFee,
       },
     });
+    await deleteManagedPublicImages(replacedImagePath(previous?.imagePath ?? "", body.imagePath));
     res.json(tour);
   }),
 
   deleteTour: asyncHandler(async (req: Request, res: Response) => {
     const id = req.params.id as string;
+    const previous = await prisma.tourPackage.findUnique({
+      where: { id },
+      select: { imagePath: true },
+    });
     await prisma.$transaction(async (tx) => {
       await deleteTargetReviews(tx, ReviewTargetType.tour, id);
       await tx.tourPackage.delete({ where: { id } });
     });
+    await deleteManagedPublicImages([previous?.imagePath ?? ""]);
     res.json({ ok: true });
   }),
 
@@ -722,6 +770,10 @@ export const adminController = {
 
   updateRoom: asyncHandler(async (req: Request, res: Response) => {
     const body = req.body as UpdateRoomBody;
+    const previous = await prisma.room.findUnique({
+      where: { id: req.params.roomId as string },
+      select: { imagePath: true },
+    });
     const room = await prisma.room.update({
       where: { id: req.params.roomId as string },
       data: {
@@ -733,11 +785,18 @@ export const adminController = {
         amenities: body.amenities,
       },
     });
+    await deleteManagedPublicImages(replacedImagePath(previous?.imagePath ?? "", body.imagePath));
     res.json(room);
   }),
 
   deleteRoom: asyncHandler(async (req: Request, res: Response) => {
-    await prisma.room.delete({ where: { id: req.params.roomId as string } });
+    const id = req.params.roomId as string;
+    const previous = await prisma.room.findUnique({
+      where: { id },
+      select: { imagePath: true },
+    });
+    await prisma.room.delete({ where: { id } });
+    await deleteManagedPublicImages([previous?.imagePath ?? ""]);
     res.json({ ok: true });
   }),
 

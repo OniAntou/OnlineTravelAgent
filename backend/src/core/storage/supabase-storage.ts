@@ -35,6 +35,64 @@ function encodeObjectKey(objectKey: string): string {
   return objectKey.split("/").map(encodeURIComponent).join("/");
 }
 
+function parseManagedPublicObjectKey(
+  value: string,
+  baseUrl: string,
+  bucket: string,
+): string | null {
+  if (!value.trim()) return null;
+
+  try {
+    const mediaUrl = new URL(value);
+    const projectUrl = new URL(baseUrl);
+    const pathPrefix = `/storage/v1/object/public/${encodeURIComponent(bucket)}/`;
+
+    if (mediaUrl.origin !== projectUrl.origin || !mediaUrl.pathname.startsWith(pathPrefix)) {
+      return null;
+    }
+
+    const objectKey = decodeURIComponent(mediaUrl.pathname.slice(pathPrefix.length));
+    return objectKey ? objectKey : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function deleteManagedPublicImages(values: readonly string[]): Promise<void> {
+  try {
+    const { baseUrl, serviceKey, bucket } = readStorageConfig();
+    const prefixes = [
+      ...new Set(
+        values.flatMap((value) => {
+          const objectKey = parseManagedPublicObjectKey(value, baseUrl, bucket);
+          return objectKey ? [objectKey] : [];
+        }),
+      ),
+    ];
+
+    if (!prefixes.length) return;
+
+    const response = await fetch(
+      `${baseUrl}/storage/v1/object/${encodeURIComponent(bucket)}`,
+      {
+        method: "DELETE",
+        headers: {
+          apikey: serviceKey,
+          authorization: `Bearer ${serviceKey}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ prefixes }),
+      },
+    );
+
+    if (!response.ok) {
+      console.warn("Unable to delete replaced catalogue images", { count: prefixes.length });
+    }
+  } catch {
+    console.warn("Unable to delete replaced catalogue images");
+  }
+}
+
 export async function uploadPublicImage(file: Express.Multer.File): Promise<string> {
   const extension = getSafeImageExtension(file);
   if (!extension) throw new HttpError(400, "File type not allowed");

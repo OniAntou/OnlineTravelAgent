@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   userCreate: vi.fn(),
   reviewDeleteMany: vi.fn(),
+  destinationFindUnique: vi.fn(),
   destinationDelete: vi.fn(),
   transaction: vi.fn(),
 }));
@@ -12,7 +13,10 @@ vi.mock("../../src/infrastructure/database/prisma.js", () => ({
   default: {
     user: { create: mocks.userCreate },
     review: { deleteMany: mocks.reviewDeleteMany },
-    destination: { delete: mocks.destinationDelete },
+    destination: {
+      findUnique: mocks.destinationFindUnique,
+      delete: mocks.destinationDelete,
+    },
     $transaction: mocks.transaction,
   },
 }));
@@ -26,6 +30,7 @@ describe("Prisma error mapping", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.reviewDeleteMany.mockResolvedValue({ count: 0 });
+    mocks.destinationFindUnique.mockResolvedValue({ imagePath: "assets/images/legacy.png" });
     mocks.transaction.mockImplementation(async (callback) =>
       callback({
         review: { deleteMany: mocks.reviewDeleteMany },

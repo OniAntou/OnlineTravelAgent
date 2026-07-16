@@ -3,6 +3,11 @@ import crypto from "crypto";
 import { ReviewTargetType } from "@prisma/client";
 import { asyncHandler } from "../../core/utils/asyncHandler.js";
 import prisma from "../../infrastructure/database/prisma.js";
+import { deleteManagedPublicImages } from "../../core/storage/supabase-storage.js";
+
+function replacedImagePath(previous: string, next: string | undefined): string[] {
+  return next !== undefined && next !== previous ? [previous] : [];
+}
 
 export const partnerController = {
   getHotels: asyncHandler(async (req: Request, res: Response) => {
@@ -59,7 +64,7 @@ export const partnerController = {
 
   createTour: asyncHandler(async (req: Request, res: Response) => {
     const partnerId = (req as any).userId;
-    const { name, description, duration, price, destinations, includes, departure } = req.body;
+    const { name, description, duration, price, imagePath, destinations, includes, departure } = req.body;
     
     const tour = await prisma.tourPackage.create({
       data: {
@@ -69,7 +74,7 @@ export const partnerController = {
         description,
         duration: duration || "3N2Đ",
         price: price || 0,
-        imagePath: "assets/images/tour_placeholder.jpg",
+        imagePath: imagePath || "assets/images/tour_placeholder.jpg",
         destinations: destinations || [],
         includes: includes || ["Khách sạn", "Xe đưa đón", "Ăn sáng"],
         departure: departure || "TP.HCM"
@@ -89,6 +94,7 @@ export const partnerController = {
       where: { id },
       data
     });
+    await deleteManagedPublicImages(replacedImagePath(hotel.imagePath, data.imagePath));
     res.json(updated);
   }),
 
@@ -97,6 +103,10 @@ export const partnerController = {
     const id = req.params.id as string;
     const hotel = await prisma.hotel.findFirst({ where: { id, partnerId } });
     if (!hotel) return res.status(404).json({ message: "Not found or unauthorized" });
+    const rooms = await prisma.room.findMany({
+      where: { hotelId: id },
+      select: { imagePath: true },
+    });
     
     await prisma.$transaction(async (tx) => {
       await tx.review.deleteMany({
@@ -105,6 +115,10 @@ export const partnerController = {
       await tx.room.deleteMany({ where: { hotelId: id } });
       await tx.hotel.delete({ where: { id } });
     });
+    await deleteManagedPublicImages([
+      hotel.imagePath,
+      ...rooms.map((room) => room.imagePath),
+    ]);
     res.json({ success: true });
   }),
 
@@ -119,6 +133,7 @@ export const partnerController = {
       where: { id },
       data
     });
+    await deleteManagedPublicImages(replacedImagePath(tour.imagePath, data.imagePath));
     res.json(updated);
   }),
 
@@ -134,6 +149,7 @@ export const partnerController = {
       });
       await tx.tourPackage.delete({ where: { id } });
     });
+    await deleteManagedPublicImages([tour.imagePath]);
     res.json({ success: true });
   }),
 
@@ -151,7 +167,6 @@ export const partnerController = {
     const hotelId = req.params.hotelId as string;
     const hotel = await prisma.hotel.findFirst({ where: { id: hotelId, partnerId } });
     if (!hotel) return res.status(404).json({ message: "Not found or unauthorized" });
-    
     const { name, description, price, capacity, imagePath, amenities } = req.body;
     const room = await prisma.room.create({
       data: {
@@ -174,12 +189,17 @@ export const partnerController = {
     const roomId = req.params.roomId as string;
     const hotel = await prisma.hotel.findFirst({ where: { id: hotelId, partnerId } });
     if (!hotel) return res.status(404).json({ message: "Not found or unauthorized" });
+    const room = await prisma.room.findFirst({
+      where: { id: roomId, hotelId },
+      select: { imagePath: true },
+    });
     
     const { name, description, price, capacity, imagePath, amenities } = req.body;
     await prisma.room.updateMany({
       where: { id: roomId, hotelId },
       data: { name, description, price: Number(price) || 0, capacity: Number(capacity) || 1, imagePath, amenities }
     });
+    await deleteManagedPublicImages(replacedImagePath(room?.imagePath ?? "", imagePath));
     res.json({ success: true });
   }),
 
@@ -189,8 +209,13 @@ export const partnerController = {
     const roomId = req.params.roomId as string;
     const hotel = await prisma.hotel.findFirst({ where: { id: hotelId, partnerId } });
     if (!hotel) return res.status(404).json({ message: "Not found or unauthorized" });
+    const room = await prisma.room.findFirst({
+      where: { id: roomId, hotelId },
+      select: { imagePath: true },
+    });
     
     await prisma.room.deleteMany({ where: { id: roomId, hotelId } });
+    await deleteManagedPublicImages([room?.imagePath ?? ""]);
     res.json({ success: true });
   })
 };

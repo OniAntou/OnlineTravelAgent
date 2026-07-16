@@ -3,20 +3,32 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   reviewDeleteMany: vi.fn(),
+  destinationFindUnique: vi.fn(),
+  destinationUpdate: vi.fn(),
   destinationDelete: vi.fn(),
+  flightFindUnique: vi.fn(),
   flightDelete: vi.fn(),
+  tourPackageFindUnique: vi.fn(),
   tourPackageDelete: vi.fn(),
   categoryFindUnique: vi.fn(),
   categoryDelete: vi.fn(),
   transaction: vi.fn(),
 }));
 
+const media = vi.hoisted(() => ({
+  deleteManagedPublicImages: vi.fn(),
+}));
+
 vi.mock("../../../src/infrastructure/database/prisma.js", () => ({
   default: {
     review: { deleteMany: mocks.reviewDeleteMany },
-    destination: { delete: mocks.destinationDelete },
-    flight: { delete: mocks.flightDelete },
-    tourPackage: { delete: mocks.tourPackageDelete },
+    destination: {
+      findUnique: mocks.destinationFindUnique,
+      update: mocks.destinationUpdate,
+      delete: mocks.destinationDelete,
+    },
+    flight: { findUnique: mocks.flightFindUnique, delete: mocks.flightDelete },
+    tourPackage: { findUnique: mocks.tourPackageFindUnique, delete: mocks.tourPackageDelete },
     category: {
       findUnique: mocks.categoryFindUnique,
       delete: mocks.categoryDelete,
@@ -24,6 +36,8 @@ vi.mock("../../../src/infrastructure/database/prisma.js", () => ({
     $transaction: mocks.transaction,
   },
 }));
+
+vi.mock("../../../src/core/storage/supabase-storage.js", () => media);
 
 import { app } from "../../../src/app.js";
 import { env } from "../../../src/core/config/env.js";
@@ -34,10 +48,15 @@ describe("admin catalogue deletion", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.reviewDeleteMany.mockResolvedValue({ count: 1 });
+    mocks.destinationFindUnique.mockResolvedValue({ imagePath: "assets/images/legacy.png" });
+    mocks.destinationUpdate.mockResolvedValue({ id: "destination-1" });
     mocks.destinationDelete.mockResolvedValue({ id: "destination-1" });
+    mocks.flightFindUnique.mockResolvedValue({ airlineLogo: "assets/images/legacy.png" });
     mocks.flightDelete.mockResolvedValue({ id: "flight-1" });
+    mocks.tourPackageFindUnique.mockResolvedValue({ imagePath: "assets/images/legacy.png" });
     mocks.tourPackageDelete.mockResolvedValue({ id: "tour-1" });
     mocks.categoryDelete.mockResolvedValue({ id: "category-empty" });
+    media.deleteManagedPublicImages.mockResolvedValue(undefined);
     mocks.transaction.mockImplementation(async (callback) =>
       callback({
         review: { deleteMany: mocks.reviewDeleteMany },
@@ -61,6 +80,21 @@ describe("admin catalogue deletion", () => {
       where: { id: "destination-1" },
     });
     expect(mocks.transaction).toHaveBeenCalledOnce();
+  });
+
+  it("reclaims a replaced destination image after the update", async () => {
+    const oldImage = "https://project.supabase.co/storage/v1/object/public/travel-media/catalog/old.png";
+    const newImage = "https://project.supabase.co/storage/v1/object/public/travel-media/catalog/new.png";
+    mocks.destinationFindUnique.mockResolvedValue({ imagePath: oldImage });
+
+    const res = await request(app)
+      .put("/api/admin/destinations/destination-1")
+      .set("Authorization", adminAuth)
+      .send({ name: "Updated destination", location: "Da Nang", imagePath: newImage });
+
+    expect(res.status).toBe(200);
+    expect(mocks.destinationUpdate).toHaveBeenCalledBefore(media.deleteManagedPublicImages as any);
+    expect(media.deleteManagedPublicImages).toHaveBeenCalledWith([oldImage]);
   });
 
   it("removes flight reviews in the same transaction", async () => {

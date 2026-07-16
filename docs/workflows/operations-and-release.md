@@ -104,6 +104,8 @@ Không phát hành thêm UI partner action nếu backend route/authorization ch�
 
 Ảnh mới dùng bucket public `travel-media` trên Supabase Storage. Backend là writer duy nhất bằng service-role key; URL public chỉ cho phép đọc. Không đưa key vào Flutter/static panel và không stage `backend/.env`. `UPLOAD_DIR` cùng route `/uploads` chỉ còn để ảnh database cũ tiếp tục hiển thị; hạ tầng không cần filesystem persistent cho ảnh mới.
 
+Sau một update/delete catalogue thành công, backend xóa ảnh Supabase cũ sau khi Prisma write/transaction đã hoàn tất. Cleanup chỉ nhận URL public thuộc chính project và bucket cấu hình, là best-effort và không được làm request CRUD thất bại. Khi điều tra tăng dung lượng bucket, phân biệt orphan do lỗi cleanup (xem warning backend) với orphan do upload xong nhưng form chưa lưu; loại sau chưa có tác vụ quét tự động.
+
 ## Incident behavior
 
 | Sự cố | Hành vi hệ thống | Phản ứng đầu tiên |

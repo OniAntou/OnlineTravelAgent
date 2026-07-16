@@ -7,8 +7,13 @@ const mocks = vi.hoisted(() => ({
   hotelFindMany: vi.fn(),
   hotelDelete: vi.fn(),
   reviewDeleteMany: vi.fn(),
+  roomFindMany: vi.fn(),
   roomDeleteMany: vi.fn(),
   transaction: vi.fn(),
+}));
+
+const media = vi.hoisted(() => ({
+  deleteManagedPublicImages: vi.fn(),
 }));
 
 vi.mock("../../../src/infrastructure/database/prisma.js", () => ({
@@ -20,11 +25,14 @@ vi.mock("../../../src/infrastructure/database/prisma.js", () => ({
       delete: mocks.hotelDelete,
     },
     room: {
+      findMany: mocks.roomFindMany,
       deleteMany: mocks.roomDeleteMany,
     },
     $transaction: mocks.transaction,
   },
 }));
+
+vi.mock("../../../src/core/storage/supabase-storage.js", () => media);
 
 import { app } from "../../../src/app.js";
 import { env } from "../../../src/core/config/env.js";
@@ -37,11 +45,13 @@ const partnerToken = jwt.sign(
 describe("partner hotel deletion", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.hotelFindFirst.mockResolvedValue({ id: "hotel-1" });
+    mocks.hotelFindFirst.mockResolvedValue({ id: "hotel-1", imagePath: "assets/images/legacy.png" });
     mocks.hotelFindMany.mockResolvedValue([{ id: "hotel-1", rooms: [] }]);
     mocks.reviewDeleteMany.mockResolvedValue({ count: 1 });
+    mocks.roomFindMany.mockResolvedValue([{ imagePath: "assets/images/legacy-room.png" }]);
     mocks.roomDeleteMany.mockResolvedValue({ count: 2 });
     mocks.hotelDelete.mockResolvedValue({ id: "hotel-1" });
+    media.deleteManagedPublicImages.mockResolvedValue(undefined);
     mocks.transaction.mockImplementation(async (callback) =>
       callback({
         review: { deleteMany: mocks.reviewDeleteMany },

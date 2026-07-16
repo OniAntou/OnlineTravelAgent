@@ -4,18 +4,25 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   reviewDeleteMany: vi.fn(),
   roomDeleteMany: vi.fn(),
+  hotelFindUnique: vi.fn(),
   hotelDelete: vi.fn(),
   transaction: vi.fn(),
+}));
+
+const media = vi.hoisted(() => ({
+  deleteManagedPublicImages: vi.fn(),
 }));
 
 vi.mock("../../../src/infrastructure/database/prisma.js", () => ({
   default: {
     review: { deleteMany: mocks.reviewDeleteMany },
     room: { deleteMany: mocks.roomDeleteMany },
-    hotel: { delete: mocks.hotelDelete },
+    hotel: { findUnique: mocks.hotelFindUnique, delete: mocks.hotelDelete },
     $transaction: mocks.transaction,
   },
 }));
+
+vi.mock("../../../src/core/storage/supabase-storage.js", () => media);
 
 import { app } from "../../../src/app.js";
 import { env } from "../../../src/core/config/env.js";
@@ -27,7 +34,12 @@ describe("admin hotel deletion", () => {
     vi.clearAllMocks();
     mocks.reviewDeleteMany.mockResolvedValue({ count: 1 });
     mocks.roomDeleteMany.mockResolvedValue({ count: 2 });
+    mocks.hotelFindUnique.mockResolvedValue({
+      imagePath: "assets/images/legacy.png",
+      rooms: [{ imagePath: "assets/images/legacy-room.png" }],
+    });
     mocks.hotelDelete.mockResolvedValue({ id: "hotel-1" });
+    media.deleteManagedPublicImages.mockResolvedValue(undefined);
     mocks.transaction.mockImplementation((run) =>
       run({
         review: { deleteMany: mocks.reviewDeleteMany },

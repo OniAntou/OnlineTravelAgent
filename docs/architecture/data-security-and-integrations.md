@@ -180,6 +180,8 @@ PostgreSQL chỉ lưu `imagePath` là URL; content nằm trong Storage nên mọ
 
 Asset bundled và giá trị `/uploads/...` cũ vẫn tương thích đọc; ảnh mới không ghi filesystem local.
 
+Khi Admin hoặc Partner thay ảnh hay xóa catalogue record, backend giữ URL cũ, hoàn tất Prisma update/transaction trước, rồi xóa object cũ theo cơ chế best-effort. Chỉ URL public có đúng origin `SUPABASE_URL`, endpoint `/storage/v1/object/public/` và bucket cấu hình mới được xóa; asset bundled, `/uploads/...`, URL ngoài project và bucket khác luôn bị bỏ qua. Sự cố Storage chỉ được cảnh báo trong log, không rollback CRUD đã thành công. Upload rồi rời form trước khi record được lưu vẫn có thể tạo orphan; việc quét orphan định kỳ chưa thuộc phạm vi hiện tại.
+
 ## Security controls và operating boundaries
 
 | Surface | Biện pháp hiện có |

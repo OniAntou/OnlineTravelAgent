@@ -12,6 +12,8 @@ Khi kế hoạch hoàn tất, giữ lại như một hồ sơ triển khai ngắ
 
 ## Kế hoạch hiện có
 
+- [Triển khai quản lý vòng đời ảnh Supabase Storage, 2026-07-17 — hoàn tất](2026-07-17-image-lifecycle-management-implementation.md)
+- [Thiết kế quản lý vòng đời ảnh Supabase Storage, 2026-07-17 — đã triển khai](2026-07-17-image-lifecycle-management-design.md)
 - [Triển khai đồng bộ ảnh bằng Supabase Storage, 2026-07-17](2026-07-17-supabase-storage-images-implementation.md)
 - [Thiết kế đồng bộ ảnh bằng Supabase Storage, 2026-07-17](2026-07-17-supabase-storage-images-design.md)
 - [Nâng cấp dependency an toàn, 2026-07-17](2026-07-17-safe-dependency-upgrades.md)

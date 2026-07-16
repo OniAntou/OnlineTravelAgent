@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { HttpError } from "../../src/core/utils/http-error.js";
-import { uploadPublicImage } from "../../src/core/storage/supabase-storage.js";
+import {
+  deleteManagedPublicImages,
+  uploadPublicImage,
+} from "../../src/core/storage/supabase-storage.js";
 
 const pngFile = {
   buffer: Buffer.from("png"),
@@ -59,5 +62,64 @@ describe("Supabase image storage", () => {
       statusCode: 502,
       message: "Image upload failed",
     });
+  });
+
+  it("deletes only this project's managed public images", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://project.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-secret");
+    vi.stubEnv("SUPABASE_STORAGE_BUCKET", "travel-media");
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("{}", { status: 200 }));
+
+    await deleteManagedPublicImages([
+      "https://project.supabase.co/storage/v1/object/public/travel-media/catalog/old.png",
+      "https://project.supabase.co/storage/v1/object/public/travel-media/catalog/old.png",
+      "assets/images/legacy.png",
+      "/uploads/legacy.png",
+      "https://other-project.supabase.co/storage/v1/object/public/travel-media/catalog/other.png",
+      "https://project.supabase.co/storage/v1/object/public/other-bucket/catalog/other.png",
+    ]);
+
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://project.supabase.co/storage/v1/object/travel-media",
+      expect.objectContaining({
+        method: "DELETE",
+        body: JSON.stringify({ prefixes: ["catalog/old.png"] }),
+      }),
+    );
+  });
+
+  it("does not let Storage cleanup failures fail a CRUD operation", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://project.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-secret");
+    vi.stubEnv("SUPABASE_STORAGE_BUCKET", "travel-media");
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("failure", { status: 500 }));
+
+    await expect(
+      deleteManagedPublicImages([
+        "https://project.supabase.co/storage/v1/object/public/travel-media/catalog/old.png",
+      ]),
+    ).resolves.toBeUndefined();
+    expect(warn).toHaveBeenCalledWith(
+      "Unable to delete replaced catalogue images",
+      { count: 1 },
+    );
+  });
+
+  it("ignores private, malformed, and empty image references", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://project.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-secret");
+    vi.stubEnv("SUPABASE_STORAGE_BUCKET", "travel-media");
+    const fetchMock = vi.spyOn(globalThis, "fetch");
+
+    await deleteManagedPublicImages([
+      "",
+      "not a URL",
+      "https://project.supabase.co/storage/v1/object/sign/travel-media/catalog/private.png",
+      "https://project.supabase.co/storage/v1/object/public/travel-media/",
+    ]);
+
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
