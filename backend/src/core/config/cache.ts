@@ -6,18 +6,18 @@ export const appCache = new NodeCache({ stdTTL: 300 });
 
 export const BOOTSTRAP_BASE_KEY = "bootstrapBase";
 
-export function invalidateBootstrapCache() {
-  appCache.flushAll();
+export function invalidateBootstrapBaseCache() {
+  appCache.del(BOOTSTRAP_BASE_KEY);
 }
 
-export function invalidateBootstrapCacheOnMutation(
+export function invalidateBootstrapBaseOnMutation(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   res.on("finish", () => {
     if (req.method !== "GET" && res.statusCode >= 200 && res.statusCode < 400) {
-      invalidateBootstrapCache();
+      invalidateBootstrapBaseCache();
     }
   });
   next();

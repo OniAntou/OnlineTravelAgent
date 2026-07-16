@@ -58,7 +58,7 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
   ) {
     final item = items[index];
     return deriveTripScheduleMilestoneStatus(
-      tripStatus: widget.trip.status,
+      tripStatus: widget.trip.status.storageValue,
       scheduleDate: day.date,
       startTime: item.startTime,
       endTime: item.endTime,
@@ -79,9 +79,7 @@ class _TripScheduleTimelineState extends ConsumerState<TripScheduleTimeline> {
           return const SizedBox.shrink();
         }
 
-        final isOngoingTrip =
-            widget.trip.status.toLowerCase() == 'đang diễn ra' ||
-            widget.trip.status.toLowerCase() == 'ongoing';
+        final isOngoingTrip = widget.trip.status == TripStatus.ongoing;
         final totalDays = schedule.days.length;
 
         // Auto-select today if not specified

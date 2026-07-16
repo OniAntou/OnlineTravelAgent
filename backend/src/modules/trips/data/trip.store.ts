@@ -3,21 +3,15 @@ import prisma from "../../../infrastructure/database/prisma.js";
 import { generateId, processTripStatus } from "../../../core/data/store-helpers.js";
 import { mockFlights, mockDestinations } from "../../../infrastructure/fallback/mock-data.js";
 import { memoryDb } from "../../../infrastructure/fallback/memory-db.js";
-import { assertMemoryFallbackEnabled } from "../../../core/config/data-availability.js";
+import {
+  assertMemoryFallbackEnabled,
+  shouldUseMemoryFallback,
+} from "../../../core/config/data-availability.js";
 import { scheduleService } from "../schedule.service.js";
 import {
   findIdempotentTrip,
   recoverIdempotentTrip,
 } from "../../booking/data/booking-idempotency.js";
-
-async function dbAvailable(): Promise<boolean> {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 function filterTripsByType<T extends { isUpcoming: boolean }>(
   trips: T[],
@@ -37,10 +31,9 @@ export const tripStore = {
     totalPrice?: number,
     requestId?: string,
   ) {
-    const useMem = !(await dbAvailable());
+    const useMem = await shouldUseMemoryFallback();
 
     if (useMem) {
-      assertMemoryFallbackEnabled();
       if (requestId) {
         const existing = memoryDb.findTripByRequestId(userId, requestId);
         if (existing) return existing;
@@ -121,10 +114,9 @@ export const tripStore = {
     guests: string,
     requestId?: string,
   ) {
-    const useMem = !(await dbAvailable());
+    const useMem = await shouldUseMemoryFallback();
 
     if (useMem) {
-      assertMemoryFallbackEnabled();
       if (requestId) {
         const existing = memoryDb.findTripByRequestId(userId, requestId);
         if (existing) return existing;
@@ -183,10 +175,9 @@ export const tripStore = {
   },
 
   async cancelTrip(userId: string | undefined, tripId: string) {
-    const useMem = !(await dbAvailable());
+    const useMem = await shouldUseMemoryFallback();
 
     if (useMem) {
-      assertMemoryFallbackEnabled();
       const trip = memoryDb.findTripById(tripId);
       if (!trip || (userId && trip.userId !== userId)) return null;
       return memoryDb.updateTrip(tripId, { status: "CANCELLED", isUpcoming: false });
@@ -202,10 +193,9 @@ export const tripStore = {
   },
 
   async getTrips(userId: string | undefined, type?: string) {
-    const useMem = !(await dbAvailable());
+    const useMem = await shouldUseMemoryFallback();
 
     if (useMem) {
-      assertMemoryFallbackEnabled();
       if (!userId) return [];
       const trips = memoryDb
         .findTripsByUserId(userId)

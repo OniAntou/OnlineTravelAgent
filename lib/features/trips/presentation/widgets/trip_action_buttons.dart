@@ -31,7 +31,7 @@ class TripActionButtons extends ConsumerWidget {
           'Chia sẻ',
           () => _showNotImplemented(context, 'Chia sẻ'),
         ),
-        if (trip.status != 'Đã hủy' && trip.isUpcoming)
+        if (trip.status != TripStatus.cancelled && trip.isUpcoming)
           _btn(
             context,
             Icons.cancel_outlined,

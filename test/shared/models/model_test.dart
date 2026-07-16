@@ -59,8 +59,12 @@ void main() {
 
     test('copyWith creates new instance with overrides', () {
       const dest = Destination(
-        id: '1', name: 'Da Lat', location: 'Lam Dong',
-        rating: '4.5', duration: '3 ngày', imagePath: '',
+        id: '1',
+        name: 'Da Lat',
+        location: 'Lam Dong',
+        rating: '4.5',
+        duration: '3 ngày',
+        imagePath: '',
       );
       final updated = dest.copyWith(name: 'Ha Noi', isFavorite: true);
       expect(updated.name, 'Ha Noi');
@@ -70,9 +74,14 @@ void main() {
 
     test('toJson returns correct map', () {
       const dest = Destination(
-        id: '1', name: 'Da Lat', location: 'Lam Dong',
-        rating: '4.5', duration: '3 ngày', imagePath: 'img.jpg',
-        latitude: 11.94, longitude: 108.44,
+        id: '1',
+        name: 'Da Lat',
+        location: 'Lam Dong',
+        rating: '4.5',
+        duration: '3 ngày',
+        imagePath: 'img.jpg',
+        latitude: 11.94,
+        longitude: 108.44,
       );
       final json = dest.toJson();
       expect(json['id'], '1');
@@ -106,6 +115,7 @@ void main() {
       expect(trip.roomId, 'R001');
       expect(trip.totalPrice, 1500000);
       expect(trip.isCustom, true);
+      expect(trip.status, TripStatus.upcoming);
     });
 
     test('fromJson handles nullable fields', () {
@@ -124,6 +134,20 @@ void main() {
       expect(trip.totalPrice, isNull);
       expect(trip.isUpcoming, false);
       expect(trip.isCustom, false);
+      expect(trip.status, TripStatus.unknown);
+    });
+
+    test('normalizes protocol and legacy status values', () {
+      expect(
+        TripStatus.fromServer('ONGOING', 'PENDING', true),
+        TripStatus.pendingPayment,
+      );
+      expect(
+        TripStatus.fromServer('ONGOING', 'SUCCESS', true),
+        TripStatus.upcoming,
+      );
+      expect(TripStatus.fromStorage('Đã hủy', false), TripStatus.cancelled);
+      expect(TripStatus.fromStorage('Đang diễn ra', false), TripStatus.ongoing);
     });
   });
 

@@ -31,7 +31,7 @@ final bootstrapProvider = FutureProvider<BootstrapData>((ref) async {
   try {
     final fresh = await api.fetchBootstrap();
     // Sync to SQLite for next launch
-    await syncService.syncAll();
+    await syncService.persistBootstrap(fresh);
     return fresh;
   } catch (error, stackTrace) {
     // API failed, log error and use cached data

@@ -54,46 +54,66 @@ class SyncService {
       return;
     }
 
+    await _runSync(() async {
+      await _flushOfflineQueue();
+      final data = await _ref.read(apiProvider).fetchBootstrap();
+      await _persistBootstrapData(data);
+    });
+  }
+
+  /// Persists a bootstrap payload the caller has already fetched. Keeping this
+  /// seam separate from [syncAll] prevents the foreground bootstrap flow from
+  /// making the same `/api/bootstrap` request twice.
+  Future<void> persistBootstrap(BootstrapData data) async {
+    if (_isSyncing) return;
+
+    await _runSync(() async {
+      await _flushOfflineQueue();
+      await _persistBootstrapData(data);
+    });
+  }
+
+  Future<void> _runSync(Future<void> Function() operation) async {
     _isSyncing = true;
 
     try {
-      await _flushOfflineQueue();
-
-      final api = _ref.read(apiProvider);
-      final data = await api.fetchBootstrap();
-
-      await db.transaction(() async {
-        await _removePreviousSnapshot(
-          data.trips.map((trip) => trip.id).toSet(),
-        );
-        await _syncDestinations(data.destinations, data.recommended);
-        await _syncCategories(data.categories);
-        await _syncHotels(data.hotels);
-        await _syncTours(data.tourPackages);
-        await _syncFlights(data.flights);
-        await _syncDocuments(data.documents);
-        await _syncTrips(data.trips);
-      });
-
-      if (data.trips.isNotEmpty) {
-        try {
-          final tripIds = data.trips
-              .map((trip) => trip.id)
-              .toList(growable: false);
-          final schedules = await api.fetchTripSchedulesBatch(tripIds);
-          for (final entry in schedules.entries) {
-            await _syncSchedule(entry.key, entry.value);
-          }
-        } catch (e, st) {
-          debugPrint('Sync schedules batch error: $e\n$st');
-        }
-      }
-
+      await operation();
       _lastSync = DateTime.now();
     } catch (e, st) {
-      debugPrint('SyncAll error: $e\n$st');
+      debugPrint('Sync error: $e\n$st');
     } finally {
       _isSyncing = false;
+    }
+  }
+
+  Future<void> _persistBootstrapData(BootstrapData data) async {
+    await db.transaction(() async {
+      await _removeStaleSnapshot(data);
+      await _syncDestinations(data.destinations, data.recommended);
+      await _syncCategories(data.categories);
+      await _syncHotels(data.hotels);
+      await _syncTours(data.tourPackages);
+      await _syncFlights(data.flights);
+      await _syncDocuments(data.documents);
+      await _syncTrips(data.trips);
+    });
+
+    await _syncTripSchedules(data.trips);
+  }
+
+  Future<void> _syncTripSchedules(List<Trip> trips) async {
+    if (trips.isEmpty) return;
+
+    try {
+      final tripIds = trips.map((trip) => trip.id).toList(growable: false);
+      final schedules = await _ref
+          .read(apiProvider)
+          .fetchTripSchedulesBatch(tripIds);
+      for (final entry in schedules.entries) {
+        await _syncSchedule(entry.key, entry.value);
+      }
+    } catch (e, st) {
+      debugPrint('Sync schedules batch error: $e\n$st');
     }
   }
 
@@ -107,7 +127,8 @@ class SyncService {
     await db.offlineQueueDao.clearQueue();
   }
 
-  Future<void> _removePreviousSnapshot(Set<String> nextTripIds) async {
+  Future<void> _removeStaleSnapshot(BootstrapData data) async {
+    final nextTripIds = data.trips.map((trip) => trip.id).toSet();
     final existingTrips = await db.tripsDao.getAll();
     final staleTripIds = existingTrips
         .map((trip) => trip.id)
@@ -122,14 +143,95 @@ class SyncService {
       await db.tripScheduleDaysDao.deleteByTripId(tripId);
     }
 
-    await db.delete(db.roomsTable).go();
-    await db.delete(db.hotelsTable).go();
-    await db.delete(db.destinationsTable).go();
-    await db.delete(db.categoriesTable).go();
-    await db.delete(db.tourPackagesTable).go();
-    await db.delete(db.flightsTable).go();
-    await db.delete(db.documentsTable).go();
-    await db.delete(db.tripsTable).go();
+    final nextRoomIds = data.hotels
+        .expand((hotel) => hotel.rooms)
+        .map((room) => room.id)
+        .toSet();
+
+    await _deleteRoomsNotIn(nextRoomIds);
+    await _deleteHotelsNotIn(data.hotels.map((hotel) => hotel.id).toSet());
+    await _deleteDestinationsNotIn(
+      data.destinations.map((destination) => destination.id).toSet(),
+    );
+    await _deleteCategoriesNotIn(data.categories.toSet());
+    await _deleteToursNotIn(data.tourPackages.map((tour) => tour.id).toSet());
+    await _deleteFlightsNotIn(data.flights.map((flight) => flight.id).toSet());
+    await _deleteDocumentsNotIn(
+      data.documents.map((document) => document.id).toSet(),
+    );
+    await _deleteTripsNotIn(nextTripIds);
+  }
+
+  Future<void> _deleteDestinationsNotIn(Set<String> ids) async {
+    final query = db.delete(db.destinationsTable);
+    if (ids.isEmpty) {
+      await query.go();
+      return;
+    }
+    await (query..where((table) => table.id.isNotIn(ids))).go();
+  }
+
+  Future<void> _deleteCategoriesNotIn(Set<String> ids) async {
+    final query = db.delete(db.categoriesTable);
+    if (ids.isEmpty) {
+      await query.go();
+      return;
+    }
+    await (query..where((table) => table.id.isNotIn(ids))).go();
+  }
+
+  Future<void> _deleteHotelsNotIn(Set<String> ids) async {
+    final query = db.delete(db.hotelsTable);
+    if (ids.isEmpty) {
+      await query.go();
+      return;
+    }
+    await (query..where((table) => table.id.isNotIn(ids))).go();
+  }
+
+  Future<void> _deleteRoomsNotIn(Set<String> ids) async {
+    final query = db.delete(db.roomsTable);
+    if (ids.isEmpty) {
+      await query.go();
+      return;
+    }
+    await (query..where((table) => table.id.isNotIn(ids))).go();
+  }
+
+  Future<void> _deleteToursNotIn(Set<String> ids) async {
+    final query = db.delete(db.tourPackagesTable);
+    if (ids.isEmpty) {
+      await query.go();
+      return;
+    }
+    await (query..where((table) => table.id.isNotIn(ids))).go();
+  }
+
+  Future<void> _deleteFlightsNotIn(Set<String> ids) async {
+    final query = db.delete(db.flightsTable);
+    if (ids.isEmpty) {
+      await query.go();
+      return;
+    }
+    await (query..where((table) => table.id.isNotIn(ids))).go();
+  }
+
+  Future<void> _deleteDocumentsNotIn(Set<String> ids) async {
+    final query = db.delete(db.documentsTable);
+    if (ids.isEmpty) {
+      await query.go();
+      return;
+    }
+    await (query..where((table) => table.id.isNotIn(ids))).go();
+  }
+
+  Future<void> _deleteTripsNotIn(Set<String> ids) async {
+    final query = db.delete(db.tripsTable);
+    if (ids.isEmpty) {
+      await query.go();
+      return;
+    }
+    await (query..where((table) => table.id.isNotIn(ids))).go();
   }
 
   Future<void> _syncDestinations(
@@ -281,7 +383,7 @@ class SyncService {
               location: Value(t.location),
               date: Value(t.date),
               guests: Value(t.guests),
-              status: Value(t.status),
+              status: Value(t.status.storageValue),
               imagePath: Value(t.imagePath),
               isUpcoming: Value(t.isUpcoming),
               flightId: Value(t.flightId),
@@ -308,7 +410,7 @@ class SyncService {
         location: Value(trip.location),
         date: Value(trip.date),
         guests: Value(trip.guests),
-        status: Value(trip.status),
+        status: Value(trip.status.storageValue),
         imagePath: Value(trip.imagePath),
         isUpcoming: Value(trip.isUpcoming),
         flightId: Value(trip.flightId),
@@ -321,8 +423,8 @@ class SyncService {
     );
   }
 
-  Future<void> syncTripStatus(String id, String status) async {
-    await db.tripsDao.updateStatus(id, status);
+  Future<void> syncTripStatus(String id, TripStatus status) async {
+    await db.tripsDao.updateStatus(id, status.storageValue);
   }
 
   Future<void> _syncSchedule(String tripId, TripSchedule schedule) async {
@@ -391,6 +493,7 @@ class SyncService {
     final recommendedRows = await db.destinationsDao.getRecommended();
     final categoryRows = await db.categoriesDao.getAll();
     final hotelRows = await db.hotelsDao.getAll();
+    final allRoomRows = await db.hotelsDao.getAllRooms();
     final tourRows = await db.tourPackagesDao.getAll();
     final tripRows = await db.tripsDao.getAll();
     final docRows = await db.documentsDao.getAll();
@@ -429,9 +532,14 @@ class SyncService {
         )
         .toList();
 
+    final roomsByHotel = <String, List<RoomsTableData>>{};
+    for (final room in allRoomRows) {
+      (roomsByHotel[room.hotelId] ??= []).add(room);
+    }
+
     final hotels = <Hotel>[];
     for (final h in hotelRows) {
-      final roomRows = await db.hotelsDao.getRoomsByHotel(h.id);
+      final roomRows = roomsByHotel[h.id] ?? const <RoomsTableData>[];
       hotels.add(
         Hotel(
           id: h.id,
@@ -500,7 +608,7 @@ class SyncService {
             location: t.location,
             date: t.date,
             guests: t.guests,
-            status: t.status,
+            status: TripStatus.fromStorage(t.status, t.isUpcoming),
             imagePath: t.imagePath,
             isUpcoming: t.isUpcoming,
             flightId: t.flightId,

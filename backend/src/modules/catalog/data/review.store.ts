@@ -1,7 +1,10 @@
 import { ReviewTargetType } from "@prisma/client";
 import prisma from "../../../infrastructure/database/prisma.js";
 import { memoryDb } from "../../../infrastructure/fallback/memory-db.js";
-import { assertMemoryFallbackEnabled } from "../../../core/config/data-availability.js";
+import {
+  assertMemoryFallbackEnabled,
+  shouldUseMemoryFallback,
+} from "../../../core/config/data-availability.js";
 import {
   mockDestinations,
   mockFlights,
@@ -9,15 +12,6 @@ import {
   mockTourPackages,
 } from "../../../infrastructure/fallback/mock-data.js";
 import { HttpError } from "../../../core/utils/http-error.js";
-
-async function dbAvailable(): Promise<boolean> {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 async function reviewTargetExists(
   targetType: ReviewTargetType,
@@ -104,10 +98,9 @@ export const reviewStore = {
   ) {
     if (!userId) throw new Error("Authentication required to create a review");
 
-    const useMem = !(await dbAvailable());
+    const useMem = await shouldUseMemoryFallback();
 
     if (useMem) {
-      assertMemoryFallbackEnabled();
       if (!memoryReviewTargetExists(targetType, targetId)) {
         throw new HttpError(404, "Review target not found");
       }
@@ -131,9 +124,8 @@ export const reviewStore = {
   async deleteReview(userId: string | undefined, reviewId: string) {
     if (!userId) return null;
 
-    const useMem = !(await dbAvailable());
+    const useMem = await shouldUseMemoryFallback();
     if (useMem) {
-      assertMemoryFallbackEnabled();
       return memoryDb.deleteReview(userId, reviewId);
     }
 

@@ -15,8 +15,17 @@ import {
 } from "./admin.schema.js";
 
 import { upload } from "../../core/middleware/upload.js";
+import { invalidateBootstrapBaseOnMutation } from "../../core/config/cache.js";
 
 export const adminRouter = Router();
+
+// Bootstrap only contains catalogue data. Attach invalidation to mutation
+// groups that can change that shared payload, not to every admin request.
+adminRouter.use("/destinations", invalidateBootstrapBaseOnMutation);
+adminRouter.use("/hotels", invalidateBootstrapBaseOnMutation);
+adminRouter.use("/flights", invalidateBootstrapBaseOnMutation);
+adminRouter.use("/tours", invalidateBootstrapBaseOnMutation);
+adminRouter.use("/categories", invalidateBootstrapBaseOnMutation);
 
 // Upload
 adminRouter.post("/upload", upload.single("file"), (req, res) => {

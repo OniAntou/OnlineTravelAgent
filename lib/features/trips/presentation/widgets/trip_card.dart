@@ -12,6 +12,7 @@ class TripCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cacheWidth = (140 * MediaQuery.devicePixelRatioOf(context)).round();
+    final isOngoing = trip.status == TripStatus.ongoing;
 
     return Container(
       height: 142,
@@ -184,9 +185,7 @@ class TripCard extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color:
-                              trip.status.toLowerCase() == 'đang diễn ra' ||
-                                  trip.status.toLowerCase() == 'ongoing'
+                          color: isOngoing
                               ? const Color(0xFFFF9800).withValues(alpha: 0.1)
                               : trip.isUpcoming
                               ? AppTheme.primaryBlue.withValues(alpha: 0.08)
@@ -194,13 +193,11 @@ class TripCard extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          trip.status,
+                          trip.status.displayLabel,
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
-                            color:
-                                trip.status.toLowerCase() == 'đang diễn ra' ||
-                                    trip.status.toLowerCase() == 'ongoing'
+                            color: isOngoing
                                 ? const Color(0xFFFF9800)
                                 : trip.isUpcoming
                                 ? AppTheme.primaryBlue

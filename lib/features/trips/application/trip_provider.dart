@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/constants/app_constants.dart';
 import '../domain/trip.dart';
 import '../../../core/utils/api_exception.dart';
 import '../../../data/services/api_provider.dart';
@@ -56,7 +55,10 @@ class TripNotifier extends Notifier<List<Trip>> {
     required String date,
     required String guests,
   }) async {
-    final normalizedFlightId = TripValidator.requiredText(flightId, 'Flight ID');
+    final normalizedFlightId = TripValidator.requiredText(
+      flightId,
+      'Flight ID',
+    );
     final normalizedDate = TripValidator.requiredText(date, 'Ngày bay');
     final normalizedGuests = TripValidator.requiredGuests(guests);
 
@@ -85,8 +87,14 @@ class TripNotifier extends Notifier<List<Trip>> {
     required String guests,
   }) async {
     final normalizedRoomId = TripValidator.requiredText(roomId, 'Room ID');
-    final normalizedCheckIn = TripValidator.requiredText(checkIn, 'Ngày nhận phòng');
-    final normalizedCheckOut = TripValidator.requiredText(checkOut, 'Ngày trả phòng');
+    final normalizedCheckIn = TripValidator.requiredText(
+      checkIn,
+      'Ngày nhận phòng',
+    );
+    final normalizedCheckOut = TripValidator.requiredText(
+      checkOut,
+      'Ngày trả phòng',
+    );
     final normalizedGuests = TripValidator.requiredGuests(guests);
 
     TripValidator.validateHotelStay(
@@ -161,27 +169,16 @@ final tripsProvider = NotifierProvider<TripNotifier, List<Trip>>(
 
 final ongoingTripsProvider = Provider<List<Trip>>((ref) {
   final trips = ref.watch(tripsProvider);
-  return trips
-      .where(
-        (t) =>
-            t.status.toLowerCase() ==
-                AppConstants.statusOngoing.toLowerCase() ||
-            t.status.toLowerCase() ==
-                AppConstants.statusOngoingEn.toLowerCase(),
-      )
-      .toList();
+  return trips.where((trip) => trip.status == TripStatus.ongoing).toList();
 });
 
 final upcomingTripsProvider = Provider<List<Trip>>((ref) {
   final trips = ref.watch(tripsProvider);
   return trips
       .where(
-        (t) =>
-            t.isUpcoming &&
-            t.status.toLowerCase() !=
-                AppConstants.statusOngoing.toLowerCase() &&
-            t.status.toLowerCase() !=
-                AppConstants.statusOngoingEn.toLowerCase(),
+        (trip) =>
+            trip.status == TripStatus.upcoming ||
+            trip.status == TripStatus.pendingPayment,
       )
       .toList();
 });
@@ -190,12 +187,10 @@ final historyTripsProvider = Provider<List<Trip>>((ref) {
   final trips = ref.watch(tripsProvider);
   return trips
       .where(
-        (t) =>
-            !t.isUpcoming &&
-            t.status.toLowerCase() !=
-                AppConstants.statusOngoing.toLowerCase() &&
-            t.status.toLowerCase() !=
-                AppConstants.statusOngoingEn.toLowerCase(),
+        (trip) =>
+            trip.status == TripStatus.completed ||
+            trip.status == TripStatus.cancelled ||
+            (trip.status == TripStatus.unknown && !trip.isUpcoming),
       )
       .toList();
 });

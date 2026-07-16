@@ -10,8 +10,12 @@ import {
   bookTourSchema,
   reviewSchema,
 } from "./client.schema.js";
+import { invalidateBootstrapBaseOnMutation } from "../../core/config/cache.js";
 
 export const clientRouter = Router();
+
+// Reviews change aggregate rating/count data embedded in the bootstrap base.
+clientRouter.use("/reviews", invalidateBootstrapBaseOnMutation);
 
 clientRouter.get("/bootstrap", optionalAuth, clientController.getBootstrap);
 

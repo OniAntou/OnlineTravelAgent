@@ -73,7 +73,7 @@ void main() {
           location: 'Da Nang',
           date: '10/08/2026',
           guests: '2 Người',
-          status: 'Upcoming',
+          status: TripStatus.upcoming,
           imagePath: '',
         ),
       ],

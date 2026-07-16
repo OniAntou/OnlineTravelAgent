@@ -41,7 +41,14 @@
 # AI agents workspace
 .agents/
 .agent/
-docs/
+docs/*
+!docs/README.md
+!docs/architecture/
+!docs/architecture/**
+!docs/workflows/
+!docs/workflows/**
+!docs/plans/
+!docs/plans/**
 brain/
 
 # Release keystore

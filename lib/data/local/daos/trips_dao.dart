@@ -22,9 +22,11 @@ class TripsDao extends DatabaseAccessor<AppDatabase> with _$TripsDaoMixin {
   }
 
   Future<List<TripsTableData>> getUpcoming() {
-    final now = DateTime.now().toIso8601String().substring(0, 10);
     return (select(tripsTable)..where(
-          (t) => t.isUpcoming.equals(true) & t.date.isBiggerThanValue(now),
+          (t) =>
+              t.status.equals('upcoming') |
+              t.status.equals('pending_payment') |
+              (t.isUpcoming.equals(true) & t.status.equals('unknown')),
         ))
         .get();
   }
@@ -34,7 +36,10 @@ class TripsDao extends DatabaseAccessor<AppDatabase> with _$TripsDaoMixin {
     return (select(tripsTable)..where(
           (t) =>
               t.status.equals('completed') |
-              (t.date.isSmallerThanValue(now) & t.isUpcoming.equals(false)),
+              t.status.equals('cancelled') |
+              (t.status.equals('unknown') &
+                  t.date.isSmallerThanValue(now) &
+                  t.isUpcoming.equals(false)),
         ))
         .get();
   }

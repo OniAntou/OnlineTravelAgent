@@ -58,7 +58,7 @@ void main() {
         location: 'Lam Dong',
         date: '2026-07-01',
         guests: '2 Người',
-        status: 'Ongoing',
+        status: TripStatus.ongoing,
         imagePath: 'assets/images/dalat_image.jpg',
       );
       notifier.addTrip(trip);
@@ -81,7 +81,7 @@ void main() {
         location: 'Lam Dong',
         date: '2026-07-01',
         guests: '2 Người',
-        status: 'Ongoing',
+        status: TripStatus.ongoing,
         imagePath: 'assets/images/dalat_image.jpg',
       );
       const trip2 = Trip(
@@ -90,7 +90,7 @@ void main() {
         location: 'Ha Noi',
         date: '2026-08-01',
         guests: '1 Người',
-        status: 'Upcoming',
+        status: TripStatus.upcoming,
         imagePath: 'assets/images/hanoi_image.png',
       );
       notifier.addTrip(trip1);
@@ -225,7 +225,7 @@ void main() {
           location: 'B',
           date: '2026-07-01',
           guests: '1',
-          status: 'Ongoing',
+          status: TripStatus.ongoing,
           imagePath: '',
         ),
       );
@@ -236,13 +236,13 @@ void main() {
           location: 'D',
           date: '2026-08-01',
           guests: '1',
-          status: 'Upcoming',
+          status: TripStatus.upcoming,
           imagePath: '',
         ),
       );
       final ongoing = container.read(ongoingTripsProvider);
       expect(ongoing.length, 1);
-      expect(ongoing.first.status, 'Ongoing');
+      expect(ongoing.first.status, TripStatus.ongoing);
     });
 
     test('derived historyTripsProvider filters correctly', () {
@@ -260,7 +260,7 @@ void main() {
           location: 'B',
           date: '2026-01-01',
           guests: '1',
-          status: 'Completed',
+          status: TripStatus.completed,
           imagePath: '',
           isUpcoming: false,
         ),
@@ -272,13 +272,13 @@ void main() {
           location: 'D',
           date: '2026-08-01',
           guests: '1',
-          status: 'Upcoming',
+          status: TripStatus.upcoming,
           imagePath: '',
         ),
       );
       final history = container.read(historyTripsProvider);
       expect(history.length, 1);
-      expect(history.first.status, 'Completed');
+      expect(history.first.status, TripStatus.completed);
     });
   });
 }

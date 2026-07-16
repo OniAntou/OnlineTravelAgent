@@ -161,6 +161,19 @@ function addDays(date: Date, days: number): Date {
   return result;
 }
 
+function groupByTripId<T extends { tripId: string }>(records: T[]): Map<string, T[]> {
+  const groups = new Map<string, T[]>();
+  for (const record of records) {
+    const group = groups.get(record.tripId);
+    if (group) {
+      group.push(record);
+    } else {
+      groups.set(record.tripId, [record]);
+    }
+  }
+  return groups;
+}
+
 function assertItems(days: ScheduleDayInput[] = []) {
   for (const day of days) {
     if (!Number.isInteger(day.dayNumber) || day.dayNumber < 1) {
@@ -391,11 +404,13 @@ export const scheduleService = {
       string,
       { tripId: string; days: typeof allDays; updates: typeof allUpdates }
     > = {};
+    const daysByTrip = groupByTripId(allDays);
+    const updatesByTrip = groupByTripId(allUpdates);
     for (const tripId of ownedIds) {
       result[tripId] = {
         tripId,
-        days: allDays.filter((day) => day.tripId === tripId),
-        updates: allUpdates.filter((update) => update.tripId === tripId),
+        days: daysByTrip.get(tripId) ?? [],
+        updates: updatesByTrip.get(tripId) ?? [],
       };
     }
     return result;

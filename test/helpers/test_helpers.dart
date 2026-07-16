@@ -166,7 +166,7 @@ class FakeTravelApiService extends TravelApiService {
       location: 'Test Location',
       date: date ?? '',
       guests: guests ?? '',
-      status: 'Upcoming',
+      status: TripStatus.upcoming,
       imagePath: '',
       totalPrice: totalPrice,
     );

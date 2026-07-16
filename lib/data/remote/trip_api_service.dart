@@ -3,6 +3,26 @@ import '../../features/trips/domain/trip.dart';
 import '../../features/trips/domain/trip_schedule.dart';
 import 'api_http_client.dart';
 
+const maxTripScheduleIdsPerRequest = 50;
+
+Iterable<List<String>> chunkTripScheduleIds(Iterable<String> tripIds) sync* {
+  final uniqueIds = <String>{};
+  for (final tripId in tripIds) {
+    final normalizedId = tripId.trim();
+    if (normalizedId.isNotEmpty) uniqueIds.add(normalizedId);
+  }
+
+  final ids = uniqueIds.toList(growable: false);
+  for (
+    var start = 0;
+    start < ids.length;
+    start += maxTripScheduleIdsPerRequest
+  ) {
+    final end = (start + maxTripScheduleIdsPerRequest).clamp(0, ids.length);
+    yield ids.sublist(start, end);
+  }
+}
+
 class TripApiService {
   final ApiHttpClient _client;
   TripApiService(this._client);
@@ -41,9 +61,22 @@ class TripApiService {
     return TripSchedule.fromJson(data);
   }
 
-  Future<Map<String, TripSchedule>> fetchTripSchedulesBatch(List<String> tripIds) async {
-    if (tripIds.isEmpty) return {};
-    final data = await _client.getJson(_client.pathWithQuery('/api/trips/schedules', {'ids': tripIds.join(',')}));
+  Future<Map<String, TripSchedule>> fetchTripSchedulesBatch(
+    List<String> tripIds,
+  ) async {
+    final result = <String, TripSchedule>{};
+    for (final ids in chunkTripScheduleIds(tripIds)) {
+      result.addAll(await _fetchTripSchedulesBatchChunk(ids));
+    }
+    return result;
+  }
+
+  Future<Map<String, TripSchedule>> _fetchTripSchedulesBatchChunk(
+    List<String> tripIds,
+  ) async {
+    final data = await _client.getJson(
+      _client.pathWithQuery('/api/trips/schedules', {'ids': tripIds.join(',')}),
+    );
     final result = <String, TripSchedule>{};
     data.forEach((tripId, value) {
       if (value is Map<String, dynamic>) {

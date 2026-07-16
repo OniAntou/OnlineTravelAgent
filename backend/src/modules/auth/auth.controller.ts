@@ -5,7 +5,7 @@ import { passwordService } from "./password.service.js";
 import { tokenService } from "./token.service.js";
 import { asyncHandler } from "../../core/utils/asyncHandler.js";
 import { memoryDb } from "../../infrastructure/fallback/memory-db.js";
-import { assertMemoryFallbackEnabled } from "../../core/config/data-availability.js";
+import { shouldUseMemoryFallback } from "../../core/config/data-availability.js";
 
 type SafeUser = { id: string; name: string; email: string; role: Role; createdAt: Date; updatedAt: Date };
 
@@ -20,23 +20,13 @@ async function buildAuthResponse(user: SafeUser) {
   };
 }
 
-async function dbAvailable(): Promise<boolean> {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 export const authController = {
   login: asyncHandler(async (req: Request, res: Response) => {
     const { email, password } = req.body;
 
-    const useMem = !(await dbAvailable());
+    const useMem = await shouldUseMemoryFallback();
 
     if (useMem) {
-      assertMemoryFallbackEnabled();
       const user = memoryDb.findUserByEmail(email);
       if (!user) {
         res.status(401).json({ message: "Invalid email or password" });
@@ -79,10 +69,9 @@ export const authController = {
   register: asyncHandler(async (req: Request, res: Response) => {
     const { name, email, password } = req.body;
 
-    const useMem = !(await dbAvailable());
+    const useMem = await shouldUseMemoryFallback();
 
     if (useMem) {
-      assertMemoryFallbackEnabled();
       const existing = memoryDb.findUserByEmail(email);
       if (existing) {
         res.status(409).json({ message: "Email already exists" });
@@ -150,10 +139,9 @@ export const authController = {
       return;
     }
 
-    const useMem = !(await dbAvailable());
+    const useMem = await shouldUseMemoryFallback();
 
     if (useMem) {
-      assertMemoryFallbackEnabled();
       const user = memoryDb.updateUser(userId, { role: "PARTNER" });
       if (!user) {
         res.status(404).json({ message: "User not found" });

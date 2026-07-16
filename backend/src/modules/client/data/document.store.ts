@@ -2,24 +2,17 @@ import prisma from "../../../infrastructure/database/prisma.js";
 import { generateId } from "../../../core/data/store-helpers.js";
 import { mockDocuments } from "../../../infrastructure/fallback/mock-data.js";
 import { memoryDb } from "../../../infrastructure/fallback/memory-db.js";
-import { assertMemoryFallbackEnabled } from "../../../core/config/data-availability.js";
-
-async function dbAvailable(): Promise<boolean> {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    return true;
-  } catch {
-    return false;
-  }
-}
+import {
+  assertMemoryFallbackEnabled,
+  shouldUseMemoryFallback,
+} from "../../../core/config/data-availability.js";
 
 export const documentStore = {
   async getDocuments(userId?: string) {
     if (!userId) return [];
 
-    const useMem = !(await dbAvailable());
+    const useMem = await shouldUseMemoryFallback();
     if (useMem) {
-      assertMemoryFallbackEnabled();
       const docs = memoryDb.findDocumentsByUserId(userId);
       return docs.length > 0 ? docs : mockDocuments;
     }
@@ -41,9 +34,8 @@ export const documentStore = {
   ) {
     if (!userId) throw new Error("Authentication required to create a document");
 
-    const useMem = !(await dbAvailable());
+    const useMem = await shouldUseMemoryFallback();
     if (useMem) {
-      assertMemoryFallbackEnabled();
       return memoryDb.createDocument({ id: generateId("doc"), title, description, icon, color, userId });
     }
 
@@ -55,9 +47,8 @@ export const documentStore = {
   async deleteDocument(userId: string | undefined, id: string) {
     if (!userId) return false;
 
-    const useMem = !(await dbAvailable());
+    const useMem = await shouldUseMemoryFallback();
     if (useMem) {
-      assertMemoryFallbackEnabled();
       return memoryDb.deleteDocument(userId, id);
     }
 

@@ -34,15 +34,13 @@ class PlaceTripDetailScreen extends ConsumerWidget {
   }
 
   Color _statusColor() {
-    final s = trip.status.toLowerCase();
-    if (s == 'đang diễn ra' || s == 'ongoing') return const Color(0xFFFF9800);
+    if (trip.status == TripStatus.ongoing) return const Color(0xFFFF9800);
     if (trip.isUpcoming) return AppTheme.primaryBlue;
     return Colors.grey;
   }
 
   Color _statusBgColor() {
-    final s = trip.status.toLowerCase();
-    if (s == 'đang diễn ra' || s == 'ongoing') {
+    if (trip.status == TripStatus.ongoing) {
       return const Color(0xFFFF9800).withValues(alpha: 0.1);
     }
     if (trip.isUpcoming) {
@@ -191,7 +189,7 @@ class PlaceTripDetailScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            trip.status,
+                            trip.status.displayLabel,
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,

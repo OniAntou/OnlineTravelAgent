@@ -22,6 +22,8 @@ class HotelsDao extends DatabaseAccessor<AppDatabase> with _$HotelsDaoMixin {
   Future<List<RoomsTableData>> getRoomsByHotel(String hotelId) =>
       (select(roomsTable)..where((t) => t.hotelId.equals(hotelId))).get();
 
+  Future<List<RoomsTableData>> getAllRooms() => select(roomsTable).get();
+
   Future<void> insertAll(
     List<HotelsTableCompanion> hotels,
     List<RoomsTableCompanion> rooms,

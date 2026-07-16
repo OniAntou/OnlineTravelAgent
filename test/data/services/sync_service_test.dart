@@ -59,7 +59,7 @@ void main() {
             location: 'Lam Dong',
             date: '2026-08-01',
             guests: '2',
-            status: 'Upcoming',
+            status: TripStatus.upcoming,
             imagePath: '',
           ),
         ],
@@ -157,6 +157,7 @@ void main() {
       final trips = await db.tripsDao.getAll();
       expect(trips.length, 1);
       expect(trips.first.destination, 'Da Lat');
+      expect(trips.first.status, 'upcoming');
     });
 
     test('sets isRecommended for destinations in recommended list', () async {
@@ -391,7 +392,7 @@ void main() {
         location: 'Lam Dong',
         date: '2026-08-01',
         guests: '2',
-        status: 'Upcoming',
+        status: TripStatus.upcoming,
         imagePath: '',
       );
 
@@ -408,7 +409,7 @@ void main() {
         location: 'Lam Dong',
         date: '2026-08-01',
         guests: '2',
-        status: 'Upcoming',
+        status: TripStatus.upcoming,
         imagePath: '',
       );
       await syncService.syncTrip(trip1);
@@ -419,7 +420,7 @@ void main() {
         location: 'Ha Noi',
         date: '2026-09-01',
         guests: '3',
-        status: 'Upcoming',
+        status: TripStatus.upcoming,
         imagePath: '',
       );
       await syncService.syncTrip(trip2);
@@ -444,9 +445,24 @@ void main() {
         ),
       );
 
-      await syncService.syncTripStatus('t1', 'completed');
+      await syncService.syncTripStatus('t1', TripStatus.completed);
       final trip = await db.tripsDao.getById('t1');
       expect(trip!.status, 'completed');
+    });
+
+    test('normalizes legacy trip status while loading SQLite cache', () async {
+      await db.tripsDao.insertTrip(
+        TripsTableCompanion.insert(
+          id: 'legacy-trip',
+          destination: 'Da Lat',
+          status: const Value('Đã hủy'),
+          isUpcoming: const Value(false),
+        ),
+      );
+
+      final bootstrap = await syncService.loadBootstrapFromSQLite();
+
+      expect(bootstrap.trips.single.status, TripStatus.cancelled);
     });
   });
 

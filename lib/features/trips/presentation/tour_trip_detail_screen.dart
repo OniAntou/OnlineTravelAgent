@@ -41,15 +41,15 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
   }
 
   Color _statusColor() {
-    final s = widget.trip.status.toLowerCase();
-    if (s == 'đang diễn ra' || s == 'ongoing') return const Color(0xFFFF9800);
+    if (widget.trip.status == TripStatus.ongoing) {
+      return const Color(0xFFFF9800);
+    }
     if (widget.trip.isUpcoming) return AppTheme.primaryBlue;
     return Colors.grey;
   }
 
   Color _statusBgColor() {
-    final s = widget.trip.status.toLowerCase();
-    if (s == 'đang diễn ra' || s == 'ongoing') {
+    if (widget.trip.status == TripStatus.ongoing) {
       return const Color(0xFFFF9800).withValues(alpha: 0.1);
     }
     if (widget.trip.isUpcoming) {
@@ -308,7 +308,7 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            widget.trip.status,
+                            widget.trip.status.displayLabel,
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,

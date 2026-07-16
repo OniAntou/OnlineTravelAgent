@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../domain/trip.dart';
 
 class BookingStatusTimeline extends StatelessWidget {
-  final String status;
+  final TripStatus status;
   const BookingStatusTimeline({super.key, required this.status});
 
   int get _activeStep {
-    final s = status.toLowerCase();
-    if (s == 'đã đi' || s == 'hoàn thành' || s == 'completed') return 4;
-    if (s == 'đang diễn ra' || s == 'ongoing') return 3;
-    if (s == 'đã xác nhận' || s == 'confirmed' || s == 'sắp tới') return 2;
-    return 1; // Đã đặt
+    switch (status) {
+      case TripStatus.completed:
+        return 4;
+      case TripStatus.ongoing:
+        return 3;
+      case TripStatus.upcoming:
+        return 2;
+      case TripStatus.pendingPayment:
+      case TripStatus.cancelled:
+      case TripStatus.unknown:
+        return 1;
+    }
   }
 
   @override

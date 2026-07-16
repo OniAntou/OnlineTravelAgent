@@ -4,7 +4,7 @@ import { Role } from "@prisma/client";
 import prisma from "../../infrastructure/database/prisma.js";
 import { env } from "../../core/config/env.js";
 import { memoryDb } from "../../infrastructure/fallback/memory-db.js";
-import { assertMemoryFallbackEnabled } from "../../core/config/data-availability.js";
+import { shouldUseMemoryFallback } from "../../core/config/data-availability.js";
 
 const ACCESS_TOKEN_TTL = "15m";
 const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
@@ -56,24 +56,14 @@ function publicTokenPair(pair: TokenPairRecord) {
   };
 }
 
-async function dbAvailable(): Promise<boolean> {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 export const tokenService = {
   accessTokenExpiresInSeconds: ACCESS_TOKEN_EXPIRES_IN_SECONDS,
 
   async issueTokenPair(user: AuthUser) {
     const pair = buildTokenPair(user);
 
-    const useMem = !(await dbAvailable());
+    const useMem = await shouldUseMemoryFallback();
     if (useMem) {
-      assertMemoryFallbackEnabled();
       memoryDb.createRefreshToken(user.id, pair.tokenHash, pair.expiresAt);
     } else {
       await prisma.refreshToken.create({
@@ -90,10 +80,9 @@ export const tokenService = {
 
   async rotateRefreshToken(refreshToken: string) {
     const tokenHash = hashToken(refreshToken);
-    const useMem = !(await dbAvailable());
+    const useMem = await shouldUseMemoryFallback();
 
     if (useMem) {
-      assertMemoryFallbackEnabled();
       const stored = memoryDb.findRefreshToken(tokenHash);
       if (!stored || stored.revokedAt || stored.expiresAt < new Date()) {
         return null;
@@ -140,10 +129,9 @@ export const tokenService = {
 
   async revokeRefreshToken(refreshToken: string) {
     const tokenHash = hashToken(refreshToken);
-    const useMem = !(await dbAvailable());
+    const useMem = await shouldUseMemoryFallback();
 
     if (useMem) {
-      assertMemoryFallbackEnabled();
       return memoryDb.revokeRefreshToken(tokenHash);
     }
 
@@ -160,10 +148,9 @@ export const tokenService = {
   },
 
   async revokeAllForUser(userId: string) {
-    const useMem = !(await dbAvailable());
+    const useMem = await shouldUseMemoryFallback();
 
     if (useMem) {
-      assertMemoryFallbackEnabled();
       memoryDb.revokeAllRefreshTokens(userId);
       return;
     }

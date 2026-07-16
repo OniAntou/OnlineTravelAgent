@@ -12,12 +12,14 @@ vi.mock("../../src/infrastructure/database/prisma.js", () => ({
 }));
 
 import { app } from "../../src/app.js";
+import { resetPersistentDataAvailabilityCache } from "../../src/core/config/data-availability.js";
 
 describe("production data availability", () => {
   const originalNodeEnv = process.env.NODE_ENV;
 
   beforeEach(() => {
     vi.clearAllMocks();
+    resetPersistentDataAvailabilityCache();
     process.env.NODE_ENV = "production";
     mocks.queryRaw.mockRejectedValue(new Error("database unavailable"));
   });

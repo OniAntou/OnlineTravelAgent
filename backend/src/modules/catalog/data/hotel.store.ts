@@ -4,7 +4,10 @@ import { attachRealReviews, formatSearchQuery, generateId } from "../../../core/
 import { TripStatus } from "@prisma/client";
 import { mockHotels } from "../../../infrastructure/fallback/mock-data.js";
 import { memoryDb } from "../../../infrastructure/fallback/memory-db.js";
-import { assertMemoryFallbackEnabled } from "../../../core/config/data-availability.js";
+import {
+  assertMemoryFallbackEnabled,
+  shouldUseMemoryFallback,
+} from "../../../core/config/data-availability.js";
 import {
   findIdempotentTrip,
   recoverIdempotentTrip,
@@ -75,10 +78,9 @@ export const hotelStore = {
     guests: string,
     requestId?: string,
   ) {
-    const useMem = !(await prisma.$queryRaw`SELECT 1`.then(() => true).catch(() => false));
+    const useMem = await shouldUseMemoryFallback();
 
     if (useMem) {
-      assertMemoryFallbackEnabled();
       if (requestId) {
         const existing = memoryDb.findTripByRequestId(userId, requestId);
         if (existing) return existing;

@@ -5,7 +5,6 @@ import helmet from "helmet";
 import multer from "multer";
 import compression from "compression";
 import winston from "winston";
-import prisma from "./infrastructure/database/prisma.js";
 
 export const logger = winston.createLogger({
   level: "info",
@@ -23,7 +22,10 @@ import { env } from "./core/config/env.js";
 import { UPLOAD_DIR, UploadValidationError } from "./core/middleware/upload.js";
 import { adminAuth } from "./core/middleware/auth.js";
 import { panelRateLimiter, panelStaticHeaders } from "./core/middleware/panel.js";
-import { PersistentDataUnavailableError } from "./core/config/data-availability.js";
+import {
+  isPersistentDataAvailable,
+  PersistentDataUnavailableError,
+} from "./core/config/data-availability.js";
 import { HttpError } from "./core/utils/http-error.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -109,7 +111,8 @@ app.use("/uploads", express.static(UPLOAD_DIR));
 
 app.get("/health", async (_, res) => {
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    const available = await isPersistentDataAvailable({ force: true });
+    if (!available) throw new Error("database unavailable");
     res.json({ ok: true, db: "connected" });
   } catch (error) {
     logger.error("Health check failed", { error });

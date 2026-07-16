@@ -3,8 +3,13 @@ import { partnerController } from "./partner.controller.js";
 import { upload } from "../../core/middleware/upload.js";
 import { validate } from "../../core/middleware/validate.js";
 import { adminHotelSchema, adminRoomSchema, adminTourSchema } from "../admin/admin.schema.js";
+import { invalidateBootstrapBaseOnMutation } from "../../core/config/cache.js";
 
 export const partnerRouter = Router();
+
+// Partner mutations below change the shared catalogue used by bootstrap.
+partnerRouter.use("/hotels", invalidateBootstrapBaseOnMutation);
+partnerRouter.use("/tours", invalidateBootstrapBaseOnMutation);
 
 partnerRouter.post("/upload", upload.single("file"), (req, res) => {
   if (!req.file) {

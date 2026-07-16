@@ -79,9 +79,7 @@ List<_AppNotification> _buildNotifications({
 }
 
 _AppNotification _notificationFromTrip(Trip trip) {
-  final status = trip.status.toLowerCase();
-
-  if (_containsAny(status, const ['cancel', 'hủy', 'huy'])) {
+  if (trip.status == TripStatus.cancelled) {
     return _AppNotification(
       title: 'Chuyến đi đã hủy',
       message: '${trip.destination} hiện không còn trong lịch trình sắp tới.',
@@ -92,12 +90,7 @@ _AppNotification _notificationFromTrip(Trip trip) {
     );
   }
 
-  if (_containsAny(status, const [
-    'pending',
-    'payment',
-    'thanh toán',
-    'thanh toan',
-  ])) {
+  if (trip.status == TripStatus.pendingPayment) {
     return _AppNotification(
       title: 'Chờ thanh toán',
       message: '${trip.destination} cần hoàn tất thanh toán để xác nhận.',
@@ -108,7 +101,7 @@ _AppNotification _notificationFromTrip(Trip trip) {
     );
   }
 
-  if (_containsAny(status, const ['ongoing', 'đang', 'dang'])) {
+  if (trip.status == TripStatus.ongoing) {
     return _AppNotification(
       title: 'Chuyến đi đang diễn ra',
       message: '${trip.destination} đang trong lịch trình của bạn.',
@@ -138,10 +131,6 @@ _AppNotification _notificationFromTrip(Trip trip) {
     color: Colors.green,
     priority: 40,
   );
-}
-
-bool _containsAny(String value, List<String> needles) {
-  return needles.any(value.contains);
 }
 
 class _NotificationCard extends StatelessWidget {
