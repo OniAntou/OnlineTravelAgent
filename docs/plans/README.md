@@ -12,5 +12,6 @@ Khi kế hoạch hoàn tất, giữ lại như một hồ sơ triển khai ngắ
 
 ## Kế hoạch hiện có
 
+- [Nâng cấp dependency an toàn, 2026-07-17](2026-07-17-safe-dependency-upgrades.md)
 - [Tối ưu runtime và luồng dữ liệu — thiết kế, 2026-07-16](2026-07-16-runtime-and-dataflow-optimization.md)
 - [Tối ưu runtime và luồng dữ liệu — kế hoạch triển khai, 2026-07-16](2026-07-16-runtime-and-dataflow-optimization-plan.md)
