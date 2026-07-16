@@ -12,6 +12,8 @@ Khi kế hoạch hoàn tất, giữ lại như một hồ sơ triển khai ngắ
 
 ## Kế hoạch hiện có
 
+- [Triển khai đồng bộ ảnh bằng Supabase Storage, 2026-07-17](2026-07-17-supabase-storage-images-implementation.md)
+- [Thiết kế đồng bộ ảnh bằng Supabase Storage, 2026-07-17](2026-07-17-supabase-storage-images-design.md)
 - [Nâng cấp dependency an toàn, 2026-07-17](2026-07-17-safe-dependency-upgrades.md)
 - [Tối ưu runtime và luồng dữ liệu — thiết kế, 2026-07-16](2026-07-16-runtime-and-dataflow-optimization.md)
 - [Tối ưu runtime và luồng dữ liệu — kế hoạch triển khai, 2026-07-16](2026-07-16-runtime-and-dataflow-optimization-plan.md)

@@ -145,7 +145,10 @@ Secrets được lấy từ environment; không đặt giá trị production tro
 | ADMIN_PASSWORD | Basic Auth password cho admin API/panel protection. |
 | CORS_ORIGINS | Danh sách web origin được phép. |
 | TRUST_PROXY | Cấu hình proxy đúng với môi trường deploy. |
-| UPLOAD_DIR | Thư mục upload tùy chọn. |
+| SUPABASE_URL | URL project Supabase phục vụ Storage ảnh catalogue. |
+| SUPABASE_SERVICE_ROLE_KEY | Khóa backend-only để ghi Storage; không được đưa vào client hay Git. |
+| SUPABASE_STORAGE_BUCKET | Bucket ảnh, hiện là travel-media. |
+| UPLOAD_DIR | Chỉ đọc tương thích các URL `/uploads/...` cũ. |
 | REQUIRE_ADMIN_BASIC_AUTH | Bảo vệ static /admin panel bằng Basic Auth khi bật. |
 | Payment provider variables | Khóa/callback config của VNPay và MoMo. |
 
@@ -171,14 +174,11 @@ Provider callback là authority cho kết quả digital payment. UI phải luôn
 
 ## Upload integration
 
-Multer upload middleware:
+Ảnh catalogue từ Admin/Partner đi qua endpoint upload đã có Basic Auth hoặc Partner JWT. Multer chỉ nhận một JPEG, PNG, GIF hoặc WebP tối đa 10 MB vào memory; backend dùng service-role key để ghi vào bucket public `travel-media` của Supabase Storage rồi trả `{ url }` với URL HTTPS tuyệt đối.
 
-- giới hạn file 10 MB;
-- cho phép image, PDF, DOC và DOCX theo MIME/extension;
-- đặt UUID filename;
-- phục vụ file qua /uploads.
+PostgreSQL chỉ lưu `imagePath` là URL; content nằm trong Storage nên mọi máy trỏ tới cùng backend/database đều xem cùng ảnh. Bucket public chỉ mở đọc qua URL, không cấp quyền upload/xóa cho anon hoặc authenticated. Service-role key chỉ có trong `backend/.env`; không đưa vào Flutter, HTML panels, log hoặc source control.
 
-Khi thay storage backend, giữ contract upload response/path và kiểm tra authorization cho nơi gọi endpoint.
+Asset bundled và giá trị `/uploads/...` cũ vẫn tương thích đọc; ảnh mới không ghi filesystem local.
 
 ## Security controls và operating boundaries
 
@@ -190,7 +190,7 @@ Khi thay storage backend, giữ contract upload response/path và kiểm tra aut
 | Input | Zod schemas và JSON payload limit. |
 | Authorization | JWT/Basic Auth/role/ownership middleware. |
 | Realtime | Verify token và room ownership. |
-| Upload | Type/size checks và UUID naming. |
+| Upload | Type/size checks, key UUID không đoán được và server-only Storage credentials. |
 | Database outage | 503 ở production thay vì memory data. |
 | Cache privacy | Logout xóa user-owned cache. |
 
@@ -204,6 +204,8 @@ Khi thay storage backend, giữ contract upload response/path và kiểm tra aut
 | Search extension/index | backend/prisma/pg_trgm.sql |
 | Auth middleware | backend/src/core/middleware/auth.ts |
 | Upload middleware | backend/src/core/middleware/upload.ts |
+| Supabase Storage service | backend/src/core/storage/supabase-storage.ts |
+| Shared image handler | backend/src/core/http/image-upload-handler.ts |
 | Env policy | backend/src/core/config/env.ts |
 | Data availability | backend/src/core/config/data-availability.ts |
 | Flutter database | lib/data/local/app_database.dart |

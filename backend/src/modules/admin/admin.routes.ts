@@ -15,6 +15,7 @@ import {
 } from "./admin.schema.js";
 
 import { upload } from "../../core/middleware/upload.js";
+import { imageUploadHandler } from "../../core/http/image-upload-handler.js";
 import { invalidateBootstrapBaseOnMutation } from "../../core/config/cache.js";
 
 export const adminRouter = Router();
@@ -28,12 +29,7 @@ adminRouter.use("/tours", invalidateBootstrapBaseOnMutation);
 adminRouter.use("/categories", invalidateBootstrapBaseOnMutation);
 
 // Upload
-adminRouter.post("/upload", upload.single("file"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded" });
-  }
-  res.json({ url: `/uploads/${req.file.filename}` });
-});
+adminRouter.post("/upload", upload.single("file"), imageUploadHandler);
 
 // Stats
 adminRouter.get("/stats", adminController.getStats);

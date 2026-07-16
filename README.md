@@ -55,7 +55,10 @@ Biến môi trường quan trọng:
 - `ADMIN_PASSWORD`: mật khẩu Basic Auth cho admin panel
 - `CORS_ORIGINS`: danh sách origin được phép, phân tách bằng dấu phẩy
 - `TRUST_PROXY`: đặt `1` nếu backend chạy sau đúng một reverse proxy
-- `UPLOAD_DIR`: tùy chọn, thư mục lưu file upload
+- `SUPABASE_URL`: URL project Supabase dùng cho ảnh catalogue dùng chung
+- `SUPABASE_SERVICE_ROLE_KEY`: service-role key chỉ dành cho backend; tuyệt đối không đưa vào Flutter, Admin/Partner panel hay Git
+- `SUPABASE_STORAGE_BUCKET`: bucket ảnh, mặc định là `travel-media`
+- `UPLOAD_DIR`: chỉ dùng để phục vụ tương thích ảnh cũ dạng `/uploads/...`; ảnh mới không ghi vào filesystem local
 
 ## Setup Flutter
 
@@ -114,4 +117,5 @@ GitHub Actions chạy:
 ## Lưu Ý
 
 - Không dùng `prisma db push` cho production. Dùng migration qua `npm run db:migrate`.
+- Mỗi máy chạy backend cần ba biến Supabase Storage ở trên để Admin/Partner tải ảnh mới; database chỉ lưu URL ảnh công khai.
 - Payment đang là phần xử lý riêng, không nằm trong phạm vi hardening hiện tại.

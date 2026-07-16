@@ -20,7 +20,10 @@ CI không tự deploy, nên phần này là runbook cho người vận hành.
 | ADMIN_PASSWORD | Secret mạnh cho admin Basic Auth. |
 | CORS_ORIGINS | Explicit allowlist origin frontend/panel cần thiết. |
 | TRUST_PROXY | Chỉ bật đúng số proxy phía trước backend. |
-| UPLOAD_DIR | Thư mục có quyền ghi và persistence đúng với hạ tầng. |
+| SUPABASE_URL | URL project Storage dùng chung cho ảnh catalogue. |
+| SUPABASE_SERVICE_ROLE_KEY | Secret backend-only cho upload; không đưa vào mobile/browser/Git. |
+| SUPABASE_STORAGE_BUCKET | `travel-media` trừ khi Storage được cấu hình lại có chủ đích. |
+| UPLOAD_DIR | Chỉ phục vụ tương thích URL `/uploads/...` cũ. |
 | REQUIRE_ADMIN_BASIC_AUTH | Bật khi static /admin cần được bảo vệ từ lớp file serving. |
 | Payment config | Provider key, secret, return/IPN URL đúng public environment. |
 
@@ -46,7 +49,7 @@ flowchart TD
 2. Xác nhận database backup/recovery point theo chính sách vận hành trước khi chạy migration.
 3. Cấp environment variables đúng environment.
 4. Tại backend release artifact, chạy npm run db:generate nếu build workflow cần và npm run db:migrate.
-5. Deploy backend, static panels và storage path tương ứng.
+5. Deploy backend, static panels và xác nhận biến Supabase Storage có mặt ở backend.
 6. Gọi GET /health.
 7. Test login, refresh, bootstrap, một route public và một protected route.
 8. Với release chạm booking/payment, test sandbox/provider callback end-to-end.
@@ -63,7 +66,7 @@ flowchart TD
 | Auth abuse | Rate-limit response và auth logs. |
 | Payment | Provider callback logs, trip payment status/reference. |
 | Realtime | Socket connect/join behavior, schedule_updated/refetch logs. |
-| Upload | File write errors, size/type rejection, storage capacity. |
+| Upload | Storage response, size/type rejection, bucket capacity và 502 upload error. |
 
 Winston có mặt trong backend để logging. Chọn log drain/retention/alert theo hạ tầng deploy; code repository không định nghĩa một provider observability bắt buộc.
 
@@ -99,7 +102,7 @@ Không phát hành thêm UI partner action nếu backend route/authorization ch�
 
 ## Upload/storage safety
 
-Upload contract dùng UPLOAD_DIR và /uploads. Hạ tầng phải cung cấp filesystem/path persistent thích hợp hoặc một adapter storage mới có contract tương đương. Khi chuyển nền tảng deployment, không giả định filesystem ephemeral sẽ giữ image/document sau restart/redeploy.
+Ảnh mới dùng bucket public `travel-media` trên Supabase Storage. Backend là writer duy nhất bằng service-role key; URL public chỉ cho phép đọc. Không đưa key vào Flutter/static panel và không stage `backend/.env`. `UPLOAD_DIR` cùng route `/uploads` chỉ còn để ảnh database cũ tiếp tục hiển thị; hạ tầng không cần filesystem persistent cho ảnh mới.
 
 ## Incident behavior
 
@@ -111,7 +114,7 @@ Upload contract dùng UPLOAD_DIR và /uploads. Hạ tầng phải cung cấp fil
 | Rate limit | 429/limit response. | Xác định traffic hợp lệ hay abuse; điều chỉnh policy có review. |
 | Payment callback mismatch | Trip giữ PENDING/FAILED hoặc ref không đúng. | Kiểm signature, callback URL, amount, provider logs và server logs. |
 | Socket không cập nhật | UI giữ schedule cũ cho tới fetch. | Kiểm token/room ownership/event, sau đó kiểm endpoint schedule. |
-| Upload lỗi | Rejection/IO error. | Kiểm size/type, quyền ghi, UPLOAD_DIR và storage capacity. |
+| Upload lỗi | Rejection/Storage error. | Kiểm size/type, ba biến Storage, bucket policy/capacity và backend logs; không lộ service-role key. |
 
 ## Rollback và compatibility
 

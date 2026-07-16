@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { partnerController } from "./partner.controller.js";
 import { upload } from "../../core/middleware/upload.js";
+import { imageUploadHandler } from "../../core/http/image-upload-handler.js";
 import { validate } from "../../core/middleware/validate.js";
 import { adminHotelSchema, adminRoomSchema, adminTourSchema } from "../admin/admin.schema.js";
 import { invalidateBootstrapBaseOnMutation } from "../../core/config/cache.js";
@@ -11,12 +12,7 @@ export const partnerRouter = Router();
 partnerRouter.use("/hotels", invalidateBootstrapBaseOnMutation);
 partnerRouter.use("/tours", invalidateBootstrapBaseOnMutation);
 
-partnerRouter.post("/upload", upload.single("file"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded" });
-  }
-  res.json({ url: `/uploads/${req.file.filename}` });
-});
+partnerRouter.post("/upload", upload.single("file"), imageUploadHandler);
 
 partnerRouter.get("/stats", partnerController.getStats);
 partnerRouter.get("/hotels", partnerController.getHotels);

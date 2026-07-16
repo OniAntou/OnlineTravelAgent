@@ -32,6 +32,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const adminDir = join(__dirname, "../admin");
 const partnerDir = join(__dirname, "../partner");
+const imageSources = ["'self'", "data:", "blob:"];
+
+try {
+  const storageOrigin = new URL(process.env.SUPABASE_URL ?? "").origin;
+  imageSources.push(storageOrigin);
+} catch {
+  // Storage can be configured after the local app is first checked out.
+}
 
 export const app = express();
 
@@ -58,7 +66,7 @@ app.use(
           "cdnjs.cloudflare.com",
         ],
         fontSrc: ["'self'", "fonts.gstatic.com", "cdnjs.cloudflare.com"],
-        imgSrc: ["'self'", "data:", "blob:"],
+        imgSrc: imageSources,
       },
     },
   }),

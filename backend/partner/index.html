@@ -296,7 +296,7 @@ async function handleUpload(fileInput, hiddenId, imgId){
     const json = await r.json();
     document.getElementById(hiddenId).value = json.url;
     const imgEl = document.getElementById(imgId);
-    imgEl.src = API + json.url;
+    imgEl.src = resolveImageUrl(json.url);
     imgEl.classList.add('show');
     toast("Upload thành công", "success");
   }catch(e){ toast(e.message, "error"); }
@@ -711,10 +711,11 @@ function renderHotels(rows){
     <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('hotel','${h.id}','${h.name.replace(/'/g,"\\'")}')"><i class="fa-solid fa-trash"></i></button>
   `)).join('');
 }
+function resolveImageUrl(url){ return /^https?:\/\//i.test(url) ? url : API + url; }
 function setImg(id, url){
   document.getElementById(id).value = url;
   const img = document.getElementById(id+'-preview');
-  if(url){ img.src = url.startsWith('/') ? API+url : url; img.classList.add('show'); }
+  if(url){ img.src = resolveImageUrl(url); img.classList.add('show'); }
   else { img.classList.remove('show'); }
 }
 function openHotelModal(hotel=null){
