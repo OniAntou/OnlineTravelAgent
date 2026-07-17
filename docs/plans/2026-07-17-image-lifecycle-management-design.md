@@ -3,6 +3,10 @@
 **Ngày:** 2026-07-17
 **Trạng thái:** Đã triển khai và kiểm chứng
 
+> Follow-up (2026-07-18): abandoned uploads are now written below `pending/`
+> and reclaimed by a bounded, reference-aware cleanup job. The architecture and
+> operations documents are the current source of truth for that extension.
+
 ## Mục tiêu
 
 Giải phóng ảnh Supabase Storage không còn được catalog sử dụng khi Admin hoặc Partner thay ảnh, xóa tài nguyên, hoặc xóa khách sạn kèm các phòng của nó. Không thay đổi schema Prisma, API payload hay quyền CRUD hiện có.

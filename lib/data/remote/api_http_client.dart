@@ -19,18 +19,35 @@ typedef QueueRequestWriter =
       Map<String, dynamic>? body,
     );
 
+class ConditionalJsonResponse {
+  const ConditionalJsonResponse({
+    required this.data,
+    required this.eTag,
+    this.notModified = false,
+  });
+
+  final Map<String, dynamic>? data;
+  final String? eTag;
+  final bool notModified;
+}
+
 class ApiHttpClient {
   ApiHttpClient({
     String? baseUrl,
     FlutterSecureStorage? secureStorage,
+    http.Client? httpClient,
     this.queueRequestWriter,
   }) : _baseUrl = baseUrl ?? _defaultBaseUrl(),
-       _secureStorage = secureStorage ?? const FlutterSecureStorage() {
+       _secureStorage = secureStorage ?? const FlutterSecureStorage(),
+       _httpClient = httpClient ?? http.Client(),
+       _ownsHttpClient = httpClient == null {
     loadTokenFuture = _loadToken();
   }
 
   final String _baseUrl;
   final FlutterSecureStorage _secureStorage;
+  final http.Client _httpClient;
+  final bool _ownsHttpClient;
   @visibleForTesting
   final QueueRequestWriter? queueRequestWriter;
   FlutterSecureStorage get secureStorage => _secureStorage;
@@ -151,7 +168,7 @@ class ApiHttpClient {
 
   Future<bool> _performRefreshAccessToken() async {
     try {
-      final response = await http
+      final response = await _httpClient
           .post(
             uri('/api/auth/refresh'),
             headers: const {'Content-Type': 'application/json'},
@@ -223,23 +240,23 @@ class ApiHttpClient {
     final targetUri = uri(path);
     switch (method) {
       case 'GET':
-        return http
+        return _httpClient
             .get(targetUri, headers: headers)
             .timeout(AppTheme.apiTimeout);
       case 'POST':
-        return http
+        return _httpClient
             .post(targetUri, headers: headers, body: jsonEncode(body))
             .timeout(AppTheme.apiTimeout);
       case 'PATCH':
-        return http
+        return _httpClient
             .patch(targetUri, headers: headers, body: jsonEncode(body))
             .timeout(AppTheme.apiTimeout);
       case 'PUT':
-        return http
+        return _httpClient
             .put(targetUri, headers: headers, body: jsonEncode(body))
             .timeout(AppTheme.apiTimeout);
       case 'DELETE':
-        return http
+        return _httpClient
             .delete(targetUri, headers: headers)
             .timeout(AppTheme.apiTimeout);
       default:
@@ -250,6 +267,44 @@ class ApiHttpClient {
   Future<Map<String, dynamic>> getJson(String path) async {
     final response = await sendRequest('GET', path);
     return await compute(_decodeJsonMap, response.body);
+  }
+
+  Future<ConditionalJsonResponse> getJsonIfModified(
+    String path, {
+    String? eTag,
+  }) async {
+    await ensureTokenLoaded();
+    final requestHeaders = Map<String, String>.from(headers);
+    if (eTag != null && eTag.isNotEmpty) {
+      requestHeaders['If-None-Match'] = eTag;
+    }
+
+    Future<http.Response> getOnce() => _httpClient
+        .get(uri(path), headers: requestHeaders)
+        .timeout(AppTheme.apiTimeout);
+
+    var response = await safeCall(getOnce, 'GET', path);
+    if (response.statusCode == 401 && _canAutoRefresh(path)) {
+      final refreshed = await refreshAccessToken();
+      if (refreshed) {
+        requestHeaders
+          ..remove('Authorization')
+          ..addAll(headers);
+        response = await safeCall(getOnce, 'GET', path);
+      }
+    }
+    if (response.statusCode == 304) {
+      return ConditionalJsonResponse(
+        data: null,
+        eTag: response.headers['etag'] ?? eTag,
+        notModified: true,
+      );
+    }
+    throwIfError(response);
+    return ConditionalJsonResponse(
+      data: await compute(_decodeJsonMap, response.body),
+      eTag: response.headers['etag'],
+    );
   }
 
   Future<List<dynamic>> getList(String path) async {
@@ -341,7 +396,7 @@ class ApiHttpClient {
 
     try {
       if (currentRefreshToken != null && currentRefreshToken.isNotEmpty) {
-        await http
+        await _httpClient
             .post(
               uri('/api/auth/logout'),
               headers: const {'Content-Type': 'application/json'},
@@ -485,7 +540,15 @@ class ApiHttpClient {
   ) async {
     await sendRequest(method, path, body, false);
   }
+
+  void dispose() {
+    if (_ownsHttpClient) {
+      _httpClient.close();
+    }
+  }
 }
 
-Map<String, dynamic> _decodeJsonMap(String source) => jsonDecode(source) as Map<String, dynamic>;
-List<dynamic> _decodeJsonList(String source) => jsonDecode(source) as List<dynamic>;
+Map<String, dynamic> _decodeJsonMap(String source) =>
+    jsonDecode(source) as Map<String, dynamic>;
+List<dynamic> _decodeJsonList(String source) =>
+    jsonDecode(source) as List<dynamic>;

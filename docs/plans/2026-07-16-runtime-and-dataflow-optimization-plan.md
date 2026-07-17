@@ -1,5 +1,7 @@
 # Runtime and Dataflow Optimization Implementation Plan
 
+> Historical note (2026-07-18): the original base-only bootstrap invalidation was superseded because the API also caches assembled `bootstrap_public` and `bootstrap_{userId}` responses. The implemented follow-up also adds conditional bootstrap ETags, nested schedule-item writes, full-text/trigram search indexes, and pending-upload cleanup. Current contracts are recorded in `docs/architecture/`.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Remove avoidable data-store probes and bootstrap work while making cache invalidation, schedule batching, and trip status deterministic.

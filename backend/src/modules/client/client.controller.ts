@@ -1,6 +1,7 @@
+import crypto from "crypto";
 import { ReviewTargetType } from "@prisma/client";
 import { Request, Response } from "express";
-import { appCache } from "../../core/config/cache.js";
+import { appCache, bootstrapResponseCacheKey } from "../../core/config/cache.js";
 import { store } from "./data/index.js";
 import { scheduleService } from "../trips/schedule.service.js";
 import { asyncHandler } from "../../core/utils/asyncHandler.js";
@@ -20,18 +21,39 @@ import {
   createReviewSchema,
 } from "../../core/validators/index.js";
 
+type BootstrapCacheEntry = {
+  data: unknown;
+  eTag: string;
+};
+
+function createBootstrapCacheEntry(data: unknown): BootstrapCacheEntry {
+  const digest = crypto.createHash("sha256").update(JSON.stringify(data)).digest("base64url");
+  return { data, eTag: `\"${digest}\"` };
+}
+
+function sendBootstrapResponse(req: Request, res: Response, entry: BootstrapCacheEntry) {
+  res.set("ETag", entry.eTag);
+  res.set("Cache-Control", "private, max-age=0, must-revalidate");
+  if (req.get("if-none-match") === entry.eTag) {
+    res.status(304).end();
+    return;
+  }
+  res.json(entry.data);
+}
+
 export const clientController = {
   getBootstrap: asyncHandler(async (req: Request, res: Response) => {
     const userId = req.userId;
-    const cacheKey = `bootstrap_${userId || 'public'}`;
-    const cached = appCache.get(cacheKey);
+    const cacheKey = bootstrapResponseCacheKey(userId);
+    const cached = appCache.get<BootstrapCacheEntry>(cacheKey);
     if (cached) {
-      res.json(cached);
+      sendBootstrapResponse(req, res, cached);
       return;
     }
     const data = await store.getBootstrap(userId);
-    appCache.set(cacheKey, data);
-    res.json(data);
+    const entry = createBootstrapCacheEntry(data);
+    appCache.set(cacheKey, entry);
+    sendBootstrapResponse(req, res, entry);
   }),
 
   getFavorites: asyncHandler(async (req: Request, res: Response) => {
@@ -153,7 +175,17 @@ export const clientController = {
       res.status(400).json({ message: "invalid targetType" });
       return;
     }
-    const data = await store.getReviews(targetType as ReviewTargetType, targetId);
+    const rawLimit = Number(req.query.limit);
+    const limit = Number.isInteger(rawLimit) && rawLimit >= 1 && rawLimit <= 50
+      ? rawLimit
+      : 20;
+    const cursor = typeof req.query.cursor === "string" && req.query.cursor.trim()
+      ? req.query.cursor
+      : undefined;
+    const data = await store.getReviews(targetType as ReviewTargetType, targetId, {
+      cursor,
+      limit,
+    });
     res.json(data);
   }),
 

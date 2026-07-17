@@ -8,11 +8,15 @@ class ReviewApiService {
   Future<ReviewResponse> getReviews({
     required String targetType,
     required String targetId,
+    String? cursor,
+    int limit = 20,
   }) async {
     final data = await _client.getJson(
       _client.pathWithQuery('/api/reviews', {
         'targetType': targetType,
         'targetId': targetId,
+        'cursor': cursor,
+        'limit': limit.toString(),
       }),
     );
     return ReviewResponse.fromJson(data);

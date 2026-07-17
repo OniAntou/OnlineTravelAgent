@@ -191,9 +191,18 @@ Không phát schedule payload như một database replica qua socket. Mục đí
 
 ### Bootstrap cache
 
-NodeCache giữ `bootstrapBase` với TTL 5 phút; user-owned payload được đọc riêng và không dùng chung base key. Cache invalidation chỉ xóa đúng `bootstrapBase`, không flush toàn bộ NodeCache.
+Each cached bootstrap response has an `ETag`. A client that sends the matching
+`If-None-Match` receives `304 Not Modified`, avoiding a repeat aggregate JSON
+transfer and local snapshot write. Cache and socket rooms are intentionally
+single-instance for the project deployment model.
 
-Middleware invalidation chỉ gắn vào mutation catalogue của Admin/Partner (destination, hotel/room, flight, tour, category) và client review, vì đây là các dữ liệu có mặt trong bootstrap base hoặc thay đổi review aggregate. Favorite, booking, document, payment và search mutation không làm mất cache catalogue không liên quan.
+Catalogue migrations add GIN full-text and trigram indexes for every searched
+name, location, description, and departure field while keeping the existing
+Prisma full-text and case-insensitive substring query contract.
+
+NodeCache giữ `bootstrapBase` và response `bootstrap_public`/`bootstrap_{userId}` với TTL 5 phút. Mutation catalogue hoặc review phải xóa toàn bộ nhóm bootstrap này, nhưng không xóa các key cache không liên quan. Favorite, booking, document và payment status chỉ xóa response bootstrap của user đã mutation.
+
+Review read API dùng cursor (`cursor`, `limit` từ 1 đến 50; mặc định 20), aggregate count/rating ở PostgreSQL và `nextCursor`. Client chỉ tải trang kế tiếp khi người dùng yêu cầu.
 
 ### Database availability
 

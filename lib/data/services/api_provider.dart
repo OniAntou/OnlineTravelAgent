@@ -9,5 +9,6 @@ final apiProvider = Provider<TravelApiService>((ref) {
       await ref.read(authProvider.notifier).logout();
     });
   };
+  ref.onDispose(api.dispose);
   return api;
 });

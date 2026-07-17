@@ -10,7 +10,10 @@ import {
   bookTourSchema,
   reviewSchema,
 } from "./client.schema.js";
-import { invalidateBootstrapBaseOnMutation } from "../../core/config/cache.js";
+import {
+  invalidateBootstrapBaseOnMutation,
+  invalidateBootstrapUserOnMutation,
+} from "../../core/config/cache.js";
 
 export const clientRouter = Router();
 
@@ -24,7 +27,12 @@ clientRouter.get("/search", clientController.globalSearch);
 
 // Favorites
 clientRouter.get("/favorites", clientAuth, clientController.getFavorites);
-clientRouter.patch("/destinations/:id/favorite", clientAuth, clientController.updateFavorite);
+clientRouter.patch(
+  "/destinations/:id/favorite",
+  clientAuth,
+  invalidateBootstrapUserOnMutation,
+  clientController.updateFavorite,
+);
 
 // Promo Codes
 clientRouter.get("/promo-codes/check", clientAuth, clientController.checkPromoCode);
@@ -33,17 +41,17 @@ clientRouter.get("/promo-codes/check", clientAuth, clientController.checkPromoCo
 clientRouter.get("/trips", clientAuth, clientController.getTrips);
 clientRouter.get("/trips/schedules", clientAuth, clientController.getTripSchedulesBatch);
 clientRouter.get("/trips/:id/schedule", clientAuth, clientController.getTripSchedule);
-clientRouter.post("/trips/book", clientAuth, validate(bookTripSchema), clientController.bookTrip);
-clientRouter.post("/trips/book-flight", clientAuth, validate(bookFlightSchema), clientController.bookFlightTrip);
-clientRouter.post("/trips/:id/cancel", clientAuth, clientController.cancelTrip);
+clientRouter.post("/trips/book", clientAuth, invalidateBootstrapUserOnMutation, validate(bookTripSchema), clientController.bookTrip);
+clientRouter.post("/trips/book-flight", clientAuth, invalidateBootstrapUserOnMutation, validate(bookFlightSchema), clientController.bookFlightTrip);
+clientRouter.post("/trips/:id/cancel", clientAuth, invalidateBootstrapUserOnMutation, clientController.cancelTrip);
 
 // Flights
 clientRouter.get("/flights/search", clientController.searchFlights);
 
 // Documents
 clientRouter.get("/documents", clientAuth, clientController.getDocuments);
-clientRouter.post("/documents", clientAuth, validate(documentSchema), clientController.createDocument);
-clientRouter.delete("/documents/:id", clientAuth, clientController.deleteDocument);
+clientRouter.post("/documents", clientAuth, invalidateBootstrapUserOnMutation, validate(documentSchema), clientController.createDocument);
+clientRouter.delete("/documents/:id", clientAuth, invalidateBootstrapUserOnMutation, clientController.deleteDocument);
 
 // Hotels
 clientRouter.get("/hotels", clientController.getHotels);

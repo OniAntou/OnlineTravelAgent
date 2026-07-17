@@ -47,6 +47,7 @@ class BootstrapData {
 
 class TravelApiService {
   final ApiHttpClient _client;
+  String? _bootstrapEtag;
 
   late final AuthApiService auth;
   late final TripApiService tripsService;
@@ -120,7 +121,28 @@ class TravelApiService {
   }
 
   Future<BootstrapData> fetchBootstrap() async {
-    final data = await _client.getJson('/api/bootstrap');
+    final response = await _client.getJsonIfModified('/api/bootstrap');
+    final data = response.data!;
+    _bootstrapEtag = response.eTag;
+    return _parseBootstrap(data);
+  }
+
+  /// Avoids transferring and re-writing the complete offline snapshot when
+  /// the server confirms it is unchanged since the previous sync.
+  Future<BootstrapData?> fetchBootstrapIfChanged() async {
+    if (_bootstrapEtag == null) {
+      return fetchBootstrap();
+    }
+    final response = await _client.getJsonIfModified(
+      '/api/bootstrap',
+      eTag: _bootstrapEtag,
+    );
+    if (response.notModified) return null;
+    _bootstrapEtag = response.eTag;
+    return _parseBootstrap(response.data!);
+  }
+
+  BootstrapData _parseBootstrap(Map<String, dynamic> data) {
     return BootstrapData(
       categories: ((data['categories'] as List?) ?? []).cast<String>().toList(
         growable: false,
@@ -151,6 +173,14 @@ class TravelApiService {
     _socket?.dispose();
     _socket = null;
     await auth.logout();
+  }
+
+  void dispose() {
+    _realtimeRooms.clear();
+    _socket?.disconnect();
+    _socket?.dispose();
+    _socket = null;
+    _client.dispose();
   }
 
   Future<Map<String, dynamic>> becomePartner() => auth.becomePartner();
@@ -230,7 +260,14 @@ class TravelApiService {
   Future<ReviewResponse> getReviews({
     required String targetType,
     required String targetId,
-  }) => reviews.getReviews(targetType: targetType, targetId: targetId);
+    String? cursor,
+    int limit = 20,
+  }) => reviews.getReviews(
+    targetType: targetType,
+    targetId: targetId,
+    cursor: cursor,
+    limit: limit,
+  );
   Future<Review> createReview({
     required String targetType,
     required String targetId,

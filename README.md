@@ -58,6 +58,8 @@ Biến môi trường quan trọng:
 - `SUPABASE_URL`: URL project Supabase dùng cho ảnh catalogue dùng chung
 - `SUPABASE_SERVICE_ROLE_KEY`: service-role key chỉ dành cho backend; tuyệt đối không đưa vào Flutter, Admin/Partner panel hay Git
 - `SUPABASE_STORAGE_BUCKET`: bucket ảnh, mặc định là `travel-media`
+- `PENDING_IMAGE_GRACE_MINUTES`: thời gian chờ trước khi dọn ảnh upload chưa được tham chiếu, mặc định `60`
+- `PENDING_IMAGE_CLEANUP_INTERVAL_MINUTES`: chu kỳ dọn ảnh upload tạm, mặc định `60`
 - `UPLOAD_DIR`: chỉ dùng để phục vụ tương thích ảnh cũ dạng `/uploads/...`; ảnh mới không ghi vào filesystem local
 
 ## Setup Flutter

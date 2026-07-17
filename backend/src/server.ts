@@ -5,6 +5,7 @@ import prisma from "./infrastructure/database/prisma.js";
 import { env } from "./core/config/env.js";
 import { app } from "./app.js";
 import { memoryDb } from "./infrastructure/fallback/memory-db.js";
+import { startPendingImageCleanup } from "./core/storage/supabase-storage.js";
 
 memoryDb.init();
 
@@ -101,9 +102,12 @@ const server = app.listen(env.port, () => {
   app.set("io", io);
 });
 
+const stopPendingImageCleanup = startPendingImageCleanup();
+
 // Graceful shutdown
 async function shutdown() {
   console.log("\nShutting down gracefully...");
+  stopPendingImageCleanup();
   server.close();
   await prisma.$disconnect();
   console.log("Database disconnected. Goodbye!");

@@ -66,26 +66,57 @@ function memoryReviewTargetExists(
 }
 
 export const reviewStore = {
-  async getReviews(targetType: ReviewTargetType, targetId: string) {
+  async getReviews(
+    targetType: ReviewTargetType,
+    targetId: string,
+    options: { cursor?: string; limit: number },
+  ) {
     try {
-      const reviews = await prisma.review.findMany({
-        where: { targetType, targetId },
-        include: { user: { select: { id: true, name: true } } },
-        orderBy: { createdAt: "desc" },
-      });
-      const total = reviews.length;
-      const avgRating = total > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / total : 0;
-      return { reviews, total, avgRating: Math.round(avgRating * 10) / 10 };
+      const where = { targetType, targetId };
+      const [rows, aggregate] = await Promise.all([
+        prisma.review.findMany({
+          where,
+          include: { user: { select: { id: true, name: true } } },
+          orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+          take: options.limit + 1,
+          ...(options.cursor
+            ? { cursor: { id: options.cursor }, skip: 1 }
+            : {}),
+        }),
+        prisma.review.aggregate({
+          where,
+          _count: { id: true },
+          _avg: { rating: true },
+        }),
+      ]);
+      const hasNextPage = rows.length > options.limit;
+      const reviews = hasNextPage ? rows.slice(0, options.limit) : rows;
+      return {
+        reviews,
+        total: aggregate._count.id,
+        avgRating: Math.round((aggregate._avg.rating ?? 0) * 10) / 10,
+        nextCursor: hasNextPage ? reviews.at(-1)?.id ?? null : null,
+      };
     } catch {
       assertMemoryFallbackEnabled();
-      const memReviews = memoryDb.findReviews(targetType, targetId);
-      const total = memReviews.length;
-      const avgRating = total > 0 ? memReviews.reduce((sum, r) => sum + r.rating, 0) / total : 0;
-      const reviews = memReviews.map((r) => {
+      const allReviews = memoryDb.findReviews(targetType, targetId);
+      const total = allReviews.length;
+      const avgRating = total > 0 ? allReviews.reduce((sum, r) => sum + r.rating, 0) / total : 0;
+      const start = options.cursor
+        ? Math.max(0, allReviews.findIndex((review) => review.id === options.cursor) + 1)
+        : 0;
+      const page = allReviews.slice(start, start + options.limit + 1);
+      const hasNextPage = page.length > options.limit;
+      const reviews = page.slice(0, options.limit).map((r) => {
         const user = memoryDb.findUserById(r.userId);
         return { ...r, user: user ? { id: user.id, name: user.name } : { id: r.userId, name: "User" } };
       });
-      return { reviews, total, avgRating: Math.round(avgRating * 10) / 10 };
+      return {
+        reviews,
+        total,
+        avgRating: Math.round(avgRating * 10) / 10,
+        nextCursor: hasNextPage ? reviews.at(-1)?.id ?? null : null,
+      };
     }
   },
 

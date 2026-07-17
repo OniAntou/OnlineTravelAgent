@@ -5,6 +5,7 @@ import { vnpayService } from "./vnpay.service.js";
 import { asyncHandler } from "../../core/utils/asyncHandler.js";
 import { PaymentStatus, Prisma, TripStatus } from "@prisma/client";
 import { memoryDb } from "../../infrastructure/fallback/memory-db.js";
+import { invalidateBootstrapUserCache } from "../../core/config/cache.js";
 
 const MOMO_PARTNER_CODE = process.env.MOMO_PARTNER_CODE ?? "MOMO";
 const MOMO_ACCESS_KEY = process.env.MOMO_ACCESS_KEY ?? "";
@@ -109,6 +110,7 @@ async function markVnpayResult(result: {
       memoryDb.updateTrip(tripId, { ...updateData, paymentStatus: "FAILED" as const });
     }
   }
+  if (trip.userId) invalidateBootstrapUserCache(trip.userId);
   return true;
 }
 
@@ -186,6 +188,7 @@ async function markMomoResult(query: Record<string, string>): Promise<boolean> {
       memoryDb.updateTrip(tripId, { ...updateData, paymentStatus: "FAILED" as const });
     }
   }
+  if (trip.userId) invalidateBootstrapUserCache(trip.userId);
   return true;
 }
 
@@ -271,6 +274,9 @@ export const paymentController = {
       PaymentStatus.PENDING,
       txnRef,
     );
+    if (validation.trip.userId) {
+      invalidateBootstrapUserCache(validation.trip.userId);
+    }
 
     res.json({
       paymentUrl,
@@ -426,6 +432,9 @@ export const paymentController = {
           await prisma.trip.update({ where: { id: tripId }, data: { paymentStatus: PaymentStatus.PENDING, paymentMethod: "momo", paymentTxnRef: orderId } });
         } catch {
           memoryDb.updateTrip(tripId, { paymentStatus: "PENDING" as any, paymentMethod: "momo", paymentTxnRef: orderId });
+        }
+        if (validation.trip.userId) {
+          invalidateBootstrapUserCache(validation.trip.userId);
         }
         res.json({
           payUrl: result.payUrl,

@@ -40,11 +40,13 @@ class ReviewResponse {
   final List<Review> reviews;
   final int total;
   final double avgRating;
+  final String? nextCursor;
 
   const ReviewResponse({
     required this.reviews,
     required this.total,
     required this.avgRating,
+    this.nextCursor,
   });
 
   factory ReviewResponse.fromJson(Map<String, dynamic> json) {
@@ -55,6 +57,7 @@ class ReviewResponse {
           .toList(),
       total: (json['total'] as num?)?.toInt() ?? 0,
       avgRating: (json['avgRating'] as num?)?.toDouble() ?? 0.0,
+      nextCursor: json['nextCursor']?.toString(),
     );
   }
 }

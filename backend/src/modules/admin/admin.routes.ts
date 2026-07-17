@@ -29,6 +29,8 @@ adminRouter.use("/hotels", invalidateBootstrapBaseOnMutation);
 adminRouter.use("/flights", invalidateBootstrapBaseOnMutation);
 adminRouter.use("/tours", invalidateBootstrapBaseOnMutation);
 adminRouter.use("/categories", invalidateBootstrapBaseOnMutation);
+adminRouter.use("/trips", invalidateBootstrapBaseOnMutation);
+adminRouter.use("/documents", invalidateBootstrapBaseOnMutation);
 
 // Upload
 adminRouter.post("/upload", upload.single("file"), imageUploadHandler);

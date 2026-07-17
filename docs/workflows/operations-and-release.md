@@ -23,6 +23,8 @@ CI không tự deploy, nên phần này là runbook cho người vận hành.
 | SUPABASE_URL | URL project Storage dùng chung cho ảnh catalogue. |
 | SUPABASE_SERVICE_ROLE_KEY | Secret backend-only cho upload; không đưa vào mobile/browser/Git. |
 | SUPABASE_STORAGE_BUCKET | `travel-media` trừ khi Storage được cấu hình lại có chủ đích. |
+| PENDING_IMAGE_GRACE_MINUTES | Grace period cho upload `pending/`; mặc định 60 phút. |
+| PENDING_IMAGE_CLEANUP_INTERVAL_MINUTES | Chu kỳ cleanup upload tạm; mặc định 60 phút. |
 | UPLOAD_DIR | Chỉ phục vụ tương thích URL `/uploads/...` cũ. |
 | REQUIRE_ADMIN_BASIC_AUTH | Bật khi static /admin cần được bảo vệ từ lớp file serving. |
 | Payment config | Provider key, secret, return/IPN URL đúng public environment. |
@@ -98,10 +100,14 @@ Không phát hành thêm UI partner action nếu backend route/authorization ch�
 | Thay schema | Migration review trước, không dùng db push production. |
 | Deployment có migration | Chạy db:migrate đúng database trước khi code mới yêu cầu field/table mới. |
 | Seed | Chỉ dùng có chủ đích ở development/demo, không seed production vô tình. |
-| Search index | Nếu deployment cần pg_trgm, áp dụng/verify backend/prisma/pg_trgm.sql theo quy trình database. |
+| Search index | Review/apply migration `20260718003000_catalog_search_indexes` theo quy trình database. |
 | Restore | Test recovery process theo chính sách hạ tầng trước khi cần sự cố thật. |
 
 ## Upload/storage safety
+
+Upload mới dùng prefix `pending/`. Backend dọn theo interval và chỉ xóa object
+quá grace period không còn được catalogue tham chiếu; lỗi Storage/database là
+no-op. Xác nhận các biến `PENDING_IMAGE_*` trên mỗi backend runner khi vận hành.
 
 Ảnh mới dùng bucket public `travel-media` trên Supabase Storage. Backend là writer duy nhất bằng service-role key; URL public chỉ cho phép đọc. Không đưa key vào Flutter/static panel và không stage `backend/.env`. `UPLOAD_DIR` cùng route `/uploads` chỉ còn để ảnh database cũ tiếp tục hiển thị; hạ tầng không cần filesystem persistent cho ảnh mới.
 

@@ -40,7 +40,9 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
   int _totalReviews = 0;
   double _avgRating = 0.0;
   bool _isLoadingReviews = true;
+  bool _isLoadingMore = false;
   bool _isSubmittingReview = false;
+  String? _nextCursor;
   int _selectedRating = 5;
   final _commentController = TextEditingController();
 
@@ -56,24 +58,39 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
     super.dispose();
   }
 
-  Future<void> _loadReviews() async {
-    setState(() => _isLoadingReviews = true);
+  Future<void> _loadReviews({bool append = false}) async {
+    if (append) {
+      if (_nextCursor == null || _isLoadingMore) return;
+      setState(() => _isLoadingMore = true);
+    } else {
+      setState(() => _isLoadingReviews = true);
+    }
     try {
       final apiService = ref.read(apiProvider);
       final response = await apiService.getReviews(
         targetType: widget.targetType,
         targetId: widget.targetId,
+        cursor: append ? _nextCursor : null,
       );
       if (mounted) {
         setState(() {
-          _reviews = response.reviews;
+          _reviews = append
+              ? [..._reviews, ...response.reviews]
+              : response.reviews;
           _totalReviews = response.total;
           _avgRating = response.avgRating;
+          _nextCursor = response.nextCursor;
           _isLoadingReviews = false;
+          _isLoadingMore = false;
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _isLoadingReviews = false);
+      if (mounted) {
+        setState(() {
+          _isLoadingReviews = false;
+          _isLoadingMore = false;
+        });
+      }
     }
   }
 
@@ -173,8 +190,24 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
               ],
             ),
           )
-        else
+        else ...[
           Column(children: _reviews.map(_buildReviewCard).toList()),
+          if (_nextCursor != null)
+            Center(
+              child: TextButton(
+                onPressed: _isLoadingMore
+                    ? null
+                    : () => _loadReviews(append: true),
+                child: _isLoadingMore
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text('home.view_all'.tr()),
+              ),
+            ),
+        ],
       ],
     );
   }
@@ -350,9 +383,7 @@ class _ReviewSectionState extends ConsumerState<ReviewSection> {
                               if (!context.mounted) return;
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('review.success'.tr()),
-                                ),
+                                SnackBar(content: Text('review.success'.tr())),
                               );
                               await _loadReviews();
                               widget.onReviewSubmitted?.call();

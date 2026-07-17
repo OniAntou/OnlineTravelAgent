@@ -323,6 +323,8 @@ model ScheduleTemplate {
   @@index([sourceType])
   @@index([tourPackageId])
   @@index([destinationId])
+  @@unique([sourceType, tourPackageId])
+  @@unique([sourceType, destinationId])
   @@map("schedule_templates")
 }
 

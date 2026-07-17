@@ -77,6 +77,8 @@ Schedule dùng hai cấp:
 1. Template: schedule chuẩn gắn TourPackage hoặc Destination.
 2. Per-trip schedule: schedule được copy khi user book, sau đó có thể được admin override/update riêng.
 
+Mỗi TourPackage hoặc Destination có tối đa một ScheduleTemplate theo source type. Constraint compound trong Prisma/PostgreSQL biến việc đọc template để hiển thị/copy thành deterministic; source validation vẫn bắt buộc đúng một relation tương ứng.
+
 ~~~mermaid
 flowchart LR
     T["TourPackage or Destination"] --> ST["ScheduleTemplate"]
@@ -97,7 +99,7 @@ flowchart LR
 |---|---|
 | backend/prisma/migrations | Lịch sử thay đổi schema và data constraint. |
 | backend/prisma/seed.ts | Seed dữ liệu development/demo. |
-| backend/prisma/pg_trgm.sql | Extension/index PostgreSQL bổ sung để hỗ trợ search. |
+| backend/prisma/migrations/20260718003000_catalog_search_indexes | Extension/index PostgreSQL bổ sung để hỗ trợ search. |
 | backend/prisma/schema.prisma | Declarative model, enum, relation/index. |
 
 Workflow schema:
@@ -148,6 +150,8 @@ Secrets được lấy từ environment; không đặt giá trị production tro
 | SUPABASE_URL | URL project Supabase phục vụ Storage ảnh catalogue. |
 | SUPABASE_SERVICE_ROLE_KEY | Khóa backend-only để ghi Storage; không được đưa vào client hay Git. |
 | SUPABASE_STORAGE_BUCKET | Bucket ảnh, hiện là travel-media. |
+| PENDING_IMAGE_GRACE_MINUTES | Grace period trước khi có thể dọn upload `pending/`; mặc định 60. |
+| PENDING_IMAGE_CLEANUP_INTERVAL_MINUTES | Chu kỳ dọn upload tạm; mặc định 60 phút. |
 | UPLOAD_DIR | Chỉ đọc tương thích các URL `/uploads/...` cũ. |
 | REQUIRE_ADMIN_BASIC_AUTH | Bảo vệ static /admin panel bằng Basic Auth khi bật. |
 | Payment provider variables | Khóa/callback config của VNPay và MoMo. |
@@ -173,6 +177,10 @@ Env parser yêu cầu các secret cần thiết ngoài test; production yêu c�
 Provider callback là authority cho kết quả digital payment. UI phải luôn map PaymentStatus server-side thay vì suy luận thành công chỉ từ điều hướng browser.
 
 ## Upload integration
+
+Ảnh upload mới nằm dưới prefix `pending/`. Cleanup định kỳ chỉ xóa object quá
+grace period không được Destination, Hotel, Room, TourPackage hoặc Flight tham
+chiếu; lỗi list, database, hoặc Storage là no-op để không ảnh hưởng CRUD.
 
 Ảnh catalogue từ Admin/Partner đi qua endpoint upload đã có Basic Auth hoặc Partner JWT. Multer chỉ nhận một JPEG, PNG, GIF hoặc WebP tối đa 10 MB vào memory; backend dùng service-role key để ghi vào bucket public `travel-media` của Supabase Storage rồi trả `{ url }` với URL HTTPS tuyệt đối.
 
@@ -203,7 +211,7 @@ Khi Admin hoặc Partner thay ảnh hay xóa catalogue record, backend giữ URL
 | Prisma schema | backend/prisma/schema.prisma |
 | Migrations | backend/prisma/migrations |
 | Seed | backend/prisma/seed.ts |
-| Search extension/index | backend/prisma/pg_trgm.sql |
+| Search extension/index | backend/prisma/migrations/20260718003000_catalog_search_indexes/migration.sql |
 | Auth middleware | backend/src/core/middleware/auth.ts |
 | Upload middleware | backend/src/core/middleware/upload.ts |
 | Supabase Storage service | backend/src/core/storage/supabase-storage.ts |

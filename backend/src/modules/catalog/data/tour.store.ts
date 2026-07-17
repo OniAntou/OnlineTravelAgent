@@ -34,8 +34,13 @@ export const tourStore = {
 
   async getTourSchedule(tourId: string) {
     try {
-      return await prisma.scheduleTemplate.findFirst({
-        where: { tourPackageId: tourId },
+      return await prisma.scheduleTemplate.findUnique({
+        where: {
+          sourceType_tourPackageId: {
+            sourceType: "tour",
+            tourPackageId: tourId,
+          },
+        },
         include: {
           days: {
             include: { items: { orderBy: { sortOrder: "asc" } } },

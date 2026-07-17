@@ -129,6 +129,7 @@ File lib/data/remote/api_http_client.dart là lớp HTTP chung. Nó:
 - gắn access token vào request cần auth;
 - nhận 401 và điều phối refresh token;
 - dùng một Future refresh dùng chung để không tạo refresh storm;
+- sở hữu một `http.Client` dùng lại cho mọi adapter HTTP và đóng nó cùng lifecycle `TravelApiService`;
 - chỉ retry request gốc một lần;
 - chuyển lỗi HTTP thành ApiException/taxonomy UI có thể xử lý.
 
@@ -158,7 +159,7 @@ Auth state lưu access token, refresh token, name, email và role trong flutter_
 
 `bootstrapProvider` đọc SQLite trước, fetch `/api/bootstrap` đúng một lần, trả payload mới cho UI và chuyển cùng payload đó vào `SyncService.persistBootstrap`. `syncAll` chỉ là entry point của periodic/background refresh nên không lặp lại request foreground.
 
-Snapshot transaction xóa row đã vắng mặt theo ID rồi upsert dữ liệu hiện tại; không wipe toàn bộ catalogue. Rehydration lấy toàn bộ room một lần rồi group theo hotel ID. Schedule adapter chia tối đa 50 trip ID/request để khớp contract backend.
+Snapshot transaction xóa row đã vắng mặt theo ID rồi upsert dữ liệu hiện tại; không wipe toàn bộ catalogue. Rehydration lấy toàn bộ room một lần rồi group theo hotel ID. Schedule adapter chia tối đa 50 trip ID/request để khớp contract backend. Sau lần fetch đầu, periodic sync dùng ETag/If-None-Match; `304 Not Modified` bỏ qua cả payload lẫn transaction SQLite.
 
 `TripStatus` là enum chuẩn giữa JSON adapter, Drift text storage, provider và widget. Cột SQLite vẫn là text, nhưng ghi canonical value (`pending_payment`, `upcoming`, `ongoing`, `completed`, `cancelled`, `unknown`) và parser vẫn đọc được nhãn legacy để cache cũ không bị vỡ.
 

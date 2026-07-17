@@ -56,8 +56,10 @@ class SyncService {
 
     await _runSync(() async {
       await _flushOfflineQueue();
-      final data = await _ref.read(apiProvider).fetchBootstrap();
-      await _persistBootstrapData(data);
+      final data = await _ref.read(apiProvider).fetchBootstrapIfChanged();
+      if (data != null) {
+        await _persistBootstrapData(data);
+      }
     });
   }
 

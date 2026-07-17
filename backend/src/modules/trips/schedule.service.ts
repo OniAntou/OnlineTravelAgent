@@ -54,16 +54,20 @@ async function copyTemplateToTripWithClient(
   });
   if (existing > 0) return;
 
-  const template = await tx.scheduleTemplate.findFirst({
+  const template = await tx.scheduleTemplate.findUnique({
     where:
       params.sourceType === PrismaScheduleSourceType.tour
         ? {
-            sourceType: PrismaScheduleSourceType.tour,
-            tourPackageId: params.sourceId,
+            sourceType_tourPackageId: {
+              sourceType: PrismaScheduleSourceType.tour,
+              tourPackageId: params.sourceId,
+            },
           }
         : {
-            sourceType: PrismaScheduleSourceType.destination,
-            destinationId: params.sourceId,
+            sourceType_destinationId: {
+              sourceType: PrismaScheduleSourceType.destination,
+              destinationId: params.sourceId,
+            },
           },
     include: {
       days: {
@@ -78,30 +82,26 @@ async function copyTemplateToTripWithClient(
 
   const startDate = parseTripStartDate(params.tripDate);
   for (const day of template.days) {
-    const createdDay = await tx.tripScheduleDay.create({
+    await tx.tripScheduleDay.create({
       data: {
         tripId: params.tripId,
         dayNumber: day.dayNumber,
         date: startDate ? addDays(startDate, day.dayNumber - 1) : null,
         title: day.title,
+        items: {
+          create: day.items.map((item) => ({
+            startTime: item.startTime,
+            endTime: item.endTime,
+            title: item.title,
+            description: item.description,
+            locationName: item.locationName,
+            latitude: item.latitude,
+            longitude: item.longitude,
+            sortOrder: item.sortOrder,
+          })),
+        },
       },
     });
-
-    for (const item of day.items) {
-      await tx.tripScheduleItem.create({
-        data: {
-          dayId: createdDay.id,
-          startTime: item.startTime,
-          endTime: item.endTime,
-          title: item.title,
-          description: item.description,
-          locationName: item.locationName,
-          latitude: item.latitude,
-          longitude: item.longitude,
-          sortOrder: item.sortOrder,
-        },
-      });
-    }
   }
 }
 
@@ -198,29 +198,25 @@ async function createTemplateDays(
   days: ScheduleDayInput[] = [],
 ) {
   for (const day of days) {
-    const createdDay = await tx.scheduleTemplateDay.create({
+    await tx.scheduleTemplateDay.create({
       data: {
         templateId,
         dayNumber: day.dayNumber,
         title: day.title ?? null,
+        items: {
+          create: (day.items ?? []).map((item, index) => ({
+            startTime: item.startTime,
+            endTime: item.endTime ?? null,
+            title: item.title,
+            description: item.description ?? null,
+            locationName: item.locationName ?? null,
+            latitude: item.latitude ?? null,
+            longitude: item.longitude ?? null,
+            sortOrder: normalizeSortOrder(item, index),
+          })),
+        },
       },
     });
-
-    for (const [index, item] of (day.items ?? []).entries()) {
-      await tx.scheduleTemplateItem.create({
-        data: {
-          dayId: createdDay.id,
-          startTime: item.startTime,
-          endTime: item.endTime ?? null,
-          title: item.title,
-          description: item.description ?? null,
-          locationName: item.locationName ?? null,
-          latitude: item.latitude ?? null,
-          longitude: item.longitude ?? null,
-          sortOrder: normalizeSortOrder(item, index),
-        },
-      });
-    }
   }
 }
 
@@ -230,32 +226,28 @@ async function createTripDays(
   days: ScheduleDayInput[] = [],
 ) {
   for (const day of days) {
-    const createdDay = await tx.tripScheduleDay.create({
+    await tx.tripScheduleDay.create({
       data: {
         tripId,
         dayNumber: day.dayNumber,
         date: toNullableDate(day.date),
         title: day.title ?? null,
+        items: {
+          create: (day.items ?? []).map((item, index) => ({
+            startTime: item.startTime,
+            endTime: item.endTime ?? null,
+            title: item.title,
+            description: item.description ?? null,
+            locationName: item.locationName ?? null,
+            latitude: item.latitude ?? null,
+            longitude: item.longitude ?? null,
+            sortOrder: normalizeSortOrder(item, index),
+            statusOverride: item.statusOverride ?? null,
+            note: item.note ?? null,
+          })),
+        },
       },
     });
-
-    for (const [index, item] of (day.items ?? []).entries()) {
-      await tx.tripScheduleItem.create({
-        data: {
-          dayId: createdDay.id,
-          startTime: item.startTime,
-          endTime: item.endTime ?? null,
-          title: item.title,
-          description: item.description ?? null,
-          locationName: item.locationName ?? null,
-          latitude: item.latitude ?? null,
-          longitude: item.longitude ?? null,
-          sortOrder: normalizeSortOrder(item, index),
-          statusOverride: item.statusOverride ?? null,
-          note: item.note ?? null,
-        },
-      });
-    }
   }
 }
 

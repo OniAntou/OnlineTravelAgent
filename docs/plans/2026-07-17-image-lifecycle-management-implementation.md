@@ -6,6 +6,10 @@
 
 **Status:** Completed and verified on 2026-07-17.
 
+> Historical scope note (2026-07-18): the later optimization follow-up added
+> reference-aware cleanup for abandoned `pending/` uploads. Its current runtime
+> contract is documented under `docs/architecture/` and `docs/workflows/`.
+
 **Architecture:** Extend the existing Storage module with strict URL recognition and best-effort deletion. Controllers collect current image references before Prisma writes, then call deletion only after the write/transaction succeeds. Storage failures are logged and ignored by CRUD responses.
 
 **Tech Stack:** Express 5, TypeScript, Prisma 6, Node.js fetch, Supabase Storage REST API, Vitest/Supertest.
