@@ -78,6 +78,7 @@ Winston có mặt trong backend để logging. Chọn log drain/retention/alert 
 - API: /api/admin.
 - API yêu cầu Basic Auth luôn luôn.
 - Static panel chỉ được Basic Auth trước khi trả HTML khi REQUIRE_ADMIN_BASIC_AUTH=true.
+- Panel gọi API theo đúng origin đang phục vụ `/admin`; mở panel qua LAN/domain thì dùng chính URL đó, không mở file HTML trực tiếp.
 
 Khi public deploy, bật bảo vệ static panel hoặc đặt equivalent access control ở reverse proxy. Không xem việc API có Basic Auth là lý do để công khai UI quản trị không chủ đích.
 

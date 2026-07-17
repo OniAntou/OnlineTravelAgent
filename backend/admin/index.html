@@ -599,7 +599,7 @@ async function handleUpload(fileInput, hiddenId, imgId){
 <script>
 let curPage='dashboard';
 let data={destinations:[],hotels:[],flights:[],tours:[],trips:[],categories:[],users:[],documents:[]};
-const API='http://localhost:3000';
+const API=window.location.origin;
 const {escapeHtml, safeClassNames, encodeActionValue, decodeActionValue}=AdminRenderSecurity;
 
 function getAuth(){
