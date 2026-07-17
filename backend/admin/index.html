@@ -166,6 +166,9 @@
         <div class="nav-item flex items-center justify-between p-4 rounded-[1rem] cursor-pointer text-sm font-semibold text-muted hover:text-primary hover:bg-silver" onclick="navigate('users')" id="nav-users">
           <div class="flex items-center gap-4"><i class="fa-solid fa-users w-5 text-center"></i> Người dùng</div>
         </div>
+        <div class="nav-item flex items-center justify-between p-4 rounded-[1rem] cursor-pointer text-sm font-semibold text-muted hover:text-primary hover:bg-silver" onclick="navigate('partners')" id="nav-partners">
+          <div class="flex items-center gap-4"><i class="fa-solid fa-handshake w-5 text-center"></i> Đối tác</div>
+        </div>
         <div class="nav-item flex items-center gap-4 p-4 rounded-[1rem] cursor-pointer text-sm font-semibold text-muted hover:text-primary hover:bg-silver" onclick="navigate('categories')" id="nav-categories">
           <i class="fa-solid fa-folder-tree w-5 text-center"></i> Danh mục
         </div>
@@ -263,6 +266,7 @@
     <div class="page" id="page-trips"><div class="flex items-center gap-6 mb-12"><div class="bg-white rounded-full px-6 py-4 shadow-glass w-96 flex items-center gap-4"><i class="fa-solid fa-search text-muted opacity-50"></i><input type="text" id="search-trips" class="bg-transparent border-none outline-none w-full text-sm font-semibold" placeholder="Search..." oninput="filterTable('trips')"></div></div><div id="tb-trips" class="flex flex-col gap-4"></div><div id="empty-trips" class="py-24 text-center text-muted font-bold tracking-widest uppercase text-sm" style="display:none">Chưa có dữ liệu</div></div>
     <div class="page" id="page-categories"><div id="tb-categories" class="flex flex-col gap-4"></div><div id="empty-categories" class="py-24 text-center text-muted font-bold tracking-widest uppercase text-sm" style="display:none">Chưa có dữ liệu</div></div>
     <div class="page" id="page-users"><div id="tb-users" class="flex flex-col gap-4"></div><div id="empty-users" class="py-24 text-center text-muted font-bold tracking-widest uppercase text-sm" style="display:none">Chưa có dữ liệu</div></div>
+    <div class="page" id="page-partners"><div id="tb-partners" class="flex flex-col gap-4"></div><div id="empty-partners" class="py-24 text-center text-muted font-bold tracking-widest uppercase text-sm" style="display:none">Chưa có dữ liệu</div></div>
     <div class="page" id="page-documents"><div id="tb-documents" class="flex flex-col gap-4"></div><div id="empty-documents" class="py-24 text-center text-muted font-bold tracking-widest uppercase text-sm" style="display:none">Chưa có dữ liệu</div></div>
 
   </div>
@@ -474,6 +478,9 @@ async function handleUpload(fileInput, hiddenId, imgId){
   </div>
 </div>
 
+<!-- Partner Modal -->
+<div class="modal-overlay" id="modal-partner"><div class="doppelrand modal-content w-full max-w-md"><div class="doppelrand-inner flex flex-col"><div class="p-8 border-b border-silver flex justify-between items-center bg-white z-10"><h3 class="text-xl font-extrabold text-ink tracking-tight" id="mpartner-title">Đối tác</h3><button class="w-10 h-10 rounded-full bg-offwhite hover:bg-silver text-ink" onclick="closeModal('modal-partner')"><i class="fa-solid fa-xmark"></i></button></div><div class="p-8 flex-1 flex flex-col gap-6"><input type="hidden" id="p-id"><div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Tên</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="p-name"></div><div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Email</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="p-email" type="email"></div><div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Mật khẩu (để trống khi sửa để giữ nguyên)</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="p-pass" type="password"></div></div><div class="p-6 border-t border-silver bg-white flex justify-end"><button class="bg-primary text-white font-bold py-4 px-10 rounded-full hover:bg-black transition-all w-full" onclick="savePartner()">Lưu Đối tác</button></div></div></div></div>
+
 <!-- Document Modal -->
 <div class="modal-overlay" id="modal-document">
   <div class="doppelrand modal-content w-full max-w-md">
@@ -598,7 +605,7 @@ async function handleUpload(fileInput, hiddenId, imgId){
 <script src="/admin/render-security.js"></script>
 <script>
 let curPage='dashboard';
-let data={destinations:[],hotels:[],flights:[],tours:[],trips:[],categories:[],users:[],documents:[]};
+let data={destinations:[],hotels:[],flights:[],tours:[],trips:[],categories:[],users:[],partners:[],documents:[]};
 const API=window.location.origin;
 const {escapeHtml, safeClassNames, encodeActionValue, decodeActionValue}=AdminRenderSecurity;
 
@@ -641,11 +648,11 @@ function navigate(page){
   document.querySelectorAll('.page').forEach(e=>e.classList.remove('active'));
   document.getElementById(`page-${page}`).classList.add('active');
   curPage=page;
-  const titles={dashboard:'Dashboard',destinations:'Điểm đến',hotels:'Khách sạn',flights:'Chuyến bay',tours:'Gói tour',trips:'Đặt chỗ',categories:'Danh mục',users:'Người dùng',documents:'Hành trang'};
+  const titles={dashboard:'Dashboard',destinations:'Điểm đến',hotels:'Khách sạn',flights:'Chuyến bay',tours:'Gói tour',trips:'Đặt chỗ',categories:'Danh mục',users:'Người dùng',partners:'Đối tác',documents:'Hành trang'};
   document.getElementById('pageTitle').textContent=titles[page]||'Admin';
   
   const addBtn=document.getElementById('addBtn');
-  if(['destinations','hotels','flights','tours','categories','users','documents'].includes(page)){addBtn.style.display='flex';}else{addBtn.style.display='none';}
+  if(['destinations','hotels','flights','tours','categories','users','partners','documents'].includes(page)){addBtn.style.display='flex';}else{addBtn.style.display='none';}
   loadPage(page);
 }
 
@@ -653,7 +660,7 @@ function loadPage(page){
   const loaders={
     dashboard:loadDashboard, destinations:loadDestinations, hotels:loadHotels,
     flights:loadFlights, tours:loadTours, trips:loadTrips,
-    categories:loadCategories, users:loadUsers, documents:loadDocuments
+    categories:loadCategories, users:loadUsers, partners:loadPartners, documents:loadDocuments
   };
   if(loaders[page]) loaders[page]().catch(e=>{
     console.error('Load error:',e);
@@ -674,6 +681,7 @@ function openAddModal(){
   if(curPage==='tours') openTourModal();
   if(curPage==='categories') openModal('modal-category');
   if(curPage==='users') openUserModal();
+  if(curPage==='partners') openPartnerModal();
   if(curPage==='documents') openDocumentModal();
 }
 
@@ -1094,13 +1102,23 @@ function renderUsers(rows){
     {label:'Email', val:u.email},
     {label:'Ngày tạo', val:new Date(u.createdAt).toLocaleDateString('vi-VN')}
   ], `
-    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDelEncoded('user','${encodeActionValue(u.id)}','${encodeActionValue(u.name)}')"><i class="fa-solid fa-ban"></i></button>
+    <button class="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary hover:text-white text-primary transition-all flex items-center justify-center" onclick="promoteUser('${encodeActionValue(u.id)}')"><i class="fa-solid fa-handshake"></i></button><button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDelEncoded('user','${encodeActionValue(u.id)}','${encodeActionValue(u.name)}')"><i class="fa-solid fa-ban"></i></button>
   `)).join('');
 }
 function openUserModal(){ document.getElementById('u-name').value=''; document.getElementById('u-email').value=''; document.getElementById('u-pass').value=''; openModal('modal-user'); }
 async function saveUser(){
   try{ await req('/api/admin/users','POST',{name:v('u-name'), email:v('u-email'), password:v('u-pass')}); closeModal('modal-user'); await loadUsers(); toast('Đã tạo User','success'); }catch(e){toast(e.message,'error');}
 }
+
+async function loadPartners(){ data.partners=await req('/api/admin/partners'); renderPartners(data.partners); }
+function renderPartners(rows){ const tb=document.getElementById('tb-partners'),em=document.getElementById('empty-partners'); if(!rows.length){tb.innerHTML='';em.style.display='block';return;} em.style.display='none'; tb.innerHTML=rows.map(p=>listRow([{label:'Tên',val:p.name,cls:'w-1/3'},{label:'Email',val:p.email},{label:'Catalog',val:`${p._count.hotels} khách sạn · ${p._count.tours} tour`}],`<button class="w-10 h-10 rounded-full bg-offwhite hover:bg-silver text-ink" onclick="editPartner('${encodeActionValue(p.id)}')"><i class="fa-solid fa-pen"></i></button><button class="w-10 h-10 rounded-full bg-amber-50 hover:bg-amber-500 hover:text-white text-amber-600" onclick="demotePartner('${encodeActionValue(p.id)}')"><i class="fa-solid fa-user-minus"></i></button><button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500" onclick="deletePartner('${encodeActionValue(p.id)}')"><i class="fa-solid fa-trash"></i></button>`)).join(''); }
+function openPartnerModal(p=null){ document.getElementById('mpartner-title').textContent=p?'Sửa Đối tác':'Thêm Đối tác'; document.getElementById('p-id').value=p?.id||''; document.getElementById('p-name').value=p?.name||''; document.getElementById('p-email').value=p?.email||''; document.getElementById('p-pass').value=''; openModal('modal-partner'); }
+function editPartner(id){ openPartnerModal(data.partners.find(p=>p.id===decodeActionValue(id))); }
+async function refreshPartnerData(){ await Promise.all([loadUsers(),loadPartners()]); }
+async function savePartner(){ const id=v('p-id'),body={name:v('p-name'),email:v('p-email')}; if(v('p-pass'))body.password=v('p-pass'); try{await req(id?`/api/admin/partners/${id}`:'/api/admin/partners',id?'PUT':'POST',body);closeModal('modal-partner');await refreshPartnerData();toast('Đã lưu Đối tác','success');}catch(e){toast(e.message,'error');} }
+async function promoteUser(id){ try{await req(`/api/admin/users/${decodeActionValue(id)}/promote-partner`,'POST');await refreshPartnerData();toast('Đã cấp quyền Đối tác','success');}catch(e){toast(e.message,'error');} }
+async function demotePartner(id){ if(!confirm('Thu hồi quyền Đối tác sẽ xóa toàn bộ khách sạn, phòng và tour của họ. Tiếp tục?'))return; try{await req(`/api/admin/partners/${decodeActionValue(id)}/demote`,'POST');await refreshPartnerData();toast('Đã thu hồi quyền','success');}catch(e){toast(e.message,'error');} }
+async function deletePartner(id){ if(!confirm('Xóa Đối tác sẽ xóa tài khoản và toàn bộ khách sạn, phòng và tour của họ. Tiếp tục?'))return; try{await req(`/api/admin/partners/${decodeActionValue(id)}`,'DELETE');await refreshPartnerData();toast('Đã xóa Đối tác','success');}catch(e){toast(e.message,'error');} }
 
 // ── DOCUMENTS ──
 async function loadDocuments(){ data.documents=await req('/api/admin/documents'); renderDocuments(data.documents); }

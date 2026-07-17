@@ -154,6 +154,7 @@ Admin router ở backend/src/modules/admin/admin.routes.ts; trước router là 
 | Trip | Liệt kê, cập nhật, xóa trip. |
 | Schedule | Đọc/cập nhật/xóa per-trip schedule; CRUD schedule template. |
 | User | Liệt kê, tạo và xóa user. |
+| Partner | Liệt kê, tạo, sửa, cấp/thu hồi quyền và xóa Partner. Thu hồi/xóa Partner sẽ xóa hotel, room, tour thuộc sở hữu; dữ liệu database được xóa trước, sau đó mới dọn ảnh Supabase Storage. |
 | Documents | CRUD document management. |
 
 Controller admin dùng schedule service để bảo toàn quy tắc copy template/per-trip update và phát event realtime sau thay đổi liên quan.

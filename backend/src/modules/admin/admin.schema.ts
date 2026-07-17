@@ -86,6 +86,14 @@ export const adminUserSchema = z.object({
   password: z.string().min(6, "password must be at least 6 characters"),
 });
 
+export const adminPartnerCreateSchema = adminUserSchema;
+
+export const adminPartnerUpdateSchema = z.object({
+  name: z.string().min(1, "name is required"),
+  email: z.string().email("invalid email"),
+  password: z.string().min(6, "password must be at least 6 characters").optional(),
+});
+
 export const adminDocumentSchema = z.object({
   id: z.string().optional(),
   title: z.string().min(1, "title is required"),

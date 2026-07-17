@@ -27,6 +27,8 @@ import {
   UpdateDocumentBody,
   CreateCategoryBody,
   CreateUserBody,
+  CreatePartnerBody,
+  UpdatePartnerBody,
   UpdateTripBody,
   UpdateScheduleItemBody,
   CreateScheduleItemBody,
@@ -58,6 +60,34 @@ async function requireDestinationCategory(category: string): Promise<string> {
   });
   if (!existing) throw new HttpError(400, "Category not found");
   return category;
+}
+
+async function removePartnerCatalog(partnerId: string): Promise<void> {
+  const partner = await prisma.user.findFirst({
+    where: { id: partnerId, role: "PARTNER" },
+    select: {
+      hotels: { select: { id: true, imagePath: true, rooms: { select: { imagePath: true } } } },
+      tours: { select: { id: true, imagePath: true } },
+    },
+  });
+  if (!partner) throw new HttpError(404, "Partner not found");
+  const hotelIds = partner.hotels.map((hotel) => hotel.id);
+  const tourIds = partner.tours.map((tour) => tour.id);
+  const imagePaths = [
+    ...partner.hotels.flatMap((hotel) => [hotel.imagePath, ...hotel.rooms.map((room) => room.imagePath)]),
+    ...partner.tours.map((tour) => tour.imagePath),
+  ];
+  await prisma.$transaction(async (tx) => {
+    await tx.scheduleTemplate.deleteMany({ where: { tourPackageId: { in: tourIds } } });
+    await tx.review.deleteMany({ where: { OR: [
+      { targetType: ReviewTargetType.hotel, targetId: { in: hotelIds } },
+      { targetType: ReviewTargetType.tour, targetId: { in: tourIds } },
+    ] } });
+    await tx.room.deleteMany({ where: { hotelId: { in: hotelIds } } });
+    await tx.hotel.deleteMany({ where: { id: { in: hotelIds } } });
+    await tx.tourPackage.deleteMany({ where: { id: { in: tourIds } } });
+  });
+  await deleteManagedPublicImages(imagePaths);
 }
 
 const allowedScheduleStatuses = new Set([
@@ -733,6 +763,7 @@ export const adminController = {
   // --- Users ---
   getUsers: asyncHandler(async (_: Request, res: Response) => {
     const data = await prisma.user.findMany({
+      where: { role: "USER" },
       orderBy: { createdAt: "desc" },
       select: { id: true, name: true, email: true, createdAt: true },
     });
@@ -750,6 +781,79 @@ export const adminController = {
 
   deleteUser: asyncHandler(async (req: Request, res: Response) => {
     const id = req.params.id as string;
+    await prisma.$transaction(async (tx) => {
+      await tx.review.deleteMany({ where: { userId: id } });
+      await tx.user.delete({ where: { id } });
+    });
+    res.json({ ok: true });
+  }),
+
+  // --- Partners ---
+  getPartners: asyncHandler(async (_: Request, res: Response) => {
+    const data = await prisma.user.findMany({
+      where: { role: "PARTNER" },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        createdAt: true,
+        _count: { select: { hotels: true, tours: true } },
+      },
+    });
+    res.json(data);
+  }),
+
+  createPartner: asyncHandler(async (req: Request, res: Response) => {
+    const body = req.body as CreatePartnerBody;
+    const password = await passwordService.hash(body.password);
+    const partner = await prisma.user.create({
+      data: {
+        name: body.name,
+        email: body.email,
+        password,
+        role: "PARTNER",
+      },
+    });
+    res.status(201).json({
+      id: partner.id,
+      name: partner.name,
+      email: partner.email,
+      role: partner.role,
+    });
+  }),
+
+  updatePartner: asyncHandler(async (req: Request, res: Response) => {
+    const body = req.body as UpdatePartnerBody;
+    const id = req.params.id as string;
+    const existing = await prisma.user.findFirst({ where: { id, role: "PARTNER" }, select: { id: true } });
+    if (!existing) throw new HttpError(404, "Partner not found");
+    const password = body.password ? await passwordService.hash(body.password) : undefined;
+    const partner = await prisma.user.update({
+      where: { id }, data: { name: body.name, email: body.email, ...(password ? { password } : {}) },
+    });
+    res.json({ id: partner.id, name: partner.name, email: partner.email, role: partner.role });
+  }),
+
+  promoteUserToPartner: asyncHandler(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const existing = await prisma.user.findUnique({ where: { id }, select: { role: true } });
+    if (!existing) throw new HttpError(404, "User not found");
+    if (existing.role === "PARTNER") throw new HttpError(409, "User is already a partner");
+    const partner = await prisma.user.update({ where: { id }, data: { role: "PARTNER" } });
+    res.json({ id: partner.id, name: partner.name, email: partner.email, role: partner.role });
+  }),
+
+  demotePartner: asyncHandler(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    await removePartnerCatalog(id);
+    const user = await prisma.user.update({ where: { id }, data: { role: "USER" } });
+    res.json({ id: user.id, name: user.name, email: user.email, role: user.role });
+  }),
+
+  deletePartner: asyncHandler(async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    await removePartnerCatalog(id);
     await prisma.$transaction(async (tx) => {
       await tx.review.deleteMany({ where: { userId: id } });
       await tx.user.delete({ where: { id } });

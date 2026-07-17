@@ -178,6 +178,7 @@ Schedule detail UI không tự tin socket payload là toàn bộ timeline. Socke
 2. Khi static panel protection bật, server yêu cầu Basic Auth ngay ở static layer.
 3. Panel gọi /api/admin với Basic credentials.
 4. Admin CRUD catalog, trip, user, document, schedule template hoặc per-trip schedule.
+5. Admin có thể tạo Partner trực tiếp hoặc cấp quyền Partner cho User. Khi thu hồi quyền hoặc xóa Partner, hệ thống yêu cầu xác nhận và xóa toàn bộ hotel, room, tour mà Partner sở hữu.
 5. Backend validate input, persist thay đổi và phát schedule_updated khi schedule liên quan thay đổi.
 6. Client đang ở room liên quan refetch lịch trình.
 

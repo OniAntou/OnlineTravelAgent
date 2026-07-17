@@ -98,6 +98,14 @@ export interface CreateUserBody {
   password: string;
 }
 
+export interface CreatePartnerBody extends CreateUserBody {}
+
+export interface UpdatePartnerBody {
+  name: string;
+  email: string;
+  password?: string;
+}
+
 import { TripStatus } from "@prisma/client";
 
 export interface UpdateTripBody {

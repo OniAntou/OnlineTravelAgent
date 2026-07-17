@@ -9,6 +9,8 @@ import {
   adminTripSchema,
   adminCategorySchema,
   adminUserSchema,
+  adminPartnerCreateSchema,
+  adminPartnerUpdateSchema,
   adminRoomSchema,
   adminDocumentSchema,
   adminScheduleTemplateSchema,
@@ -166,6 +168,18 @@ adminRouter.post(
   adminController.createUser,
 );
 adminRouter.delete("/users/:id", adminController.deleteUser);
+
+// Partners
+adminRouter.get("/partners", adminController.getPartners);
+adminRouter.post(
+  "/partners",
+  validate(adminPartnerCreateSchema),
+  adminController.createPartner,
+);
+adminRouter.put("/partners/:id", validate(adminPartnerUpdateSchema), adminController.updatePartner);
+adminRouter.post("/users/:id/promote-partner", adminController.promoteUserToPartner);
+adminRouter.post("/partners/:id/demote", adminController.demotePartner);
+adminRouter.delete("/partners/:id", adminController.deletePartner);
 
 // Rooms
 adminRouter.get("/hotels/:hotelId/rooms", adminController.getRooms);
