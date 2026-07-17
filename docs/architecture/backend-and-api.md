@@ -142,6 +142,8 @@ Payment controller xác minh user sở hữu Trip và amount gửi lên khớp t
 
 ## Admin API
 
+`Destination.category` tham chiếu đến tên `Category` trong cơ sở dữ liệu. Màn hình quản trị chỉ cho chọn category hiện có, và backend kiểm tra giá trị này trước khi ghi dữ liệu. Nếu category không tồn tại, API trả về `400 Category not found` thay vì để lỗi ràng buộc dữ liệu trở thành thông báo chung.
+
 Admin router ở backend/src/modules/admin/admin.routes.ts; trước router là Basic Auth.
 
 | Nhóm | Khả năng |

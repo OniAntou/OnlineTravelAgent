@@ -317,7 +317,7 @@ async function handleUpload(fileInput, hiddenId, imgId){
         <div class="col-span-2"><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Slug</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="ds-slug"></div>
         <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Tên</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="ds-name"></div>
         <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Vị trí</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="ds-loc"></div>
-        <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Category</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="ds-cat"></div>
+        <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Category</label><select class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="ds-cat"></select></div>
         <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Rating</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="ds-rating"></div>
         <script>document.write(renderUploadField('Ảnh Điểm đến', 'ds-img', 'ds-img-preview'))</script>
         <div class="col-span-2 flex items-center gap-8">
@@ -1148,12 +1148,22 @@ function renderDestinations(rows){
     <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDelEncoded('destination','${encodeActionValue(d.id)}','${encodeActionValue(d.name)}')"><i class="fa-solid fa-trash"></i></button>
   `)).join('');
 }
-function openDestinationModal(dest=null){
+async function openDestinationModal(dest=null){
   document.getElementById('mdest-title').textContent=dest?'Cập nhật Điểm đến':'Thêm Điểm đến';
   document.getElementById('ds-id').value=dest?.id??'';
   document.getElementById('ds-slug').value=dest?.id??'';
   document.getElementById('ds-slug').disabled=!!dest;
-  ['name','loc','cat','rating','desc'].forEach(k=>document.getElementById(`ds-${k}`).value=dest?.[k==='loc'?'location':k==='cat'?'category':k==='desc'?'description':k]??'');
+  ['name','loc','rating','desc'].forEach(k=>document.getElementById(`ds-${k}`).value=dest?.[k==='loc'?'location':k==='desc'?'description':k]??'');
+  try {
+    const categories=await req('/api/admin/categories');
+    const categorySelect=document.getElementById('ds-cat');
+    const selectedCategory=dest?.category||'Địa điểm';
+    categorySelect.innerHTML=categories.map(category=>`<option value="${escapeHtml(category.name)}">${escapeHtml(category.name)}</option>`).join('');
+    categorySelect.value=categories.some(category=>category.name===selectedCategory)?selectedCategory:'Địa điểm';
+  } catch(e) {
+    toast(e.message,'error');
+    return;
+  }
   setImg('ds-img', dest?.imagePath??'');
   document.getElementById('ds-fav').checked=dest?.isFavorite??false;
   document.getElementById('ds-rec').checked=dest?.isRecommended??false;

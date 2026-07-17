@@ -10,4 +10,11 @@ describe("admin panel API origin", () => {
     expect(response.text).toContain("const API=window.location.origin;");
     expect(response.text).not.toContain("const API='http://localhost:3000';");
   });
+
+  it("uses a category selector instead of free-text destination categories", async () => {
+    const response = await request(app).get("/admin/");
+
+    expect(response.status).toBe(200);
+    expect(response.text).toContain('<select class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="ds-cat">');
+  });
 });

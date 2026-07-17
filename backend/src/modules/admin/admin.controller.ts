@@ -51,6 +51,15 @@ function replacedImagePath(previous: string, next: string | undefined): string[]
   return next !== undefined && next !== previous ? [previous] : [];
 }
 
+async function requireDestinationCategory(category: string): Promise<string> {
+  const existing = await prisma.category.findUnique({
+    where: { name: category },
+    select: { id: true },
+  });
+  if (!existing) throw new HttpError(400, "Category not found");
+  return category;
+}
+
 const allowedScheduleStatuses = new Set([
   "completed",
   "ongoing",
@@ -152,12 +161,15 @@ export const adminController = {
 
   createDestination: asyncHandler(async (req: Request, res: Response) => {
     const body = req.body as CreateDestinationBody;
+    const category = await requireDestinationCategory(
+      body.category?.trim() || "Địa điểm",
+    );
     const dest = await prisma.destination.create({
       data: {
         id: body.id || generateId("dest"),
         name: body.name,
         location: body.location,
-        category: body.category || "Địa điểm",
+        category,
         rating: body.rating || "4.0",
         duration: body.duration || "2N/1Đ",
         imagePath: body.imagePath || "",
@@ -175,6 +187,9 @@ export const adminController = {
 
   updateDestination: asyncHandler(async (req: Request, res: Response) => {
     const body = req.body as UpdateDestinationBody;
+    const category = body.category === undefined
+      ? undefined
+      : await requireDestinationCategory(body.category.trim());
     const previous = await prisma.destination.findUnique({
       where: { id: req.params.id as string },
       select: { imagePath: true },
@@ -184,7 +199,7 @@ export const adminController = {
       data: {
         name: body.name,
         location: body.location,
-        category: body.category,
+        category,
         rating: body.rating,
         duration: body.duration,
         imagePath: body.imagePath,
