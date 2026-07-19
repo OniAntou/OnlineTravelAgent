@@ -173,7 +173,7 @@ Auth state lưu access token, refresh token, name, email và role trong flutter_
 
 Snapshot transaction xóa row đã vắng mặt theo ID rồi upsert dữ liệu hiện tại; không wipe toàn bộ catalogue. Rehydration lấy toàn bộ room một lần rồi group theo hotel ID. Schedule adapter chia tối đa 50 trip ID/request để khớp contract backend. Sau lần fetch đầu, periodic sync dùng ETag/If-None-Match; `304 Not Modified` bỏ qua cả payload lẫn transaction SQLite.
 
-`TripStatus` là enum chuẩn giữa JSON adapter, Drift text storage, provider và widget. Cột SQLite vẫn là text, nhưng ghi canonical value (`pending_payment`, `upcoming`, `ongoing`, `completed`, `cancelled`, `unknown`) và parser vẫn đọc được nhãn legacy để cache cũ không bị vỡ.
+`TripStatus` là enum chuẩn giữa JSON adapter, Drift text storage, provider và widget. Cột SQLite vẫn là text, nhưng ghi canonical value (`pending_payment`, `upcoming`, `ongoing`, `completed`, `cancelled`, `unknown`) và parser vẫn đọc được nhãn legacy để cache cũ không bị vỡ. Trạng thái kết thúc (`completed`, `cancelled`) luôn được ưu tiên hơn `PaymentStatus.PENDING` legacy, nên lịch sử thanh toán không thể đưa booking đã kết thúc trở lại danh sách sắp tới.
 
 Drift database được định nghĩa tại lib/data/local/app_database.dart, tables và DAOs nằm trong lib/data/local/tables và lib/data/local/daos.
 

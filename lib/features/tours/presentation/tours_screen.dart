@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/theme/app_theme.dart';
-import '../domain/tour_package.dart';
-import '../application/tour_provider.dart';
-import '../../../shared/widgets/sort_bottom_sheet.dart';
-import '../../../shared/widgets/app_image.dart';
-import 'tour_detail_screen.dart';
 import '../../../app/state/app_state_provider.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/app_utils.dart';
+import '../../../shared/widgets/app_image.dart';
+import '../application/tour_catalog_filter.dart';
+import '../application/tour_provider.dart';
+import '../domain/tour_package.dart';
+import 'tour_detail_screen.dart';
+import 'widgets/tour_filter_sheet.dart';
 
 class ToursScreen extends ConsumerStatefulWidget {
   const ToursScreen({super.key});
@@ -20,7 +21,7 @@ class ToursScreen extends ConsumerStatefulWidget {
 class _ToursScreenState extends ConsumerState<ToursScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  String _sortBy = 'Popular'; // 'Popular', 'PriceAsc', 'PriceDesc'
+  TourCatalogFilter _filter = const TourCatalogFilter();
 
   @override
   void dispose() {
@@ -28,44 +29,56 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
     super.dispose();
   }
 
-  List<TourPackage> _getSortedAndFiltered(List<TourPackage> list) {
-    var filtered = list;
-
-    if (_searchQuery.isNotEmpty) {
-      filtered = filtered.where((t) {
-        final lowerQuery = _searchQuery.toLowerCase();
-        return t.name.toLowerCase().contains(lowerQuery) ||
-            t.departure.toLowerCase().contains(lowerQuery);
-      }).toList();
-    }
-
-    final sorted = List<TourPackage>.from(filtered);
-    if (_sortBy == 'PriceAsc') {
-      sorted.sort((a, b) => a.price.compareTo(b.price));
-    } else if (_sortBy == 'PriceDesc') {
-      sorted.sort((a, b) => b.price.compareTo(a.price));
-    } else {
-      // Popular
-      sorted.sort((a, b) {
-        if (a.isPopular && !b.isPopular) return -1;
-        if (!a.isPopular && b.isPopular) return 1;
-        return 0;
-      });
-    }
-    return sorted;
-  }
-
-  String _getSortLabel() => getSortLabel(_sortBy);
-
   Future<void> _onRefresh() async {
     ref.invalidate(bootstrapProvider);
     await ref.read(bootstrapProvider.future);
   }
 
+  Future<void> _openFilter(List<TourPackage> tours) async {
+    final selected = await showTourFilterSheet(
+      context,
+      initialFilter: _filter,
+      departures: tourDepartures(tours),
+      catalogMaximumPrice: tourMaximumPrice(tours),
+    );
+    if (!mounted || selected == null) return;
+    setState(() => _filter = selected);
+  }
+
+  void _resetFilters() {
+    _searchController.clear();
+    setState(() {
+      _searchQuery = '';
+      _filter = const TourCatalogFilter();
+    });
+  }
+
+  String _sortLabel(TourCatalogSort sort) {
+    return switch (sort) {
+      TourCatalogSort.recommended => 'Đề xuất',
+      TourCatalogSort.priceAscending => 'Giá tăng dần',
+      TourCatalogSort.priceDescending => 'Giá giảm dần',
+      TourCatalogSort.durationAscending => 'Ngắn nhất',
+      TourCatalogSort.durationDescending => 'Dài nhất',
+    };
+  }
+
+  String _durationLabel(TourDurationBucket bucket) {
+    return switch (bucket) {
+      TourDurationBucket.any => 'Tất cả',
+      TourDurationBucket.twoToThreeDays => '2–3 ngày',
+      TourDurationBucket.fourDaysOrMore => 'Từ 4 ngày',
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
-    final allTours = ref.watch(toursProvider);
-    final sortedList = _getSortedAndFiltered(allTours);
+    final tours = ref.watch(toursProvider);
+    final visibleTours = filterTours(
+      tours,
+      query: _searchQuery,
+      filter: _filter,
+    );
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -91,8 +104,10 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
         centerTitle: true,
         actions: [
           IconButton(
+            key: const Key('tour-filter-button'),
             icon: const Icon(Icons.tune, color: AppTheme.primaryBlue),
-            onPressed: () => _showSortBottomSheet(context),
+            tooltip: 'Bộ lọc & sắp xếp',
+            onPressed: () => _openFilter(tours),
           ),
         ],
       ),
@@ -103,9 +118,8 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Elegant Search Input
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 10),
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
@@ -113,11 +127,10 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: TextField(
+                    key: const Key('tour-search-input'),
                     controller: _searchController,
-                    onChanged: (text) {
-                      setState(() {
-                        _searchQuery = text;
-                      });
+                    onChanged: (value) {
+                      setState(() => _searchQuery = value);
                     },
                     decoration: InputDecoration(
                       icon: const Icon(
@@ -131,70 +144,96 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
                         fontSize: 14,
                       ),
                       border: InputBorder.none,
-                      suffixIcon: _searchController.text.isNotEmpty
+                      suffixIcon: _searchQuery.isNotEmpty || !_filter.isDefault
                           ? IconButton(
+                              key: const Key('tour-catalog-clear'),
                               icon: const Icon(Icons.clear, size: 18),
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() {
-                                  _searchQuery = '';
-                                });
-                              },
+                              tooltip: 'Xóa tìm kiếm và bộ lọc',
+                              onPressed: _resetFilters,
                             )
                           : null,
                     ),
                   ),
                 ),
               ),
-
-              // Results and Sorter Bar
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
-                      'Tìm thấy ${sortedList.length} gói tour',
+                      'Tìm thấy ${visibleTours.length} gói tour',
+                      key: const Key('tour-catalog-result-count'),
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontWeight: FontWeight.w500,
                         fontSize: 13,
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () => _showSortBottomSheet(context),
-                      child: Row(
-                        children: [
-                          Text(
-                            _getSortLabel(),
-                            style: const TextStyle(
-                              color: AppTheme.primaryBlue,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 13,
-                            ),
-                          ),
-                          const Icon(
-                            Icons.arrow_drop_down,
-                            color: AppTheme.primaryBlue,
-                          ),
-                        ],
+                    if (_filter.departure != null)
+                      _activeChip(
+                        key: const Key('tour-active-departure'),
+                        label: _filter.departure!,
+                        onDeleted: () {
+                          setState(() {
+                            _filter = _filter.copyWith(clearDeparture: true);
+                          });
+                        },
                       ),
-                    ),
+                    if (_filter.durationBucket != TourDurationBucket.any)
+                      _activeChip(
+                        key: const Key('tour-active-duration'),
+                        label: _durationLabel(_filter.durationBucket),
+                        onDeleted: () {
+                          setState(() {
+                            _filter = _filter.copyWith(
+                              durationBucket: TourDurationBucket.any,
+                            );
+                          });
+                        },
+                      ),
+                    if (_filter.maximumPrice != null)
+                      _activeChip(
+                        key: const Key('tour-active-price'),
+                        label: 'Tối đa ${formatVND(_filter.maximumPrice!)}',
+                        onDeleted: () {
+                          setState(() {
+                            _filter = _filter.copyWith(clearMaximumPrice: true);
+                          });
+                        },
+                      ),
+                    if (_filter.popularOnly)
+                      _activeChip(
+                        key: const Key('tour-active-popular'),
+                        label: 'Tour nổi bật',
+                        onDeleted: () {
+                          setState(() {
+                            _filter = _filter.copyWith(popularOnly: false);
+                          });
+                        },
+                      ),
+                    if (_filter.sort != TourCatalogSort.recommended)
+                      _activeChip(
+                        key: const Key('tour-active-sort'),
+                        label: _sortLabel(_filter.sort),
+                        onDeleted: () {
+                          setState(() {
+                            _filter = _filter.copyWith(
+                              sort: TourCatalogSort.recommended,
+                            );
+                          });
+                        },
+                      ),
                   ],
                 ),
               ),
-
-              // Main Responsive Grid Layout
               Expanded(
-                child: sortedList.isEmpty
-                    ? _buildEmptyState(context)
+                child: visibleTours.isEmpty
+                    ? _buildEmptyState()
                     : GridView.builder(
-                        padding: const EdgeInsets.fromLTRB(
-                          20,
-                          10,
-                          20,
-                          100,
-                        ), // extra padding for FAB
+                        padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
@@ -202,10 +241,9 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
                               crossAxisSpacing: 16,
                               childAspectRatio: 0.68,
                             ),
-                        itemCount: sortedList.length,
+                        itemCount: visibleTours.length,
                         itemBuilder: (context, index) {
-                          final tour = sortedList[index];
-                          return _buildTourCard(context, tour);
+                          return _buildTourCard(context, visibleTours[index]);
                         },
                       ),
               ),
@@ -213,6 +251,25 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _activeChip({
+    required Key key,
+    required String label,
+    required VoidCallback onDeleted,
+  }) {
+    return InputChip(
+      key: key,
+      label: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 170),
+        child: Text(label, overflow: TextOverflow.ellipsis),
+      ),
+      onPressed: onDeleted,
+      onDeleted: onDeleted,
+      deleteIconColor: AppTheme.primaryBlue,
+      backgroundColor: AppTheme.primaryBlue.withValues(alpha: 0.08),
+      side: BorderSide.none,
     );
   }
 
@@ -240,7 +297,6 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image with Overlays
             Expanded(
               flex: 5,
               child: Stack(
@@ -272,7 +328,6 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
                       ),
                     ),
                   ),
-                  // Price tag overlay
                   Positioned(
                     bottom: 12,
                     left: 12,
@@ -298,11 +353,10 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
                 ],
               ),
             ),
-            // Info text block
             Expanded(
               flex: 3,
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -367,7 +421,7 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context) {
+  Widget _buildEmptyState() {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -397,7 +451,7 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Chúng tôi không tìm thấy tour nào phù hợp với tìm kiếm của bạn. Vui lòng thử từ khóa khác.',
+              'Không có tour phù hợp với tìm kiếm và bộ lọc hiện tại.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,
@@ -407,13 +461,7 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () {
-                _searchController.clear();
-                setState(() {
-                  _searchQuery = '';
-                  _sortBy = 'Popular';
-                });
-              },
+              onPressed: _resetFilters,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryBlue,
                 padding: const EdgeInsets.symmetric(
@@ -426,7 +474,7 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
                 elevation: 0,
               ),
               child: const Text(
-                'Đặt lại tìm kiếm',
+                'Đặt lại bộ lọc',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -436,24 +484,6 @@ class _ToursScreenState extends ConsumerState<ToursScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  void _showSortBottomSheet(BuildContext context) {
-    SortBottomSheet.show(
-      context,
-      currentSort: _sortBy,
-      onSortChanged: (code) {
-        if (code == 'Rating') {
-          return; // rating sorting not implemented for tours
-        }
-        setState(() => _sortBy = code);
-      },
-      options: const [
-        SortOption('Popular', 'Phổ biến nhất', Icons.insights),
-        SortOption('PriceAsc', 'Giá từ thấp đến cao', Icons.trending_up),
-        SortOption('PriceDesc', 'Giá từ cao đến thấp', Icons.trending_down),
-      ],
     );
   }
 }

@@ -18,6 +18,12 @@ enum TripStatus {
     String rawPaymentStatus,
     bool isUpcoming,
   ) {
+    final storedStatus = TripStatus.fromStorage(rawStatus, isUpcoming);
+    if (storedStatus == TripStatus.completed ||
+        storedStatus == TripStatus.cancelled) {
+      return storedStatus;
+    }
+
     if (rawPaymentStatus.trim().toUpperCase() == 'PENDING') {
       return TripStatus.pendingPayment;
     }
@@ -31,7 +37,7 @@ enum TripStatus {
       case 'CANCELED':
         return TripStatus.cancelled;
       default:
-        return TripStatus.fromStorage(rawStatus, isUpcoming);
+        return storedStatus;
     }
   }
 

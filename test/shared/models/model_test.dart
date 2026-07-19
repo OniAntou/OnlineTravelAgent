@@ -149,6 +149,17 @@ void main() {
       expect(TripStatus.fromStorage('Đã hủy', false), TripStatus.cancelled);
       expect(TripStatus.fromStorage('Đang diễn ra', false), TripStatus.ongoing);
     });
+
+    test('keeps a legacy cancelled trip terminal when payment is pending', () {
+      final trip = Trip.fromJson({
+        'id': 'legacy-cancelled',
+        'status': 'Đã hủy',
+        'paymentStatus': 'PENDING',
+        'isUpcoming': false,
+      });
+
+      expect(trip.status, TripStatus.cancelled);
+    });
   });
 
   group('Hotel', () {

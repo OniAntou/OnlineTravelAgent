@@ -82,6 +82,13 @@ sequenceDiagram
 
 Các catalog endpoint public gồm hotels, tours, flight search và general search; API vẫn là source of truth cho dữ liệu mới hơn cache.
 
+Màn hình Hotels và Tours cũng có bộ lọc cục bộ trên catalog bootstrap đang
+được tải: Hotels hỗ trợ từ khóa, vị trí, giá tối đa, chỉ nơi còn phòng và sắp
+xếp; Tours hỗ trợ từ khóa, nơi khởi hành, thời lượng, giá tối đa, tour nổi bật
+và sắp xếp. Thay đổi trong sheet chỉ có hiệu lực sau khi chọn Áp dụng, không
+gửi query mới lên API, không lưu thành bộ lọc cá nhân và không bao gồm rating,
+tiện ích, ngày khởi hành hoặc hướng dẫn viên.
+
 ### Favorite
 
 1. User nhấn favorite trên destination.

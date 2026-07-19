@@ -6,17 +6,3 @@ final hotelsProvider = Provider<List<Hotel>>((ref) {
   final bootstrap = ref.watch(bootstrapProvider).value;
   return bootstrap?.hotels ?? [];
 });
-
-class HotelSearchQueryNotifier extends Notifier<String> {
-  @override
-  String build() => '';
-
-  void update(String query) {
-    state = query;
-  }
-}
-
-final hotelSearchQueryProvider =
-    NotifierProvider<HotelSearchQueryNotifier, String>(
-      HotelSearchQueryNotifier.new,
-    );
