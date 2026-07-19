@@ -163,6 +163,9 @@
         <div class="nav-item flex items-center justify-between p-4 rounded-[1rem] cursor-pointer text-sm font-semibold text-muted hover:text-primary hover:bg-silver" onclick="navigate('trips')" id="nav-trips">
           <div class="flex items-center gap-4"><i class="fa-solid fa-ticket w-5 text-center"></i> Đặt chỗ</div>
         </div>
+        <div class="nav-item flex items-center justify-between p-4 rounded-[1rem] cursor-pointer text-sm font-semibold text-muted hover:text-primary hover:bg-silver" onclick="navigate('trip-change-requests')" id="nav-trip-change-requests">
+          <div class="flex items-center gap-4"><i class="fa-solid fa-arrow-right-arrow-left w-5 text-center"></i> Yêu cầu thay đổi</div>
+        </div>
         <div class="nav-item flex items-center justify-between p-4 rounded-[1rem] cursor-pointer text-sm font-semibold text-muted hover:text-primary hover:bg-silver" onclick="navigate('users')" id="nav-users">
           <div class="flex items-center gap-4"><i class="fa-solid fa-users w-5 text-center"></i> Người dùng</div>
         </div>
@@ -278,6 +281,16 @@
     <div class="page" id="page-partners"><div id="tb-partners" class="flex flex-col gap-4"></div><div id="empty-partners" class="py-24 text-center text-muted font-bold tracking-widest uppercase text-sm" style="display:none">Chưa có dữ liệu</div></div>
     <div class="page" id="page-documents"><div id="tb-documents" class="flex flex-col gap-4"></div><div id="empty-documents" class="py-24 text-center text-muted font-bold tracking-widest uppercase text-sm" style="display:none">Chưa có dữ liệu</div></div>
 
+    <div class="page" id="page-trip-change-requests">
+      <div class="flex flex-wrap gap-3 mb-12" id="trip-change-request-status-filters">
+        <button type="button" class="px-4 py-2 rounded-full bg-primary text-white text-xs font-bold" data-trip-change-request-status="PENDING" onclick="setTripChangeRequestStatusFilter('PENDING')">Đang chờ</button>
+        <button type="button" class="px-4 py-2 rounded-full bg-white text-muted text-xs font-bold border border-silver" data-trip-change-request-status="APPROVED" onclick="setTripChangeRequestStatusFilter('APPROVED')">Đã duyệt</button>
+        <button type="button" class="px-4 py-2 rounded-full bg-white text-muted text-xs font-bold border border-silver" data-trip-change-request-status="REJECTED" onclick="setTripChangeRequestStatusFilter('REJECTED')">Từ chối</button>
+        <button type="button" class="px-4 py-2 rounded-full bg-white text-muted text-xs font-bold border border-silver" data-trip-change-request-status="" onclick="setTripChangeRequestStatusFilter('')">Tất cả</button>
+      </div>
+      <div id="tb-trip-change-requests" class="flex flex-col gap-4"></div>
+      <div id="empty-trip-change-requests" class="py-24 text-center text-muted font-bold tracking-widest uppercase text-sm" style="display:none">Chưa có yêu cầu phù hợp</div>
+    </div>
   </div>
 </div>
 
@@ -512,6 +525,41 @@ async function handleUpload(fileInput, hiddenId, imgId){
   </div>
 </div>
 
+<!-- Trip Change Request Review Modal -->
+<div class="modal-overlay" id="modal-trip-change-request">
+  <div class="doppelrand modal-content w-full max-w-lg">
+    <div class="doppelrand-inner flex flex-col">
+      <div class="p-8 border-b border-silver flex justify-between items-center bg-white z-10">
+        <h3 class="text-xl font-extrabold text-ink tracking-tight">Xử lý yêu cầu thay đổi</h3>
+        <button class="w-10 h-10 rounded-full bg-offwhite hover:bg-silver text-ink transition-all flex items-center justify-center" onclick="closeModal('modal-trip-change-request')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="p-8 flex-1 flex flex-col gap-5">
+        <input type="hidden" id="tcr-id">
+        <input type="hidden" id="tcr-type">
+        <div class="p-5 bg-offwhite rounded-2xl border border-silver flex flex-col gap-2">
+          <div class="text-[10px] uppercase tracking-widest text-muted font-bold" id="tcr-type-display"></div>
+          <div class="text-lg font-bold text-ink" id="tcr-trip-display"></div>
+          <div class="text-sm font-semibold text-muted" id="tcr-user-display"></div>
+          <div class="text-sm text-ink whitespace-pre-wrap" id="tcr-reason-display"></div>
+          <div class="text-sm font-semibold text-muted" id="tcr-requested-date-display"></div>
+        </div>
+        <div id="tcr-refund-field">
+          <label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Số tiền hoàn (VND)</label>
+          <input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="tcr-refund-amount" type="number" min="0" step="1000" inputmode="decimal" placeholder="Ví dụ: 500000">
+        </div>
+        <div>
+          <label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Ghi chú cho khách (không bắt buộc)</label>
+          <textarea class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary h-28" id="tcr-admin-note" maxlength="500"></textarea>
+        </div>
+      </div>
+      <div class="p-6 border-t border-silver bg-white flex gap-3">
+        <button class="flex-1 bg-red-50 text-red-600 font-bold py-4 px-6 rounded-full hover:bg-red-500 hover:text-white transition-all" onclick="saveTripChangeRequestDecision('REJECTED')">Từ chối</button>
+        <button class="flex-1 bg-primary text-white font-bold py-4 px-6 rounded-full hover:bg-black transition-all" onclick="saveTripChangeRequestDecision('APPROVED')">Duyệt</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Trip Modal (Advanced Details) -->
 <div class="modal-overlay" id="modal-trip">
   <div class="doppelrand modal-content w-full max-w-lg">
@@ -615,10 +663,13 @@ async function handleUpload(fileInput, hiddenId, imgId){
 <script src="/admin/render-security.js"></script>
 <script>
 let curPage='dashboard';
-let data={destinations:[],hotels:[],flights:[],tours:[],trips:[],categories:[],users:[],partners:[],documents:[]};
+let data={destinations:[],hotels:[],flights:[],tours:[],trips:[],tripChangeRequests:[],categories:[],users:[],partners:[],documents:[]};
 let tripStatusFilter='';
+let tripChangeRequestStatusFilter='PENDING';
 const tripStatusLabels={PENDING:'Chờ xác nhận',ONGOING:'Đang diễn ra',COMPLETED:'Hoàn thành',CANCELLED:'Đã hủy'};
 const API=window.location.origin;
+const tripChangeRequestTypeLabels={RESCHEDULE:'Đổi lịch',REFUND:'Yêu cầu hoàn tiền'};
+const tripChangeRequestStatusLabels={PENDING:'Đang chờ xử lý',APPROVED:'Đã duyệt',REJECTED:'Từ chối'};
 const {escapeHtml, safeClassNames, encodeActionValue, decodeActionValue}=AdminRenderSecurity;
 
 function getAuth(){
@@ -662,6 +713,7 @@ function navigate(page){
   curPage=page;
   const titles={dashboard:'Dashboard',destinations:'Điểm đến',hotels:'Khách sạn',flights:'Chuyến bay',tours:'Gói tour',trips:'Đặt chỗ',categories:'Danh mục',users:'Người dùng',partners:'Đối tác',documents:'Hành trang'};
   document.getElementById('pageTitle').textContent=titles[page]||'Admin';
+  if(page==='trip-change-requests') document.getElementById('pageTitle').textContent='Yêu cầu thay đổi';
   
   const addBtn=document.getElementById('addBtn');
   if(['destinations','hotels','flights','tours','categories','users','partners','documents'].includes(page)){addBtn.style.display='flex';}else{addBtn.style.display='none';}
@@ -672,6 +724,7 @@ function loadPage(page){
   const loaders={
     dashboard:loadDashboard, destinations:loadDestinations, hotels:loadHotels,
     flights:loadFlights, tours:loadTours, trips:loadTrips,
+    'trip-change-requests':loadTripChangeRequests,
     categories:loadCategories, users:loadUsers, partners:loadPartners, documents:loadDocuments
   };
   if(loaders[page]) loaders[page]().catch(e=>{
@@ -922,6 +975,105 @@ function editTrip(id){
 async function saveTripStatus(){
   const id=document.getElementById('tr-id').value, status=document.getElementById('tr-status').value;
   try{ await req(`/api/admin/trips/${id}`,'PUT',{status}); closeModal('modal-trip'); await loadTrips(); toast('Cập nhật thành công','success'); }catch(e){toast(e.message,'error');}
+}
+
+// ── TRIP CHANGE REQUESTS ──
+function tripChangeRequestStatusClass(status){
+  if(status==='APPROVED') return 'bg-emerald-100 text-emerald-700';
+  if(status==='REJECTED') return 'bg-red-100 text-red-700';
+  return 'bg-amber-100 text-amber-700';
+}
+function formatTripChangeRequestAmount(amount){
+  if(amount===null||amount===undefined||amount==='') return '—';
+  const numeric=Number(amount);
+  if(!Number.isFinite(numeric)) return '—';
+  return new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND',maximumFractionDigits:0}).format(numeric);
+}
+async function loadTripChangeRequests(){
+  const query=tripChangeRequestStatusFilter?`?status=${encodeURIComponent(tripChangeRequestStatusFilter)}`:'';
+  data.tripChangeRequests=await req(`/api/admin/trip-change-requests${query}`);
+  renderTripChangeRequests(data.tripChangeRequests);
+}
+function setTripChangeRequestStatusFilter(status){
+  tripChangeRequestStatusFilter=status;
+  document.querySelectorAll('[data-trip-change-request-status]').forEach(button=>{
+    const selected=button.dataset.tripChangeRequestStatus===status;
+    button.classList.toggle('bg-primary',selected);
+    button.classList.toggle('text-white',selected);
+    button.classList.toggle('bg-white',!selected);
+    button.classList.toggle('text-muted',!selected);
+  });
+  loadTripChangeRequests().catch(e=>toast('Lỗi tải dữ liệu: '+e.message,'error'));
+}
+function renderTripChangeRequests(rows){
+  const tb=document.getElementById('tb-trip-change-requests'), em=document.getElementById('empty-trip-change-requests');
+  if(!rows.length){tb.innerHTML='';em.style.display='block';return;}
+  em.style.display='none';
+  tb.innerHTML=rows.map(request=>{
+    const trip=request.trip||{};
+    const user=trip.user||{};
+    const typeLabel=tripChangeRequestTypeLabels[request.type]||request.type;
+    const statusLabel=tripChangeRequestStatusLabels[request.status]||request.status;
+    const userLabel=[user.name,user.email].filter(Boolean).join(' · ')||'Không rõ khách hàng';
+    const detail=request.type==='RESCHEDULE'
+      ? `Ngày mong muốn: ${request.requestedDate||'—'}`
+      : `Tổng đơn: ${formatTripChangeRequestAmount(trip.totalPrice)}`;
+    const reviewAction=request.status==='PENDING'
+      ? `<button class="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary hover:text-white text-primary transition-all flex items-center justify-center" title="Xử lý yêu cầu" onclick="openTripChangeRequestReview('${encodeActionValue(request.id)}')"><i class="fa-solid fa-clipboard-check"></i></button>`
+      : '';
+    return listRow([
+      {label:'Yêu cầu', val:typeLabel, cls:'w-1/5'},
+      {label:'Chuyến đi', val:trip.destination||'Chuyến đi', cls:'w-1/4'},
+      {label:'Khách hàng', val:userLabel, cls:'w-1/4'},
+      {label:'Nội dung', val:detail},
+      {label:'Trạng thái', html:`<span class="px-3 py-1 rounded-full text-[10px] uppercase ${tripChangeRequestStatusClass(request.status)}">${escapeHtml(statusLabel)}</span>`}
+    ], reviewAction);
+  }).join('');
+}
+function openTripChangeRequestReview(encodedId){
+  const requestId=decodeActionValue(encodedId);
+  const request=data.tripChangeRequests.find(item=>item.id===requestId);
+  if(!request){toast('Không tìm thấy yêu cầu cần xử lý','error');return;}
+  const trip=request.trip||{};
+  const user=trip.user||{};
+  document.getElementById('tcr-id').value=request.id;
+  document.getElementById('tcr-type').value=request.type;
+  document.getElementById('tcr-type-display').textContent=tripChangeRequestTypeLabels[request.type]||request.type;
+  document.getElementById('tcr-trip-display').textContent=trip.destination||'Chuyến đi';
+  document.getElementById('tcr-user-display').textContent=[user.name,user.email].filter(Boolean).join(' · ')||'Không rõ khách hàng';
+  document.getElementById('tcr-reason-display').textContent=request.reason||'Không có lý do';
+  document.getElementById('tcr-requested-date-display').textContent=request.type==='RESCHEDULE'
+    ? `Ngày mong muốn: ${request.requestedDate||'—'}`
+    : `Tổng giá trị đơn: ${formatTripChangeRequestAmount(trip.totalPrice)}`;
+  const refundField=document.getElementById('tcr-refund-field');
+  refundField.style.display=request.type==='REFUND'?'block':'none';
+  const refundInput=document.getElementById('tcr-refund-amount');
+  refundInput.value='';
+  refundInput.max=trip.totalPrice??'';
+  document.getElementById('tcr-admin-note').value='';
+  openModal('modal-trip-change-request');
+}
+async function saveTripChangeRequestDecision(decision){
+  const id=document.getElementById('tcr-id').value;
+  const type=document.getElementById('tcr-type').value;
+  const body={decision};
+  const adminNote=v('tcr-admin-note');
+  if(adminNote) body.adminNote=adminNote;
+  if(decision==='APPROVED'&&type==='REFUND'){
+    const amountText=v('tcr-refund-amount');
+    const refundAmount=Number(amountText);
+    if(!amountText||!Number.isFinite(refundAmount)||refundAmount<0){
+      toast('Nhập số tiền hoàn hợp lệ trước khi duyệt','error');
+      return;
+    }
+    body.refundAmount=refundAmount;
+  }
+  try{
+    await req(`/api/admin/trip-change-requests/${encodeURIComponent(id)}`,'PATCH',body);
+    closeModal('modal-trip-change-request');
+    await loadTripChangeRequests();
+    toast(decision==='APPROVED'?'Đã duyệt yêu cầu':'Đã từ chối yêu cầu','success');
+  }catch(e){toast(e.message,'error');}
 }
 
 // ── TRIP SCHEDULE ──
