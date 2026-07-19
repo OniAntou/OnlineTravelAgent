@@ -245,7 +245,7 @@ void main() {
       expect(ongoing.first.status, TripStatus.ongoing);
     });
 
-    test('derived historyTripsProvider filters correctly', () {
+    test('separates completed and cancelled trips', () {
       container = ProviderContainer(
         overrides: [
           apiProvider.overrideWithValue(fakeApi),
@@ -267,18 +267,21 @@ void main() {
       );
       notifier.addTrip(
         const Trip(
-          id: '2',
+          id: 'cancelled-1',
           destination: 'C',
           location: 'D',
           date: '2026-08-01',
           guests: '1',
-          status: TripStatus.upcoming,
+          status: TripStatus.cancelled,
           imagePath: '',
         ),
       );
       final history = container.read(historyTripsProvider);
       expect(history.length, 1);
       expect(history.first.status, TripStatus.completed);
+      final cancelled = container.read(cancelledTripsProvider);
+      expect(cancelled.length, 1);
+      expect(cancelled.first.status, TripStatus.cancelled);
     });
   });
 }

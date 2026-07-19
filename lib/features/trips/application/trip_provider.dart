@@ -183,13 +183,17 @@ final upcomingTripsProvider = Provider<List<Trip>>((ref) {
       .toList();
 });
 
+final cancelledTripsProvider = Provider<List<Trip>>((ref) {
+  final trips = ref.watch(tripsProvider);
+  return trips.where((trip) => trip.status == TripStatus.cancelled).toList();
+});
+
 final historyTripsProvider = Provider<List<Trip>>((ref) {
   final trips = ref.watch(tripsProvider);
   return trips
       .where(
         (trip) =>
             trip.status == TripStatus.completed ||
-            trip.status == TripStatus.cancelled ||
             (trip.status == TripStatus.unknown && !trip.isUpcoming),
       )
       .toList();

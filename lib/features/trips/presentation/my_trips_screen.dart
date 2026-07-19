@@ -29,7 +29,7 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -86,6 +86,7 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
               final ongoing = ref.watch(ongoingTripsProvider);
               final upcoming = ref.watch(upcomingTripsProvider);
               final history = ref.watch(historyTripsProvider);
+              final cancelled = ref.watch(cancelledTripsProvider);
 
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -139,13 +140,14 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
                           ),
                           labelColor: Colors.white,
                           unselectedLabelColor: Colors.grey[500],
+                          labelPadding: EdgeInsets.zero,
                           labelStyle: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 13,
+                            fontSize: 12,
                           ),
                           unselectedLabelStyle: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 13,
+                            fontSize: 12,
                           ),
                           indicatorSize: TabBarIndicatorSize.tab,
                           dividerColor: Colors.transparent,
@@ -153,6 +155,7 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
                             Tab(text: 'Đang diễn ra'),
                             Tab(text: 'Sắp tới'),
                             Tab(text: 'Lịch sử'),
+                            Tab(text: 'Đã huỷ'),
                           ],
                         ),
                       ),
@@ -165,6 +168,7 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
                           _tripList(ongoing),
                           _tripList(upcoming),
                           _tripList(history),
+                          _tripList(cancelled),
                         ],
                       ),
                     ),
