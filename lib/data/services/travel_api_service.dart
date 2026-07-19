@@ -9,6 +9,7 @@ import '../../shared/models/review.dart';
 import '../../features/hotels/domain/room.dart';
 import '../../features/tours/domain/tour_package.dart';
 import '../../features/trips/domain/trip.dart';
+import '../../features/trips/domain/trip_change_request.dart';
 import '../../features/trips/domain/trip_schedule.dart';
 import '../remote/api_http_client.dart';
 
@@ -205,7 +206,19 @@ class TravelApiService {
     guests: guests,
     totalPrice: totalPrice,
   );
-  Future<Trip> cancelTrip(String tripId) => tripsService.cancelTrip(tripId);
+  Future<List<TripChangeRequest>> fetchTripChangeRequests(String tripId) =>
+      tripsService.fetchTripChangeRequests(tripId);
+  Future<TripChangeRequest> createTripChangeRequest({
+    required String tripId,
+    required TripChangeRequestType type,
+    required String reason,
+    String? requestedDate,
+  }) => tripsService.createTripChangeRequest(
+    tripId: tripId,
+    type: type,
+    reason: reason,
+    requestedDate: requestedDate,
+  );
   Future<Trip> bookFlight({
     required String flightId,
     required String date,

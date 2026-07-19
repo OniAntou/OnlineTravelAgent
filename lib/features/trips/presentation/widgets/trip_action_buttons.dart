@@ -1,43 +1,92 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../application/trip_change_request_provider.dart';
 import '../../domain/trip.dart';
-import '../../application/trip_provider.dart';
+import '../../domain/trip_change_request.dart';
+import 'trip_change_request_form.dart';
+import 'trip_change_request_panel.dart';
 
 class TripActionButtons extends ConsumerWidget {
   final Trip trip;
+
   const TripActionButtons({super.key, required this.trip});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+    final requestState = ref.watch(tripChangeRequestsProvider(trip.id));
+    final List<TripChangeRequest>? loadedRequests = requestState.when(
+      data: (items) => items,
+      loading: () => null,
+      error: (error, stackTrace) => null,
+    );
+    final requests = loadedRequests ?? const <TripChangeRequest>[];
+    final canSubmitChange =
+        loadedRequests != null && canRequestTripChange(trip, requests);
+    final hasPendingRequest = requests.any((request) => request.isPending);
+    final disabledMessage = requestState.when(
+      data: (_) => hasPendingRequest
+          ? 'Yêu cầu hiện tại đang chờ xử lý'
+          : 'Chuyến đi này chưa thể gửi yêu cầu thay đổi',
+      loading: () => 'Đang tải trạng thái yêu cầu',
+      error: (error, stackTrace) => 'Không thể tải trạng thái yêu cầu',
+    );
+
+    return Wrap(
+      alignment: WrapAlignment.spaceEvenly,
+      spacing: 16,
+      runSpacing: 16,
       children: [
         _btn(
-          context,
-          Icons.support_agent,
-          'Hỗ trợ',
-          () => _showNotImplemented(context, 'Hỗ trợ'),
+          icon: Icons.support_agent,
+          label: 'Hỗ trợ',
+          color: AppTheme.primaryBlue,
+          onTap: () => _showNotImplemented(context, 'Hỗ trợ'),
         ),
         _btn(
-          context,
-          Icons.receipt_long,
-          'Hóa đơn',
-          () => _showNotImplemented(context, 'Hóa đơn'),
+          icon: Icons.receipt_long,
+          label: 'Hóa đơn',
+          color: AppTheme.primaryBlue,
+          onTap: () => _showNotImplemented(context, 'Hóa đơn'),
         ),
         _btn(
-          context,
-          Icons.share_outlined,
-          'Chia sẻ',
-          () => _showNotImplemented(context, 'Chia sẻ'),
+          icon: Icons.share_outlined,
+          label: 'Chia sẻ',
+          color: AppTheme.primaryBlue,
+          onTap: () => _showNotImplemented(context, 'Chia sẻ'),
         ),
-        if (trip.status != TripStatus.cancelled && trip.isUpcoming)
+        if (trip.isUpcoming &&
+            trip.status != TripStatus.completed &&
+            trip.status != TripStatus.cancelled) ...[
           _btn(
-            context,
-            Icons.cancel_outlined,
-            'Hủy vé',
-            () => _confirmCancel(context, ref),
+            icon: Icons.edit_calendar_outlined,
+            label: 'Đổi lịch',
+            color: AppTheme.primaryBlue,
+            tooltip: canSubmitChange ? null : disabledMessage,
+            onTap: canSubmitChange
+                ? () => showTripChangeRequestForm(
+                    context,
+                    ref,
+                    trip: trip,
+                    type: TripChangeRequestType.reschedule,
+                  )
+                : null,
           ),
+          _btn(
+            icon: Icons.currency_exchange_outlined,
+            label: 'Yêu cầu hoàn tiền',
+            color: const Color(0xFFD97706),
+            tooltip: canSubmitChange ? null : disabledMessage,
+            onTap: canSubmitChange
+                ? () => showTripChangeRequestForm(
+                    context,
+                    ref,
+                    trip: trip,
+                    type: TripChangeRequestType.refund,
+                  )
+                : null,
+          ),
+        ],
       ],
     );
   }
@@ -52,95 +101,54 @@ class TripActionButtons extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmCancel(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Xác nhận hủy vé'),
-        content: const Text(
-          'Bạn có chắc chắn muốn hủy chuyến đi này không? Thao tác này không thể hoàn tác.',
+  Widget _btn({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback? onTap,
+    String? tooltip,
+  }) {
+    final enabled = onTap != null;
+    final foreground = enabled ? color : const Color(0xFF9CA3AF);
+    final action = Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      child: GestureDetector(
+        onTap: onTap,
+        child: SizedBox(
+          width: 92,
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: enabled
+                      ? const Color(0xFFF5F7FA)
+                      : const Color(0xFFF3F4F6),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFFEEEEEE)),
+                ),
+                child: Icon(icon, color: foreground),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: enabled ? const Color(0xFF555555) : foreground,
+                ),
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Không', style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Hủy vé', style: TextStyle(color: Colors.white)),
-          ),
-        ],
       ),
     );
 
-    if (confirmed == true) {
-      if (!context.mounted) return;
-
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(child: CircularProgressIndicator()),
-      );
-
-      try {
-        await ref.read(tripsProvider.notifier).cancelTrip(trip.id);
-        if (context.mounted) {
-          Navigator.pop(context); // close loading
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Đã hủy chuyến đi thành công'),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      } catch (e) {
-        if (context.mounted) {
-          Navigator.pop(context); // close loading
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Có lỗi xảy ra khi hủy chuyến đi'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      }
-    }
-  }
-
-  Widget _btn(
-    BuildContext context,
-    IconData icon,
-    String label,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F7FA),
-              shape: BoxShape.circle,
-              border: Border.all(color: const Color(0xFFEEEEEE)),
-            ),
-            child: Icon(
-              icon,
-              color: label == 'Hủy vé' ? Colors.red : AppTheme.primaryBlue,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-              color: label == 'Hủy vé' ? Colors.red : const Color(0xFF555555),
-            ),
-          ),
-        ],
-      ),
-    );
+    return tooltip == null ? action : Tooltip(message: tooltip, child: action);
   }
 }

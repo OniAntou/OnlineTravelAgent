@@ -12,6 +12,7 @@ import '../../destinations/application/destination_provider.dart';
 import '../../tours/application/tour_provider.dart';
 import 'widgets/booking_info_card.dart';
 import 'widgets/booking_status_timeline.dart';
+import 'widgets/trip_change_request_panel.dart';
 import 'widgets/trip_action_buttons.dart';
 import 'widgets/trip_section_header.dart';
 import 'widgets/trip_schedule_timeline.dart';
@@ -352,6 +353,10 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
                     // Booking Status Timeline
                     const TripSectionHeader(title: 'Trạng thái đặt chỗ'),
                     BookingStatusTimeline(status: widget.trip.status),
+                    const SizedBox(height: 28),
+
+                    const TripSectionHeader(title: 'Yêu cầu thay đổi'),
+                    TripChangeRequestPanel(trip: widget.trip),
                     const SizedBox(height: 28),
 
                     // Lịch trình Tour (Itinerary Timeline with Real-Time Tracking)

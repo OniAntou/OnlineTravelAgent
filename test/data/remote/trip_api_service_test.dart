@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:online_travel_agent/data/remote/trip_api_service.dart';
+import 'package:online_travel_agent/features/trips/domain/trip_change_request.dart';
 
 void main() {
   test('chunks unique trip schedule IDs to the backend limit', () {
@@ -22,5 +23,24 @@ void main() {
       '/api/trips/trip-1/schedule/items/item-1/status',
     );
     expect(confirmTripScheduleItemBody, {'statusOverride': 'completed'});
+  });
+
+  test('builds owned trip change request paths and bodies', () {
+    expect(
+      tripChangeRequestsPath('trip-1'),
+      '/api/trips/trip-1/change-requests',
+    );
+    expect(
+      createTripChangeRequestBody(
+        type: TripChangeRequestType.reschedule,
+        reason: 'Tôi cần chuyển lịch vì có lịch thi.',
+        requestedDate: '25/08/2099',
+      ),
+      {
+        'type': 'RESCHEDULE',
+        'reason': 'Tôi cần chuyển lịch vì có lịch thi.',
+        'requestedDate': '25/08/2099',
+      },
+    );
   });
 }
