@@ -14,6 +14,7 @@
 | connectivity_plus | Trigger đồng bộ khi mạng quay lại. |
 | easy_localization | Tiếng Việt mặc định, tiếng Anh là locale hỗ trợ. |
 | flutter_map | Hiển thị bản đồ. |
+| geolocator | Lấy vị trí thiết bị khi người dùng mở chi tiết chuyến đi. |
 
 ## Khởi động và lifecycle
 
@@ -48,6 +49,16 @@ App state ở lib/app/state/app_state_provider.dart điều phối SyncService:
 - tránh sync đồng thời và dừng timer khi app background.
 
 Đây không phải background task được hệ điều hành bảo đảm chạy khi app đã bị kill.
+
+### GPS trong chi tiết chuyến đi
+
+GPS chỉ được khởi động từ màn hình chi tiết chuyến đi khi lịch trình còn một
+điểm có tọa độ. Subscription dừng khi màn hình bị dispose hoặc ứng dụng không
+còn foreground; ứng dụng không yêu cầu background location, không geofence và
+không ghi lịch sử hành trình. Tọa độ thô chỉ tồn tại trong bộ nhớ để hiển thị
+marker hiện tại, tính khoảng cách tới điểm kế tiếp và mở ứng dụng bản đồ của
+thiết bị. Request duy nhất tới backend là xác nhận thủ công `completed` cho
+schedule item thuộc chính chuyến đi của người dùng, không gửi tọa độ.
 
 ## Source layout
 
@@ -186,7 +197,7 @@ RealtimeRoomRegistry tại lib/data/services/realtime_room_registry.dart ghi nh�
 | trip_{tripId} | User là owner của Trip. | Trip schedule provider. |
 | tour_{tourId} | User có trip chưa hủy liên quan tour. | Tour provider/schedule. |
 
-Client rejoin rooms sau reconnect. Khi nhận schedule_updated, provider invalidate/refetch API; event không mang toàn bộ state authoritative.
+Client rejoin rooms sau reconnect. Khi nhận `schedule_updated`, trip provider chỉ invalidate khi payload có đúng `tripId`, còn tour provider chỉ invalidate khi payload có đúng `tourId`; event của room khác hoặc payload rỗng bị bỏ qua. Event không mang toàn bộ state authoritative.
 
 ## UI module map
 

@@ -15,4 +15,12 @@ void main() {
     expect(chunks.first, hasLength(maxTripScheduleIdsPerRequest));
     expect(chunks.last, ['trip-50']);
   });
+
+  test('builds the owned schedule-item confirmation request', () {
+    expect(
+      confirmTripScheduleItemPath('trip-1', 'item-1'),
+      '/api/trips/trip-1/schedule/items/item-1/status',
+    );
+    expect(confirmTripScheduleItemBody, {'statusOverride': 'completed'});
+  });
 }

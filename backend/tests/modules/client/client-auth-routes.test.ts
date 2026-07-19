@@ -17,6 +17,14 @@ describe("client protected routes", () => {
     expect(res.status).toBe(401);
   });
 
+  it("requires authentication before confirming a schedule stop", async () => {
+    const res = await request(app)
+      .patch("/api/trips/trip-1/schedule/items/item-1/status")
+      .send({ statusOverride: "completed" });
+
+    expect(res.status).toBe(401);
+  });
+
   it("requires authentication for client documents", async () => {
     const list = await request(app).get("/api/documents");
     const create = await request(app).post("/api/documents").send({

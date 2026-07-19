@@ -19,6 +19,13 @@ type PaymentTrip = {
   userId: string | null;
   totalPrice: Prisma.Decimal | number | null;
   paymentTxnRef?: string | null;
+  status: TripStatus;
+};
+
+type ConfirmedPaymentFields = {
+  paymentMethod: "vnpay" | "momo";
+  paymentTxnRef: string;
+  paymentTxnNumber: string | null;
 };
 
 function parsePositiveAmount(value: unknown): number | null {
@@ -38,12 +45,18 @@ async function loadPaymentTrip(tripId: string): Promise<PaymentTrip | null> {
   try {
     return await prisma.trip.findUnique({
       where: { id: tripId },
-      select: { id: true, userId: true, totalPrice: true, paymentTxnRef: true },
+      select: { id: true, userId: true, totalPrice: true, paymentTxnRef: true, status: true },
     });
   } catch {
     const trip = memoryDb.findTripById(tripId);
     if (!trip) return null;
-    return { id: trip.id, userId: trip.userId || null, totalPrice: trip.totalPrice || null, paymentTxnRef: trip.paymentTxnRef || null };
+    return {
+      id: trip.id,
+      userId: trip.userId || null,
+      totalPrice: trip.totalPrice || null,
+      paymentTxnRef: trip.paymentTxnRef || null,
+      status: trip.status as TripStatus,
+    };
   }
 }
 
@@ -70,6 +83,22 @@ function tripIdFromTxnRef(txnRef: string): string {
   const parts = txnRef.split("-");
   parts.pop();
   return parts.join("-");
+}
+
+function confirmedPaymentTripUpdate(
+  trip: PaymentTrip,
+  payment: ConfirmedPaymentFields,
+) {
+  if (trip.status !== TripStatus.PENDING) {
+    return { ...payment, paymentStatus: PaymentStatus.SUCCESS };
+  }
+
+  return {
+    ...payment,
+    paymentStatus: PaymentStatus.SUCCESS,
+    status: TripStatus.ONGOING,
+    isUpcoming: true,
+  };
 }
 
 async function markVnpayResult(result: {
@@ -99,9 +128,12 @@ async function markVnpayResult(result: {
 
   if (result.responseCode === "00") {
     try {
-      await prisma.trip.update({ where: { id: tripId }, data: { ...updateData, paymentStatus: PaymentStatus.SUCCESS, status: TripStatus.ONGOING, isUpcoming: true } });
+      await prisma.trip.update({
+        where: { id: tripId },
+        data: confirmedPaymentTripUpdate(trip, updateData),
+      });
     } catch {
-      memoryDb.updateTrip(tripId, { ...updateData, paymentStatus: "SUCCESS" as const, status: "ONGOING" as const, isUpcoming: true });
+      memoryDb.updateTrip(tripId, confirmedPaymentTripUpdate(trip, updateData));
     }
   } else {
     try {
@@ -177,9 +209,12 @@ async function markMomoResult(query: Record<string, string>): Promise<boolean> {
 
   if (query["resultCode"] === "0") {
     try {
-      await prisma.trip.update({ where: { id: tripId }, data: { ...updateData, paymentStatus: PaymentStatus.SUCCESS, status: TripStatus.ONGOING, isUpcoming: true } });
+      await prisma.trip.update({
+        where: { id: tripId },
+        data: confirmedPaymentTripUpdate(trip, updateData),
+      });
     } catch {
-      memoryDb.updateTrip(tripId, { ...updateData, paymentStatus: "SUCCESS" as const, status: "ONGOING" as const, isUpcoming: true });
+      memoryDb.updateTrip(tripId, confirmedPaymentTripUpdate(trip, updateData));
     }
   } else {
     try {

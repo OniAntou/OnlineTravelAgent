@@ -32,7 +32,7 @@ export interface MemTrip {
   location: string;
   date: string;
   guests: string;
-  status: "ONGOING" | "COMPLETED" | "CANCELLED";
+  status: "PENDING" | "ONGOING" | "COMPLETED" | "CANCELLED";
   imagePath: string;
   isUpcoming: boolean;
   flightId?: string | null;

@@ -124,7 +124,7 @@ flowchart TD
 
 - Client sinh requestId; database có unique userId + requestId để retry không tạo trip trùng.
 - Backend kiểm source và dữ liệu booking trong transaction.
-- Trip lưu owner, source relation, total price, promo/discount và payment state.
+- Trip lưu owner, source relation, total price, promo/discount và payment state. Booking mới có `TripStatus.PENDING`; callback thanh toán hợp lệ chuyển pending sang `ONGOING`, nhưng không được kích hoạt lại booking mà Admin đã hủy.
 - Destination/tour dùng template-to-trip copy; hotel/flight không sinh cùng loại schedule copy.
 - User chỉ có thể đọc/cancel Trip của chính mình.
 

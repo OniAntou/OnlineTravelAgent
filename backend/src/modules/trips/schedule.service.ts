@@ -408,6 +408,29 @@ export const scheduleService = {
     return result;
   },
 
+  async confirmTripScheduleItem(
+    tripId: string,
+    itemId: string,
+    requesterUserId: string,
+  ) {
+    const trip = await prisma.trip.findUnique({
+      where: { id: tripId },
+      select: { id: true, userId: true },
+    });
+    if (!trip || trip.userId !== requesterUserId) return null;
+
+    const item = await prisma.tripScheduleItem.findFirst({
+      where: { id: itemId, day: { tripId } },
+      select: { id: true },
+    });
+    if (!item) return null;
+
+    return prisma.tripScheduleItem.update({
+      where: { id: item.id },
+      data: { statusOverride: "completed" },
+    });
+  },
+
   async updateTripSchedule(tripId: string, days: ScheduleDayInput[] = []) {
     const trip = await prisma.trip.findUnique({
       where: { id: tripId },

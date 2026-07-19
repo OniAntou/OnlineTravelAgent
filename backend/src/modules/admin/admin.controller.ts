@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { Prisma, ReviewTargetType } from "@prisma/client";
+import { Prisma, ReviewTargetType, TripStatus } from "@prisma/client";
 import { Request, Response } from "express";
 import prisma from "../../infrastructure/database/prisma.js";
 import { asyncHandler } from "../../core/utils/asyncHandler.js";
@@ -171,11 +171,15 @@ export const adminController = {
     const normalizedTrips = trips.map(processTripStatus);
     const tripsUpcoming = normalizedTrips.filter((trip) => trip.isUpcoming).length;
     const tripsHistory = normalizedTrips.length - tripsUpcoming;
+    const tripsPending = normalizedTrips.filter(
+      (trip) => trip.status === TripStatus.PENDING,
+    ).length;
     res.json({
       destinations,
       hotels,
       flights,
       tours,
+      tripsPending,
       tripsUpcoming,
       tripsHistory,
     });
@@ -474,9 +478,15 @@ export const adminController = {
 
   updateTrip: asyncHandler(async (req: Request, res: Response) => {
     const body = req.body as UpdateTripBody;
+    const isUpcoming =
+      body.status === TripStatus.PENDING
+        ? true
+        : body.status === TripStatus.COMPLETED || body.status === TripStatus.CANCELLED
+          ? false
+          : body.isUpcoming;
     const trip = await prisma.trip.update({
       where: { id: req.params.id as string },
-      data: { status: body.status, isUpcoming: body.isUpcoming },
+      data: { status: body.status, isUpcoming },
     });
     res.json(trip);
   }),

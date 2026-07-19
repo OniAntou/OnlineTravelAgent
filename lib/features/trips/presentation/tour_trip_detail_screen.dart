@@ -15,6 +15,7 @@ import 'widgets/booking_status_timeline.dart';
 import 'widgets/trip_action_buttons.dart';
 import 'widgets/trip_section_header.dart';
 import 'widgets/trip_schedule_timeline.dart';
+import 'widgets/trip_gps_progress_panel.dart';
 import 'widgets/shared_trip_ui.dart';
 
 class TourTripDetailScreen extends ConsumerStatefulWidget {
@@ -359,6 +360,8 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
 
                     // Bản đồ lộ trình
                     const TripSectionHeader(title: 'Bản đồ lộ trình'),
+                    TripGpsProgressPanel(trip: widget.trip),
+                    const SizedBox(height: 12),
                     _buildRouteMap(points, markers, centerPoint),
                     const SizedBox(height: 28),
 

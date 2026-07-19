@@ -3,6 +3,7 @@ import {
   bookHotelSchema,
   bookTripSchema,
   bookTourSchema,
+  confirmTripScheduleItemSchema,
   reviewSchema,
 } from "../../../src/modules/client/client.schema.js";
 
@@ -101,5 +102,16 @@ describe("client request schemas", () => {
     expect(invalidDate.success).toBe(false);
     expect(invalidGuests.success).toBe(false);
     expect(invalidLabeledGuests.success).toBe(false);
+  });
+
+  it("only accepts a completed schedule-item confirmation", () => {
+    expect(
+      confirmTripScheduleItemSchema.safeParse({ statusOverride: "completed" })
+        .success,
+    ).toBe(true);
+    expect(
+      confirmTripScheduleItemSchema.safeParse({ statusOverride: "ongoing" })
+        .success,
+    ).toBe(false);
   });
 });

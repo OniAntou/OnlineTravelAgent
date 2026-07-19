@@ -119,7 +119,7 @@ Client cũng có leave_trip_room và leave_tour_room. RealtimeRoomRegistry giữ
 
 ### Event contract
 
-Event schedule_updated có nghĩa là schedule của target đã thay đổi. Nó không có nghĩa client đã có đủ state mới trong memory. Consumer phải invalidate/refetch endpoint có authorization thay vì merge thủ công từ event chưa được xem như snapshot chính thức.
+Event `schedule_updated` có nghĩa là schedule của target đã thay đổi. Nó không có nghĩa client đã có đủ state mới trong memory. Consumer chỉ invalidate/refetch khi payload chỉ đúng target đang theo dõi (`tripId` cho trip hoặc `tourId` cho tour), thay vì merge thủ công từ event chưa được xem như snapshot chính thức.
 
 ## Template-versus-trip state
 

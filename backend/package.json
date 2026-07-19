@@ -17,6 +17,7 @@
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:missing-tour-schedules": "tsx prisma/seed-missing-tour-schedules.ts",
     "db:studio": "prisma studio",
     "test": "vitest run"
   },

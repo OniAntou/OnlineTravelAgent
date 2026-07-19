@@ -32,6 +32,7 @@ describe("admin trip statistics", () => {
     mocks.flightCount.mockResolvedValue(1);
     mocks.tourCount.mockResolvedValue(1);
     mocks.tripFindMany.mockResolvedValue([
+      { date: "2099-01-01", status: "PENDING", isUpcoming: false },
       { date: "2099-01-01", status: "ONGOING", isUpcoming: false },
       { date: "2000-01-01", status: "ONGOING", isUpcoming: true },
     ]);
@@ -43,7 +44,7 @@ describe("admin trip statistics", () => {
       .set("Authorization", adminAuth);
 
     expect(response.status).toBe(200);
-    expect(response.body).toMatchObject({ tripsUpcoming: 1, tripsHistory: 1 });
+    expect(response.body).toMatchObject({ tripsUpcoming: 2, tripsHistory: 1, tripsPending: 1 });
     expect(mocks.tripFindMany).toHaveBeenCalledOnce();
   });
 });

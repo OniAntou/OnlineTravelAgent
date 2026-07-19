@@ -8,6 +8,7 @@ import {
   documentSchema,
   bookHotelSchema,
   bookTourSchema,
+  confirmTripScheduleItemSchema,
   reviewSchema,
 } from "./client.schema.js";
 import {
@@ -40,6 +41,12 @@ clientRouter.get("/promo-codes/check", clientAuth, clientController.checkPromoCo
 // Trips
 clientRouter.get("/trips", clientAuth, clientController.getTrips);
 clientRouter.get("/trips/schedules", clientAuth, clientController.getTripSchedulesBatch);
+clientRouter.patch(
+  "/trips/:id/schedule/items/:itemId/status",
+  clientAuth,
+  validate(confirmTripScheduleItemSchema),
+  clientController.confirmTripScheduleItem,
+);
 clientRouter.get("/trips/:id/schedule", clientAuth, clientController.getTripSchedule);
 clientRouter.post("/trips/book", clientAuth, invalidateBootstrapUserOnMutation, validate(bookTripSchema), clientController.bookTrip);
 clientRouter.post("/trips/book-flight", clientAuth, invalidateBootstrapUserOnMutation, validate(bookFlightSchema), clientController.bookFlightTrip);

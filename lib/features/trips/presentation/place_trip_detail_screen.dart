@@ -13,6 +13,7 @@ import 'widgets/booking_status_timeline.dart';
 import 'widgets/trip_action_buttons.dart';
 import 'widgets/trip_section_header.dart';
 import 'widgets/trip_schedule_timeline.dart';
+import 'widgets/trip_gps_progress_panel.dart';
 import '../../../core/utils/app_utils.dart';
 import 'widgets/shared_trip_ui.dart';
 
@@ -242,6 +243,8 @@ class PlaceTripDetailScreen extends ConsumerWidget {
 
                     // Map
                     const TripSectionHeader(title: 'Vị trí trên bản đồ'),
+                    TripGpsProgressPanel(trip: trip),
+                    const SizedBox(height: 12),
                     _buildMap(destination),
                     const SizedBox(height: 28),
 

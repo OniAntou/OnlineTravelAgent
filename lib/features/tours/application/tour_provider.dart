@@ -4,6 +4,9 @@ import '../../trips/domain/trip_schedule.dart';
 import '../../../app/state/app_state_provider.dart';
 import '../../../data/services/api_provider.dart';
 
+bool shouldRefreshTourSchedule(String tourId, dynamic event) =>
+    event is Map && event['tourId'] == tourId;
+
 final toursProvider = Provider<List<TourPackage>>((ref) {
   final bootstrap = ref.watch(bootstrapProvider).value;
   return bootstrap?.tourPackages ?? [];
@@ -39,10 +42,7 @@ final tourScheduleProvider = FutureProvider.autoDispose
       apiService.joinTourRoom(tourId);
 
       void onScheduleUpdated(dynamic data) {
-        if (data is Map && data['tourId'] != null && data['tourId'] != tourId) {
-          return;
-        }
-        ref.invalidateSelf();
+        if (shouldRefreshTourSchedule(tourId, data)) ref.invalidateSelf();
       }
 
       socket.on('schedule_updated', onScheduleUpdated);

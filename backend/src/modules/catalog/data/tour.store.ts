@@ -80,7 +80,7 @@ export const tourStore = {
             location: tour.departure,
             date,
             guests,
-            status: TripStatus.ONGOING,
+            status: TripStatus.PENDING,
             imagePath: tour.imagePath,
             isUpcoming: true,
             tourPackageId: tour.id,

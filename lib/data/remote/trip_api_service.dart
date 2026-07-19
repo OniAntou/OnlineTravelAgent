@@ -4,6 +4,10 @@ import '../../features/trips/domain/trip_schedule.dart';
 import 'api_http_client.dart';
 
 const maxTripScheduleIdsPerRequest = 50;
+const confirmTripScheduleItemBody = {'statusOverride': 'completed'};
+
+String confirmTripScheduleItemPath(String tripId, String itemId) =>
+    '/api/trips/$tripId/schedule/items/$itemId/status';
 
 Iterable<List<String>> chunkTripScheduleIds(Iterable<String> tripIds) sync* {
   final uniqueIds = <String>{};
@@ -59,6 +63,13 @@ class TripApiService {
   Future<TripSchedule> fetchTripSchedule(String tripId) async {
     final data = await _client.getJson('/api/trips/$tripId/schedule');
     return TripSchedule.fromJson(data);
+  }
+
+  Future<void> confirmTripScheduleItem(String tripId, String itemId) async {
+    await _client.patchJson(
+      confirmTripScheduleItemPath(tripId, itemId),
+      confirmTripScheduleItemBody,
+    );
   }
 
   Future<Map<String, TripSchedule>> fetchTripSchedulesBatch(

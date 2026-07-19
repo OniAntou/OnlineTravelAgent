@@ -106,6 +106,26 @@ export const clientController = {
     res.json(data);
   }),
 
+  confirmTripScheduleItem: asyncHandler(
+    async (req: Request, res: Response) => {
+      const tripId = req.params.id as string;
+      const itemId = req.params.itemId as string;
+      const item = await scheduleService.confirmTripScheduleItem(
+        tripId,
+        itemId,
+        req.userId!,
+      );
+      if (!item) {
+        res.status(404).json({ message: "Trip schedule item not found" });
+        return;
+      }
+
+      const io = req.app.get("io");
+      if (io) io.to(`trip_${tripId}`).emit("schedule_updated", { tripId });
+      res.json(item);
+    },
+  ),
+
   bookTrip: asyncHandler(async (req: Request, res: Response) => {
     const userId = req.userId;
     const body = bookTripSchema.parse(req.body);

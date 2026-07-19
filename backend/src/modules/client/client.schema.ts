@@ -132,6 +132,10 @@ export const bookTourSchema = z.object({
   requestId: optionalText,
 });
 
+export const confirmTripScheduleItemSchema = z.object({
+  statusOverride: z.literal("completed"),
+});
+
 export const reviewSchema = z.object({
   targetType: z.enum(["destination", "hotel", "tour", "flight"]),
   targetId: requiredText("targetId"),

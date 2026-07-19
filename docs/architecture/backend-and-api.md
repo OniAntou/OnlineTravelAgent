@@ -110,6 +110,18 @@ Client routes nằm tại backend/src/modules/client/client.routes.ts.
 
 Controller client là backend/src/modules/client/client.controller.ts. Các stores thuộc backend/src/modules/catalog/data và logic booking/schedule dùng module booking/trips.
 
+## Tour schedule seed
+
+Catalog tour templates are normally read through `GET /api/tours/:id/schedule`.
+To complete a database that is missing the five built-in catalog itineraries,
+run `npm run db:seed:missing-tour-schedules` from `backend`. The command only
+creates an absent template identified by the `sourceType: tour` and
+`tourPackageId` pair, so it is safe to run again and never overwrites an
+existing itinerary.
+
+Do not use `npm run db:seed` for this maintenance operation: the general seed
+deletes and recreates application data before it loads fixture data.
+
 ## Auth API
 
 Routes ở backend/src/modules/auth/auth.routes.ts.
@@ -138,9 +150,11 @@ Routes ở backend/src/modules/payment/payment.routes.ts.
 | MoMo | GET /momo/return | Xử lý browser return. |
 | MoMo | POST /momo/ipn | Xử lý IPN và verify HMAC SHA-256. |
 
-Payment controller xác minh user sở hữu Trip và amount gửi lên khớp totalPrice ở server trước khi tạo request. Provider response cập nhật payment method, status và transaction reference trên Trip.
+Payment controller xác minh user sở hữu Trip và amount gửi lên khớp totalPrice ở server trước khi tạo request. Booking mới bắt đầu với `TripStatus.PENDING`; callback thanh toán đã xác thực chỉ chuyển trạng thái đó sang `ONGOING`. Nếu Admin đã hủy booking, callback vẫn ghi nhận payment result nhưng không kích hoạt lại chuyến đi.
 
 ## Admin API
+
+Admin duy trì booking bằng Basic Auth. Dashboard trả thêm `tripsPending`; thẻ **Đơn chờ xác nhận** mở danh sách booking đã lọc `PENDING`. Admin có thể đặt booking về `PENDING`, `ONGOING`, `COMPLETED` hoặc `CANCELLED`; trạng thái pending và các trạng thái kết thúc luôn đồng bộ `isUpcoming` tương ứng.
 
 `Destination.category` tham chiếu đến tên `Category` trong cơ sở dữ liệu. Màn hình quản trị chỉ cho chọn category hiện có, và backend kiểm tra giá trị này trước khi ghi dữ liệu. Nếu category không tồn tại, API trả về `400 Category not found` thay vì để lỗi ràng buộc dữ liệu trở thành thông báo chung.
 

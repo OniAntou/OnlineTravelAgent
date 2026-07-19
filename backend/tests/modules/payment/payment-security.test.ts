@@ -91,6 +91,35 @@ describe("payment security", () => {
     expect(mocks.tripUpdate).not.toHaveBeenCalled();
   });
 
+  it("does not reactivate an Admin-cancelled booking after verified payment", async () => {
+    mocks.tripFindUnique.mockResolvedValue({
+      id: "trip-1",
+      userId: "owner-1",
+      totalPrice: 1000,
+      paymentTxnRef: "trip-1-123",
+      status: "CANCELLED",
+    });
+    mocks.verifyReturnUrl.mockReturnValue({
+      isValid: true,
+      txnRef: "trip-1-123",
+      responseCode: "00",
+      transactionNo: "txn-1",
+      amount: 1000,
+    });
+    mocks.tripUpdate.mockResolvedValue({});
+
+    const res = await request(app).get("/api/payment/vnpay/return");
+
+    expect(res.status).toBe(200);
+    expect(mocks.tripUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ paymentStatus: "SUCCESS" }),
+      }),
+    );
+    expect(mocks.tripUpdate.mock.calls[0]?.[0]?.data).not.toHaveProperty("status");
+    expect(mocks.tripUpdate.mock.calls[0]?.[0]?.data).not.toHaveProperty("isUpcoming");
+  });
+
   it("does not expose payment status to a different user", async () => {
     mocks.tripFindUnique.mockResolvedValue({
       id: "trip-1",

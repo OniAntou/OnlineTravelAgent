@@ -78,6 +78,10 @@ import { TripStatus } from "@prisma/client";
 export function processTripStatus<T extends { status: TripStatus; isUpcoming: boolean; date: string }>(
   trip: T,
 ): T {
+  if (trip.status === TripStatus.PENDING) {
+    return { ...trip, isUpcoming: true };
+  }
+
   if (trip.status === TripStatus.CANCELLED) {
     return { ...trip, isUpcoming: false };
   }

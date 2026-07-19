@@ -235,6 +235,8 @@ class TravelApiService {
   );
   Future<TripSchedule> fetchTripSchedule(String tripId) =>
       tripsService.fetchTripSchedule(tripId);
+  Future<void> confirmTripScheduleItem(String tripId, String itemId) =>
+      tripsService.confirmTripScheduleItem(tripId, itemId);
   Future<Map<String, TripSchedule>> fetchTripSchedulesBatch(
     List<String> tripIds,
   ) => tripsService.fetchTripSchedulesBatch(tripIds);
