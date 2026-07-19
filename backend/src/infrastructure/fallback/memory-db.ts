@@ -51,6 +51,20 @@ export interface MemTrip {
   updatedAt: Date;
 }
 
+export interface MemTripChangeRequest {
+  id: string;
+  tripId: string;
+  type: "RESCHEDULE" | "REFUND";
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  reason: string;
+  requestedDate?: string | null;
+  refundAmount?: number | null;
+  adminNote?: string | null;
+  reviewedAt?: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface MemReview {
   id: string;
   userId: string;
@@ -83,6 +97,7 @@ class MemoryDB {
   users: MemUser[] = [];
   refreshTokens: MemRefreshToken[] = [];
   trips: MemTrip[] = [];
+  tripChangeRequests: MemTripChangeRequest[] = [];
   reviews: MemReview[] = [];
   documents: MemDocument[] = [];
   favorites: MemFavorite[] = [];
@@ -201,6 +216,47 @@ class MemoryDB {
     if (!trip) return null;
     Object.assign(trip, data, { updatedAt: new Date() });
     return trip;
+  }
+
+  // ---- Trip Change Requests ----
+
+  createTripChangeRequest(
+    data: Omit<MemTripChangeRequest, "id" | "createdAt" | "updatedAt"> & {
+      id?: string;
+    },
+  ) {
+    const now = new Date();
+    const request: MemTripChangeRequest = {
+      ...data,
+      id: data.id ?? crypto.randomUUID(),
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.tripChangeRequests.push(request);
+    return request;
+  }
+
+  findTripChangeRequestById(id: string) {
+    return this.tripChangeRequests.find((request) => request.id === id) ?? null;
+  }
+
+  findTripChangeRequestsByTripId(tripId: string) {
+    return this.tripChangeRequests
+      .filter((request) => request.tripId === tripId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  findPendingTripChangeRequest(tripId: string) {
+    return this.tripChangeRequests.find(
+      (request) => request.tripId === tripId && request.status === "PENDING",
+    ) ?? null;
+  }
+
+  updateTripChangeRequest(id: string, data: Partial<MemTripChangeRequest>) {
+    const request = this.tripChangeRequests.find((item) => item.id === id);
+    if (!request) return null;
+    Object.assign(request, data, { updatedAt: new Date() });
+    return request;
   }
 
   // ---- Reviews ----

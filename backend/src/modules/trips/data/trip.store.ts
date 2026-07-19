@@ -174,24 +174,6 @@ export const tripStore = {
     }
   },
 
-  async cancelTrip(userId: string | undefined, tripId: string) {
-    const useMem = await shouldUseMemoryFallback();
-
-    if (useMem) {
-      const trip = memoryDb.findTripById(tripId);
-      if (!trip || (userId && trip.userId !== userId)) return null;
-      return memoryDb.updateTrip(tripId, { status: "CANCELLED", isUpcoming: false });
-    }
-
-    const trip = await prisma.trip.findUnique({ where: { id: tripId } });
-    if (!trip || (userId && trip.userId !== userId)) return null;
-
-    return prisma.trip.update({
-      where: { id: tripId },
-      data: { status: TripStatus.CANCELLED, isUpcoming: false },
-    });
-  },
-
   async getTrips(userId: string | undefined, type?: string) {
     const useMem = await shouldUseMemoryFallback();
 

@@ -19,6 +19,7 @@ import {
 import { upload } from "../../core/middleware/upload.js";
 import { imageUploadHandler } from "../../core/http/image-upload-handler.js";
 import { invalidateBootstrapBaseOnMutation } from "../../core/config/cache.js";
+import { reviewTripChangeRequestSchema } from "../trips/trip-change-request.schema.js";
 
 export const adminRouter = Router();
 
@@ -95,6 +96,15 @@ adminRouter.put(
 adminRouter.delete("/tours/:id", adminController.deleteTour);
 
 // Trips
+adminRouter.get(
+  "/trip-change-requests",
+  adminController.getTripChangeRequests,
+);
+adminRouter.patch(
+  "/trip-change-requests/:id",
+  validate(reviewTripChangeRequestSchema),
+  adminController.reviewTripChangeRequest,
+);
 adminRouter.get("/trips", adminController.getTrips);
 adminRouter.put(
   "/trips/:id",

@@ -30,6 +30,17 @@ enum PaymentStatus {
   FAILED
 }
 
+enum TripChangeRequestType {
+  RESCHEDULE
+  REFUND
+}
+
+enum TripChangeRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum ReviewTargetType {
   destination
   hotel
@@ -119,6 +130,7 @@ model Trip {
 
   scheduleDays    TripScheduleDay[]
   scheduleUpdates TripScheduleUpdate[]
+  changeRequests  TripChangeRequest[]
 
   @@index([userId])
   @@index([flightId])
@@ -131,6 +143,26 @@ model Trip {
   @@index([userId, createdAt(sort: Desc)], map: "trips_user_id_created_at_idx")
   @@unique([userId, requestId])
   @@map("trips")
+}
+
+model TripChangeRequest {
+  id            String                  @id @default(cuid())
+  tripId        String                  @map("trip_id")
+  type          TripChangeRequestType
+  status        TripChangeRequestStatus @default(PENDING)
+  reason        String
+  requestedDate String?                 @map("requested_date")
+  refundAmount  Decimal?                @map("refund_amount") @db.Decimal(12, 2)
+  adminNote     String?                 @map("admin_note")
+  reviewedAt    DateTime?               @map("reviewed_at") @db.Timestamptz(3)
+  createdAt     DateTime                @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime                @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@index([tripId, status])
+  @@index([status, createdAt])
+  @@map("trip_change_requests")
 }
 
 model Flight {

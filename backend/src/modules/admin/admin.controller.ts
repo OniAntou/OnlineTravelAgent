@@ -12,6 +12,9 @@ import { passwordService } from "../auth/password.service.js";
 import { processTripStatus } from "../../core/data/store-helpers.js";
 import { getTourScheduleRealtimeTarget } from "../trips/schedule-realtime.js";
 import { deleteManagedPublicImages } from "../../core/storage/supabase-storage.js";
+import { invalidateBootstrapUserCache } from "../../core/config/cache.js";
+import { tripChangeRequestService } from "../trips/trip-change-request.service.js";
+import { tripChangeRequestQuerySchema } from "../trips/trip-change-request.schema.js";
 import {
   CreateDestinationBody,
   UpdateDestinationBody,
@@ -471,6 +474,23 @@ export const adminController = {
   }),
 
   // --- Trips ---
+  getTripChangeRequests: asyncHandler(async (req: Request, res: Response) => {
+    const { status } = tripChangeRequestQuerySchema.parse(req.query);
+    const requests = await tripChangeRequestService.listForAdmin(status);
+    res.json(requests);
+  }),
+
+  reviewTripChangeRequest: asyncHandler(async (req: Request, res: Response) => {
+    const result = await tripChangeRequestService.review(
+      req.params.id as string,
+      req.body,
+    );
+    if (result.trip.userId) {
+      invalidateBootstrapUserCache(result.trip.userId);
+    }
+    res.json(result.request);
+  }),
+
   getTrips: asyncHandler(async (_: Request, res: Response) => {
     const data = await prisma.trip.findMany({ orderBy: { createdAt: "desc" } });
     res.json(data);

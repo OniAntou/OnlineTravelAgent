@@ -11,6 +11,7 @@ import {
   confirmTripScheduleItemSchema,
   reviewSchema,
 } from "./client.schema.js";
+import { createTripChangeRequestSchema } from "../trips/trip-change-request.schema.js";
 import {
   invalidateBootstrapBaseOnMutation,
   invalidateBootstrapUserOnMutation,
@@ -48,9 +49,19 @@ clientRouter.patch(
   clientController.confirmTripScheduleItem,
 );
 clientRouter.get("/trips/:id/schedule", clientAuth, clientController.getTripSchedule);
+clientRouter.get(
+  "/trips/:id/change-requests",
+  clientAuth,
+  clientController.getTripChangeRequests,
+);
+clientRouter.post(
+  "/trips/:id/change-requests",
+  clientAuth,
+  validate(createTripChangeRequestSchema),
+  clientController.createTripChangeRequest,
+);
 clientRouter.post("/trips/book", clientAuth, invalidateBootstrapUserOnMutation, validate(bookTripSchema), clientController.bookTrip);
 clientRouter.post("/trips/book-flight", clientAuth, invalidateBootstrapUserOnMutation, validate(bookFlightSchema), clientController.bookFlightTrip);
-clientRouter.post("/trips/:id/cancel", clientAuth, invalidateBootstrapUserOnMutation, clientController.cancelTrip);
 
 // Flights
 clientRouter.get("/flights/search", clientController.searchFlights);

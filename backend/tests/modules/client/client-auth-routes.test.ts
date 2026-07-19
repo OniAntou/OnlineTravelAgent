@@ -25,6 +25,25 @@ describe("client protected routes", () => {
     expect(res.status).toBe(401);
   });
 
+  it("requires authentication before reading or creating a trip change request", async () => {
+    const list = await request(app).get("/api/trips/trip-1/change-requests");
+    const create = await request(app)
+      .post("/api/trips/trip-1/change-requests")
+      .send({
+        type: "REFUND",
+        reason: "Tôi không thể tham gia chuyến đi này.",
+      });
+
+    expect(list.status).toBe(401);
+    expect(create.status).toBe(401);
+  });
+
+  it("does not expose the retired direct-cancel endpoint", async () => {
+    const response = await request(app).post("/api/trips/trip-1/cancel").send({});
+
+    expect(response.status).toBe(404);
+  });
+
   it("requires authentication for client documents", async () => {
     const list = await request(app).get("/api/documents");
     const create = await request(app).post("/api/documents").send({

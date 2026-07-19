@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import { appCache, bootstrapResponseCacheKey } from "../../core/config/cache.js";
 import { store } from "./data/index.js";
 import { scheduleService } from "../trips/schedule.service.js";
+import { tripChangeRequestService } from "../trips/trip-change-request.service.js";
 import { asyncHandler } from "../../core/utils/asyncHandler.js";
 import {
   BookTripBody,
@@ -312,14 +313,20 @@ export const clientController = {
     res.json(result.promo);
   }),
 
-  cancelTrip: asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.userId;
-    const tripId = req.params.id as string;
-    const trip = await store.cancelTrip(userId, tripId);
-    if (!trip) {
-      res.status(404).json({ message: "Trip not found or unauthorized" });
-      return;
-    }
-    res.json(trip);
-  })
+  getTripChangeRequests: asyncHandler(async (req: Request, res: Response) => {
+    const requests = await tripChangeRequestService.listForTrip(
+      req.userId,
+      req.params.id as string,
+    );
+    res.json(requests);
+  }),
+
+  createTripChangeRequest: asyncHandler(async (req: Request, res: Response) => {
+    const request = await tripChangeRequestService.create(
+      req.userId,
+      req.params.id as string,
+      req.body,
+    );
+    res.status(201).json(request);
+  }),
 };
