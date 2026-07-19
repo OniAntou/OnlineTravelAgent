@@ -1,6 +1,6 @@
 # Trip change requests (minimal) design
 
-**Status:** Approved for planning
+**Status:** Implemented and verified on 2026-07-19
 
 ## Goal
 
@@ -142,13 +142,13 @@ the request, and applies the related trip update atomically.
 - A separate customer history screen, pagination, or a complex back-office
   workflow.
 
-## Verification
+## Verification completed
 
 - Backend tests cover ownership, one-pending-request enforcement, reschedule
-  approval, refund approval, rejection, invalid dates/amounts, and immutable
-  reviewed requests.
-- Flutter tests cover the two request actions, disabled pending state, and
-  decision details shown in the trip-detail card.
-- Admin UI tests cover queue filtering and the approve/reject dialogs.
-- Run `npm test`, `npm run build`, and `npm run db:validate` from `backend/`,
-  then run `flutter analyze` and `flutter test` from the repository root.
+  approval, refund approval, rejection, invalid dates/amounts, immutable
+  reviewed requests, protected client routes and the Admin queue contract.
+- Flutter tests cover request model mapping, owner-scoped fetch, disabled
+  pending state and decision details shown in the trip-detail card.
+- `flutter analyze`, targeted Flutter tests, backend build/tests and Prisma
+  validation passed. Migration `20260719010000_trip_change_requests` was
+  deployed and verified with RLS plus the pending/request queue indexes.

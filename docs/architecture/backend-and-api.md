@@ -67,7 +67,7 @@ backend/src/
 │   ├── client/             mobile-facing aggregate API
 │   ├── catalog/            stores for hotel, tour, search, review, promo
 │   ├── booking/            idempotency support
-│   ├── trips/              schedule service and realtime helpers
+│   ├── trips/              schedule, change-request service and realtime helpers
 │   ├── payment/            VNPay, MoMo and callbacks
 │   ├── admin/              protected admin CRUD
 │   └── partner/            partner-scoped CRUD
@@ -101,7 +101,7 @@ Client routes nằm tại backend/src/modules/client/client.routes.ts.
 | Promo | GET /promo-codes/check | Client JWT | Kiểm tra promo code. |
 | Trips | GET /trips; GET /trips/schedules; GET /trips/:id/schedule | Client JWT | Đọc trip và schedule của owner. |
 | Booking | POST /trips/book; POST /trips/book-flight; POST /hotels/book; POST /tours/book | Client JWT + Zod | Tạo trip từ service đã chọn. |
-| Cancel | POST /trips/:id/cancel | Client JWT | Hủy trip của owner. |
+| Trip change request | GET/POST /trips/:id/change-requests | Client JWT + Zod | Owner xem hoặc gửi một yêu cầu đổi lịch/hoàn tiền. |
 | Flight | GET /flights/search | Public | Tìm flight. |
 | Documents | GET/POST /documents; DELETE /documents/:id | Client JWT | Document của profile. |
 | Hotels | GET /hotels; GET /hotels/search; GET /hotels/:id | Public | Catalog/detail hotel. |
@@ -109,6 +109,8 @@ Client routes nằm tại backend/src/modules/client/client.routes.ts.
 | Reviews | GET /reviews; POST /reviews; DELETE /reviews/:id | GET public; mutation client JWT | Review catalog. |
 
 Controller client là backend/src/modules/client/client.controller.ts. Các stores thuộc backend/src/modules/catalog/data và logic booking/schedule dùng module booking/trips.
+
+Yêu cầu thay đổi chỉ được tạo cho Trip `PENDING` hoặc `ONGOING` còn upcoming và thuộc đúng owner. Mỗi Trip chỉ có một request `PENDING`; `RESCHEDULE` phải có ngày tương lai, còn `REFUND` không nhận ngày. Client không còn route hủy trực tiếp. Request status được đọc riêng theo Trip, không đi qua bootstrap/offline queue.
 
 ## Tour schedule seed
 
@@ -154,7 +156,9 @@ Payment controller xác minh user sở hữu Trip và amount gửi lên khớp t
 
 ## Admin API
 
-Admin duy trì booking bằng Basic Auth. Dashboard trả thêm `tripsPending`; thẻ **Đơn chờ xác nhận** mở danh sách booking đã lọc `PENDING`. Admin có thể đặt booking về `PENDING`, `ONGOING`, `COMPLETED` hoặc `CANCELLED`; trạng thái pending và các trạng thái kết thúc luôn đồng bộ `isUpcoming` tương ứng.
+Admin duy trì booking bằng Basic Auth. Dashboard trả thêm `tripsPending`; thẻ **Đơn chờ xác nhận** mở danh sách booking đã lọc `PENDING`. Admin có thể đặt booking về `PENDING`, `ONGOING`, `COMPLETED` hoặc `CANCELLED`; trạng thái pending và các trạng thái kết thúc luôn đồng bộ `isUpcoming` tương ứng. Mục **Yêu cầu thay đổi** mặc định tải queue `PENDING`, cho lọc theo request status và xử lý bằng `PATCH /api/admin/trip-change-requests/:id`.
+
+Khi Admin duyệt `RESCHEDULE`, transaction thay `Trip.date`; khi duyệt `REFUND`, Trip trở thành `CANCELLED` và `isUpcoming = false` nhưng payment history được giữ nguyên. `refundAmount` chỉ là giá trị mô phỏng (không gọi provider); dữ liệu duyệt/reject làm invalid bootstrap cache của đúng owner.
 
 `Destination.category` tham chiếu đến tên `Category` trong cơ sở dữ liệu. Màn hình quản trị chỉ cho chọn category hiện có, và backend kiểm tra giá trị này trước khi ghi dữ liệu. Nếu category không tồn tại, API trả về `400 Category not found` thay vì để lỗi ràng buộc dữ liệu trở thành thông báo chung.
 
@@ -166,6 +170,7 @@ Admin router ở backend/src/modules/admin/admin.routes.ts; trước router là 
 | Stats | Đọc dashboard aggregate. |
 | Catalog | CRUD destination, hotel, room, flight, tour, category. |
 | Trip | Liệt kê, cập nhật, xóa trip. |
+| Trip change request | Liệt kê/lọc request và duyệt hoặc từ chối request `PENDING`. |
 | Schedule | Đọc/cập nhật/xóa per-trip schedule; CRUD schedule template. |
 | User | Liệt kê, tạo và xóa user. |
 | Partner | Liệt kê, tạo, sửa, cấp/thu hồi quyền và xóa Partner. Thu hồi/xóa Partner sẽ xóa hotel, room, tour thuộc sở hữu; dữ liệu database được xóa trước, sau đó mới dọn ảnh Supabase Storage. |
@@ -214,7 +219,7 @@ Catalogue migrations add GIN full-text and trigram indexes for every searched
 name, location, description, and departure field while keeping the existing
 Prisma full-text and case-insensitive substring query contract.
 
-NodeCache giữ `bootstrapBase` và response `bootstrap_public`/`bootstrap_{userId}` với TTL 5 phút. Mutation catalogue hoặc review phải xóa toàn bộ nhóm bootstrap này, nhưng không xóa các key cache không liên quan. Favorite, booking, document và payment status chỉ xóa response bootstrap của user đã mutation.
+NodeCache giữ `bootstrapBase` và response `bootstrap_public`/`bootstrap_{userId}` với TTL 5 phút. Mutation catalogue hoặc review phải xóa toàn bộ nhóm bootstrap này, nhưng không xóa các key cache không liên quan. Favorite, booking, document, payment status và Admin review trip change request chỉ xóa response bootstrap của user đã mutation.
 
 Review read API dùng cursor (`cursor`, `limit` từ 1 đến 50; mặc định 20), aggregate count/rating ở PostgreSQL và `nextCursor`. Client chỉ tải trang kế tiếp khi người dùng yêu cầu.
 
@@ -254,6 +259,7 @@ Tests nằm trong backend/tests và chạy bằng Vitest/Supertest. Mục tiêu 
 | Catalog/search/review/promo stores | backend/src/modules/catalog |
 | Booking idempotency | backend/src/modules/booking/data/booking-idempotency.ts |
 | Schedule | backend/src/modules/trips/schedule.service.ts |
+| Trip change request | backend/src/modules/trips/trip-change-request.service.ts |
 | Payment | backend/src/modules/payment |
 | Admin | backend/src/modules/admin |
 | Partner | backend/src/modules/partner |

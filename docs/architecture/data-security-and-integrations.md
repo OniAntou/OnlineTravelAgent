@@ -16,6 +16,7 @@ erDiagram
     TOUR_PACKAGE ||--o{ TRIP : booked_as
     DESTINATION ||--o{ TRIP : booked_as
     FLIGHT ||--o{ TRIP : booked_as
+    TRIP ||--o{ TRIP_CHANGE_REQUEST : changes
     TRIP ||--o{ TRIP_SCHEDULE_DAY : contains
     TRIP_SCHEDULE_DAY ||--o{ TRIP_SCHEDULE_ITEM : contains
     TOUR_PACKAGE ||--o{ SCHEDULE_TEMPLATE : defines
@@ -29,7 +30,7 @@ erDiagram
 | Identity | User, RefreshToken | Account, role và refresh session lifecycle. |
 | Catalog | Category, Destination, Flight, Hotel, Room, TourPackage | Dữ liệu dịch vụ du lịch để browse/search/book. |
 | User content | UserFavoriteDestination, DocumentItem, Review, PromoCode | Dữ liệu riêng hoặc nội dung gắn người dùng. |
-| Booking | Trip | Giao dịch/đại diện hành trình của user. |
+| Booking | Trip, TripChangeRequest | Giao dịch hành trình và yêu cầu đổi lịch/hoàn tiền có xét duyệt. |
 | Schedule template | ScheduleTemplate, ScheduleTemplateDay, ScheduleTemplateItem | Lịch chuẩn của tour/destination. |
 | Trip schedule | TripScheduleDay, TripScheduleItem, TripScheduleUpdate | Lịch riêng được copy/override theo booking. |
 
@@ -38,7 +39,9 @@ erDiagram
 | Enum | Giá trị |
 |---|---|
 | Role | USER, PARTNER, ADMIN. |
-| TripStatus | ONGOING, COMPLETED, CANCELLED. |
+| TripStatus | PENDING, ONGOING, COMPLETED, CANCELLED. |
+| TripChangeRequestType | RESCHEDULE, REFUND. |
+| TripChangeRequestStatus | PENDING, APPROVED, REJECTED. |
 | PaymentStatus | PENDING, SUCCESS, FAILED. |
 | ReviewTargetType | destination, hotel, tour, flight. |
 | ScheduleSourceType | tour, destination. |
@@ -55,6 +58,7 @@ Trip ghi:
 - totalPrice, promoCode, discount;
 - requestId;
 - payment method/status/transaction reference;
+- change requests, gồm lý do, ngày đề nghị hoặc số tiền hoàn mô phỏng, quyết định và ghi chú Admin;
 - schedule days và updates.
 
 Trip không thay thế catalog entity. Nó lưu snapshot/quan hệ đủ để lịch sử booking vẫn đọc được khi catalog có thay đổi.
@@ -68,6 +72,9 @@ Trip không thay thế catalog entity. Nó lưu snapshot/quan hệ đủ để l
 | User chỉ thấy trip của mình | userId filter và authorization ở client router. |
 | Partner không sửa dữ liệu của partner khác | partnerId scope trong partner controller. |
 | Payment không tin amount client | Server đối chiếu với totalPrice lưu trên Trip. |
+| Một Trip chỉ có một yêu cầu đang chờ | Service kiểm tra trước khi ghi và partial unique index theo `trip_id` khi status là `PENDING`. |
+| Đổi lịch/hoàn tiền chỉ thay Trip khi duyệt | Transaction claim request `PENDING`, lưu quyết định rồi mới cập nhật date hoặc `CANCELLED` atomically. |
+| Lý do và quyết định không lộ qua Data API | `trip_change_requests` bật RLS, revoke quyền các role API Supabase; chỉ server-side Prisma truy cập. |
 | Data production không fallback giả | Persistent data unavailable trả lỗi 503. |
 
 ## Template và trip schedule
@@ -100,6 +107,7 @@ flowchart LR
 | backend/prisma/migrations | Lịch sử thay đổi schema và data constraint. |
 | backend/prisma/seed.ts | Seed dữ liệu development/demo. |
 | backend/prisma/migrations/20260718003000_catalog_search_indexes | Extension/index PostgreSQL bổ sung để hỗ trợ search. |
+| backend/prisma/migrations/20260719010000_trip_change_requests | Enum, bảng, chỉ mục pending duy nhất và bảo vệ RLS cho yêu cầu thay đổi chuyến đi. |
 | backend/prisma/schema.prisma | Declarative model, enum, relation/index. |
 
 Workflow schema:
@@ -123,6 +131,7 @@ Drift/SQLite là cache cục bộ, không phải database authority. Những tab
 - offline queue legacy.
 
 SyncService ghi snapshot theo transaction. Generated Drift files có hậu tố .g.dart và không chỉnh sửa thủ công.
+Trip change request không nằm trong bootstrap/Drift snapshot: màn hình chi tiết tải endpoint owner-scoped theo từng Trip và mutation không được queue/replay offline.
 
 ## Authentication và token security
 
@@ -201,6 +210,7 @@ Khi Admin hoặc Partner thay ảnh hay xóa catalogue record, backend giữ URL
 | Authorization | JWT/Basic Auth/role/ownership middleware. |
 | Realtime | Verify token và room ownership. |
 | Upload | Type/size checks, key UUID không đoán được và server-only Storage credentials. |
+| Trip change request | RLS và revoke role Data API; ownership/role checks vẫn do API service thực thi. |
 | Database outage | 503 ở production thay vì memory data. |
 | Cache privacy | Logout xóa user-owned cache. |
 
@@ -212,6 +222,7 @@ Khi Admin hoặc Partner thay ảnh hay xóa catalogue record, backend giữ URL
 | Migrations | backend/prisma/migrations |
 | Seed | backend/prisma/seed.ts |
 | Search extension/index | backend/prisma/migrations/20260718003000_catalog_search_indexes/migration.sql |
+| Trip change request service | backend/src/modules/trips/trip-change-request.service.ts |
 | Auth middleware | backend/src/core/middleware/auth.ts |
 | Upload middleware | backend/src/core/middleware/upload.ts |
 | Supabase Storage service | backend/src/core/storage/supabase-storage.ts |

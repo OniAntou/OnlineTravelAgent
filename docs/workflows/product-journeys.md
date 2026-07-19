@@ -126,7 +126,7 @@ flowchart TD
 - Backend kiểm source và dữ liệu booking trong transaction.
 - Trip lưu owner, source relation, total price, promo/discount và payment state. Booking mới có `TripStatus.PENDING`; callback thanh toán hợp lệ chuyển pending sang `ONGOING`, nhưng không được kích hoạt lại booking mà Admin đã hủy.
 - Destination/tour dùng template-to-trip copy; hotel/flight không sinh cùng loại schedule copy.
-- User chỉ có thể đọc/cancel Trip của chính mình.
+- User chỉ có thể đọc Trip của chính mình; thay đổi lịch hoặc hoàn tiền đi qua request có Admin xét duyệt.
 
 ## 5. Checkout và payment
 
@@ -168,7 +168,22 @@ Server enum là PENDING, SUCCESS hoặc FAILED. Client code phải map contract 
 5. Trip schedule provider gọi GET /trips/:id/schedule.
 6. Provider join room trip tương ứng để nhận schedule_updated.
 7. Khi event đến, provider refetch protected API để render state mới.
-8. User có thể cancel qua POST /trips/:id/cancel nếu điều kiện nghiệp vụ cho phép.
+8. Với Trip upcoming còn `PENDING` hoặc `ONGOING`, user có thể gửi `RESCHEDULE` hoặc `REFUND` kèm lý do; mỗi Trip có tối đa một request `PENDING`.
+9. Detail gọi `GET /trips/:id/change-requests` riêng, hiển thị request mới nhất và khóa hai action trong khi đang chờ.
+
+### Đổi lịch và hoàn tiền mô phỏng
+
+~~~mermaid
+flowchart LR
+    C["Owner gửi RESCHEDULE hoặc REFUND"] --> V["Server kiểm ownership, Trip active/upcoming và unique PENDING"]
+    V --> P["TripChangeRequest PENDING"]
+    P --> A["Admin duyệt hoặc từ chối"]
+    A -->|"Duyệt RESCHEDULE"| R["Đổi Trip.date"]
+    A -->|"Duyệt REFUND"| F["Lưu refundAmount, Trip CANCELLED"]
+    A -->|"Từ chối"| X["Trip giữ nguyên"]
+~~~
+
+Admin có thể thêm ghi chú. Khi duyệt, service claim request `PENDING` trong cùng transaction để không có hai quyết định đồng thời. Refund là mô phỏng cho đồ án: hệ thống lưu số tiền được duyệt nhưng không gọi VNPay, MoMo hoặc provider khác; payment history của Trip vẫn giữ nguyên.
 
 Schedule detail UI không tự tin socket payload là toàn bộ timeline. Socket chỉ báo rằng cần tải lại dữ liệu từ server.
 
@@ -178,9 +193,11 @@ Schedule detail UI không tự tin socket payload là toàn bộ timeline. Socke
 2. Khi static panel protection bật, server yêu cầu Basic Auth ngay ở static layer.
 3. Panel gọi /api/admin với Basic credentials.
 4. Admin CRUD catalog, trip, user, document, schedule template hoặc per-trip schedule.
-5. Admin có thể tạo Partner trực tiếp hoặc cấp quyền Partner cho User. Khi thu hồi quyền hoặc xóa Partner, hệ thống yêu cầu xác nhận và xóa toàn bộ hotel, room, tour mà Partner sở hữu.
-5. Backend validate input, persist thay đổi và phát schedule_updated khi schedule liên quan thay đổi.
-6. Client đang ở room liên quan refetch lịch trình.
+5. Admin mở **Yêu cầu thay đổi**, mặc định xem `PENDING`, lọc theo status và duyệt/từ chối sau khi xem Trip, khách hàng, lý do và ngày/giá trị liên quan.
+6. Duyệt đổi lịch thay `Trip.date`; duyệt hoàn tiền ghi số tiền mô phỏng và hủy Trip. Từ chối không thay Trip; cả hai có thể lưu ghi chú.
+7. Admin có thể tạo Partner trực tiếp hoặc cấp quyền Partner cho User. Khi thu hồi quyền hoặc xóa Partner, hệ thống yêu cầu xác nhận và xóa toàn bộ hotel, room, tour mà Partner sở hữu.
+8. Backend validate input, persist thay đổi và phát schedule_updated khi schedule liên quan thay đổi.
+9. Client đang ở room liên quan refetch lịch trình.
 
 Admin API luôn được Basic Auth ngay cả khi static panel protection chưa bật.
 

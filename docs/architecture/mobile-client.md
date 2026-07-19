@@ -126,7 +126,8 @@ Các provider theo feature nhận dữ liệu từ bootstrap/API, đóng gói mu
 |---|---|
 | Auth | Restore session, login/register/logout, cập nhật profile. |
 | Destination/Favorite | Toggle favorite optimistic và serialize mutation theo destination. |
-| Trips | Tạo/cancel booking, nhóm dữ liệu theo state/dates. |
+| Trips | Tạo booking, nhóm dữ liệu theo state/dates; hiển thị kết quả đổi lịch/hoàn tiền sau khi Admin xét duyệt. |
+| Trip change request | Tải theo Trip owner-scoped, gửi đổi lịch hoặc hoàn tiền; disable action khi còn `PENDING`. |
 | Trip schedule | Join trip room và refetch khi có schedule_updated. |
 | Tour | Tải tour, lịch template và join tour room khi cần. |
 | Profile/Documents | Đọc/tạo/xóa document thuộc user. |
@@ -152,7 +153,7 @@ Các services dưới lib/data/remote phân chia theo domain:
 |---|---|
 | auth_api_service.dart | Login, register, refresh, logout, become partner. |
 | location_api_service.dart | Destination, hotel, flight, tour, search, favorite, promo. |
-| trip_api_service.dart | Trips, booking, cancel, schedule. |
+| trip_api_service.dart | Trips, booking, change request, schedule. |
 | payment_api_service.dart | Tạo/kiểm tra luồng payment. |
 | document_api_service.dart | Documents của profile. |
 | review_api_service.dart | Review. |
@@ -177,6 +178,7 @@ Snapshot transaction xóa row đã vắng mặt theo ID rồi upsert dữ liệu
 Drift database được định nghĩa tại lib/data/local/app_database.dart, tables và DAOs nằm trong lib/data/local/tables và lib/data/local/daos.
 
 Snapshot cache chứa catalog, favorites, hotels, rooms, flights, tours, documents, trips và trip schedules. Cache được thay bởi transaction, thay vì từng widget tự ghi bảng riêng.
+Yêu cầu đổi lịch/hoàn tiền được đọc trực tiếp theo Trip qua `tripChangeRequestsProvider`; không ghi vào Drift hoặc offline queue vì đây là mutation cần trạng thái server mới nhất.
 
 | Tình huống | Hành vi hiện tại |
 |---|---|
@@ -208,7 +210,7 @@ Client rejoin rooms sau reconnect. Khi nhận `schedule_updated`, trip provider 
 | dashboard/search/destinations | Khám phá catalog, tìm kiếm và destination. |
 | hotels/flights/tours | Duyệt detail và chọn dịch vụ. |
 | booking | Checkout, phương thức thanh toán, bank transfer, VNPay. |
-| trips | My Trips, detail destination/tour, timeline lịch trình, cancel. |
+| trips | My Trips, detail destination/tour, timeline lịch trình, gửi và xem trạng thái đổi lịch/hoàn tiền. |
 | favorites | Danh sách destination đã lưu. |
 | profile | Profile và documents. |
 | partner | Partner dashboard. |

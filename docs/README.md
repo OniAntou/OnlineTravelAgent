@@ -69,6 +69,10 @@ Các file generated không được dùng làm tài liệu gốc: Drift generate
 
 [Thiết kế tối ưu runtime và luồng dữ liệu](plans/2026-07-16-runtime-and-dataflow-optimization.md) mô tả các contract hiện tại cho persistent-data availability, cache bootstrap, snapshot Flutter, schedule batch và `TripStatus`. [Kế hoạch triển khai](plans/2026-07-16-runtime-and-dataflow-optimization-plan.md) lưu các bước và kiểm chứng đã thực hiện.
 
+## Workflow vừa triển khai
+
+[Thiết kế yêu cầu đổi lịch và hoàn tiền](superpowers/specs/2026-07-19-trip-change-requests-design.md) mô tả luồng customer request, Admin review, migration và giới hạn refund mô phỏng hiện tại.
+
 ## Snapshot tài liệu
 
-Tài liệu phản ánh source tree tại 2026-07-16: Flutter 3.44, Node.js 24, Express 5, Prisma 6/PostgreSQL, Riverpod, Drift và Socket.IO.
+Tài liệu phản ánh source tree tại 2026-07-19: Flutter 3.44, Node.js 24, Express 5, Prisma 6/PostgreSQL, Riverpod, Drift và Socket.IO.
