@@ -708,7 +708,7 @@ function renderHotels(rows){
     {label:'Giá từ', val:`$${h.priceFrom}`}
   ], `
     <button class="w-10 h-10 rounded-full bg-offwhite hover:bg-silver text-ink transition-all flex items-center justify-center" onclick="editHotel('${h.id}')"><i class="fa-solid fa-pen"></i></button>
-    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('hotel','${h.id}','${h.name.replace(/'/g,"\\'")}')"><i class="fa-solid fa-trash"></i></button>
+    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('hotel','${h.id}',decodeURIComponent('${encodeURIComponent(h.name).replace(/'/g,"%27")}'))"><i class="fa-solid fa-trash"></i></button>
   `)).join('');
 }
 function resolveImageUrl(url){ return /^https?:\/\//i.test(url) ? url : API + url; }
@@ -746,7 +746,7 @@ function renderRooms(rooms){
       <div><div class="text-sm font-bold text-ink">${r.name}</div><div class="text-xs text-muted">Sức chứa: ${r.capacity} khách - $${r.price}</div></div>
       <div class="flex gap-2">
         <button class="w-8 h-8 rounded-full bg-offwhite hover:bg-silver text-ink" onclick="editRoom('${r.id}')"><i class="fa-solid fa-pen text-xs"></i></button>
-        <button class="w-8 h-8 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500" onclick="confirmDel('room','${r.id}','${r.name}')"><i class="fa-solid fa-trash text-xs"></i></button>
+        <button class="w-8 h-8 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500" onclick="confirmDel('room','${r.id}',decodeURIComponent('${encodeURIComponent(r.name).replace(/'/g,"%27")}'))"><i class="fa-solid fa-trash text-xs"></i></button>
       </div>
     </div>
   `).join('');
@@ -787,7 +787,7 @@ function renderFlights(rows){
     {label:'Giá', val:fmtUSD(f.price)}
   ], `
     <button class="w-10 h-10 rounded-full bg-offwhite hover:bg-silver text-ink transition-all flex items-center justify-center" onclick="editFlight('${f.id}')"><i class="fa-solid fa-pen"></i></button>
-    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('flight','${f.id}','${f.airline.replace(/'/g,"\\'")}')"><i class="fa-solid fa-trash"></i></button>
+    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('flight','${f.id}',decodeURIComponent('${encodeURIComponent(f.airline).replace(/'/g,"%27")}'))"><i class="fa-solid fa-trash"></i></button>
   `)).join('');
 }
 function openFlightModal(fl=null){
@@ -822,7 +822,7 @@ function renderTours(rows){
     {label:'Tag', val:t.isPopular?'<span class="px-3 py-1 bg-primary text-white rounded-full text-[10px]">HOT</span>':''}
   ], `
     <button class="w-10 h-10 rounded-full bg-offwhite hover:bg-silver text-ink transition-all flex items-center justify-center" onclick="editTour('${t.id}')"><i class="fa-solid fa-pen"></i></button>
-    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('tour','${t.id}','${t.name.replace(/'/g,"\\'")}')"><i class="fa-solid fa-trash"></i></button>
+    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('tour','${t.id}',decodeURIComponent('${encodeURIComponent(t.name).replace(/'/g,"%27")}'))"><i class="fa-solid fa-trash"></i></button>
   `)).join('');
 }
 function openTourModal(tour=null){
@@ -862,7 +862,7 @@ function renderTrips(rows){
   ], `
     <button class="w-10 h-10 rounded-full bg-offwhite hover:bg-primary hover:text-white text-ink transition-all flex items-center justify-center" onclick="openTripSchedule('${t.id}')"><i class="fa-solid fa-calendar-alt"></i></button>
     <button class="w-10 h-10 rounded-full bg-offwhite hover:bg-silver text-ink transition-all flex items-center justify-center" onclick="editTrip('${t.id}')"><i class="fa-solid fa-eye"></i></button>
-    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('trip','${t.id}','${t.destination.replace(/'/g,"\\'")}')"><i class="fa-solid fa-trash"></i></button>
+    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('trip','${t.id}',decodeURIComponent('${encodeURIComponent(t.destination).replace(/'/g,"%27")}'))"><i class="fa-solid fa-trash"></i></button>
   `)).join('');
 }
 function editTrip(id){
@@ -1126,7 +1126,7 @@ function renderUsers(rows){
     {label:'Email', val:u.email},
     {label:'Ngày tạo', val:new Date(u.createdAt).toLocaleDateString('vi-VN')}
   ], `
-    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('user','${u.id}','${u.name}')"><i class="fa-solid fa-ban"></i></button>
+    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('user','${u.id}',decodeURIComponent('${encodeURIComponent(u.name).replace(/'/g,"%27")}'))"><i class="fa-solid fa-ban"></i></button>
   `)).join('');
 }
 function openUserModal(){ document.getElementById('u-name').value=''; document.getElementById('u-email').value=''; document.getElementById('u-pass').value=''; openModal('modal-user'); }
@@ -1146,7 +1146,7 @@ function renderDocuments(rows){
     {label:'Mô tả', val:d.description}
   ], `
     <button class="w-10 h-10 rounded-full bg-offwhite hover:bg-silver text-ink transition-all flex items-center justify-center" onclick="editDocument('${d.id}')"><i class="fa-solid fa-pen"></i></button>
-    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('document','${d.id}','${d.title}')"><i class="fa-solid fa-trash"></i></button>
+    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('document','${d.id}',decodeURIComponent('${encodeURIComponent(d.title).replace(/'/g,"%27")}'))"><i class="fa-solid fa-trash"></i></button>
   `)).join('');
 }
 function openDocumentModal(doc=null){
@@ -1177,7 +1177,7 @@ function renderDestinations(rows){
     {label:'Tags', val:(d.isFavorite?'<span class="px-2 py-1 bg-red-100 text-red-500 rounded-full text-xs mr-2"><i class="fa-solid fa-heart"></i></span>':'')+(d.isRecommended?'<span class="px-2 py-1 bg-blue-100 text-blue-500 rounded-full text-xs"><i class="fa-solid fa-thumbs-up"></i></span>':'')}
   ], `
     <button class="w-10 h-10 rounded-full bg-offwhite hover:bg-silver text-ink transition-all flex items-center justify-center" onclick="editDestination('${d.id}')"><i class="fa-solid fa-pen"></i></button>
-    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('destination','${d.id}','${d.name.replace(/'/g,"\\'")}')"><i class="fa-solid fa-trash"></i></button>
+    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('destination','${d.id}',decodeURIComponent('${encodeURIComponent(d.name).replace(/'/g,"%27")}'))"><i class="fa-solid fa-trash"></i></button>
   `)).join('');
 }
 function openDestinationModal(dest=null){
@@ -1204,7 +1204,7 @@ function renderCategories(rows){
   if(!rows.length){tb.innerHTML='';em.style.display='block';return;}
   em.style.display='none';
   tb.innerHTML=rows.map(c=>listRow([ {label:'ID', val:c.id, cls:'font-mono text-muted'}, {label:'Tên danh mục', val:c.name, cls:'w-1/2'} ], `
-    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('category','${c.id}','${c.name}')"><i class="fa-solid fa-trash"></i></button>
+    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('category','${c.id}',decodeURIComponent('${encodeURIComponent(c.name).replace(/'/g,"%27")}'))"><i class="fa-solid fa-trash"></i></button>
   `)).join('');
 }
 async function saveCategory(){ try{ await req('/api/partner/categories','POST',{name:v('cat-name')}); closeModal('modal-category'); await loadCategories(); toast('Đã thêm','success'); }catch(e){toast(e.message,'error');} }
