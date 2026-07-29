@@ -28,7 +28,7 @@ export const tripStore = {
     destinationId: string,
     date: string,
     guests: string,
-    totalPrice?: number,
+    _clientTotalPrice?: number,
     requestId?: string,
   ) {
     const useMem = await shouldUseMemoryFallback();
@@ -51,7 +51,7 @@ export const tripStore = {
         imagePath: destination.imagePath,
         isUpcoming: true,
         isCustom: false,
-        totalPrice: totalPrice || null,
+        totalPrice: Number(destination.price) || null,
         requestId: requestId || null,
       });
     }
@@ -80,7 +80,7 @@ export const tripStore = {
             imagePath: destination.imagePath,
             isUpcoming: true,
             destinationId: destination.id,
-            totalPrice: totalPrice,
+            totalPrice: destination.price,
             requestId,
           },
         });
@@ -134,6 +134,7 @@ export const tripStore = {
         imagePath: flight.airlineLogo,
         isUpcoming: true,
         isCustom: false,
+        totalPrice: Number(flight.price) || null,
         requestId: requestId || null,
       });
     }
@@ -159,6 +160,7 @@ export const tripStore = {
           imagePath: flight.airlineLogo,
           isUpcoming: true,
           flightId: flight.id,
+          totalPrice: flight.price,
           requestId,
         },
       });

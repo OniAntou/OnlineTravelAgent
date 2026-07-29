@@ -406,6 +406,7 @@ async function handleUpload(fileInput, hiddenId, imgId){
       </div>
       <div class="p-8 overflow-y-auto bg-offwhite/30 flex-1 grid grid-cols-2 gap-6">
         <input type="hidden" id="r-id">
+        <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Số lượng phòng</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="r-inventory" type="number" min="1" value="1"></div>
         <div class="col-span-2"><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Tên Phòng</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="r-name"></div>
         <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Sức chứa (Khách)</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="r-cap" type="number"></div>
         <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Giá 1 đêm</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="r-price" type="number"></div>
@@ -818,8 +819,9 @@ function renderRooms(rooms){
   const tb = document.getElementById('h-rooms-list');
   if(!rooms.length){tb.innerHTML='<div class="text-xs text-muted">Khách sạn này chưa có phòng nào.</div>';return;}
   tb.innerHTML = rooms.map(r=>`
-    <div class="flex items-center justify-between p-4 bg-white border border-silver rounded-2xl">
+    <div class="flex items-center justify-between p-4 bg-white border border-silver rounded-2xl" data-room-inventory="${escapeHtml(r.inventory ?? 1)}">
       <div><div class="text-sm font-bold text-ink">${escapeHtml(r.name)}</div><div class="text-xs text-muted">Sức chứa: ${escapeHtml(r.capacity)} khách - $${escapeHtml(r.price)}</div></div>
+      <div class="text-xs text-muted">Số phòng: ${escapeHtml(r.inventory ?? 1)}</div>
       <div class="flex gap-2">
         <button class="w-8 h-8 rounded-full bg-offwhite hover:bg-silver text-ink" onclick="editRoom('${r.id}')"><i class="fa-solid fa-pen text-xs"></i></button>
         <button class="w-8 h-8 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500" onclick="confirmDelEncoded('room','${encodeActionValue(r.id)}','${encodeActionValue(r.name)}')"><i class="fa-solid fa-trash text-xs"></i></button>
@@ -830,7 +832,7 @@ function renderRooms(rooms){
 function openRoomModal(room=null){
   document.getElementById('mroom-title').textContent=room?'Sửa Phòng':'Thêm Phòng';
   document.getElementById('r-id').value=room?.id??'';
-  ['name','cap','price','desc'].forEach(k=>document.getElementById(`r-${k}`).value=room?.[k==='cap'?'capacity':k==='desc'?'description':k]??'');
+  ['name','cap','inventory','price','desc'].forEach(k=>document.getElementById(`r-${k}`).value=room?.[k==='cap'?'capacity':k==='desc'?'description':k]??(k==='inventory'?1:''));
   setImg('r-img', room?.imagePath??'');
   document.getElementById('r-amenities').value=room?.amenities?.join(', ')??'';
   openModal('modal-room');
@@ -842,7 +844,7 @@ function editRoom(id){
 async function saveRoom(){
   const hotelId=document.getElementById('h-id').value;
   const id=document.getElementById('r-id').value;
-  const body={ name:v('r-name'), capacity:parseInt(v('r-cap'))||1, price:parseFloat(v('r-price'))||0, imagePath:v('r-img'), description:v('r-desc'), amenities:v('r-amenities').split(',').map(a=>a.trim()).filter(Boolean)};
+  const body={ name:v('r-name'), capacity:parseInt(v('r-cap'))||1, inventory:parseInt(v('r-inventory'))||1, price:parseFloat(v('r-price'))||0, imagePath:v('r-img'), description:v('r-desc'), amenities:v('r-amenities').split(',').map(a=>a.trim()).filter(Boolean)};
   try{ 
     if(id) await req(`/api/admin/hotels/${hotelId}/rooms/${id}`,'PUT',body); 
     else await req(`/api/admin/hotels/${hotelId}/rooms`,'POST',body); 

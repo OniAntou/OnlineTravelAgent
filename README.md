@@ -120,4 +120,4 @@ GitHub Actions chạy:
 
 - Không dùng `prisma db push` cho production. Dùng migration qua `npm run db:migrate`.
 - Mỗi máy chạy backend cần ba biến Supabase Storage ở trên để Admin/Partner tải ảnh mới; database chỉ lưu URL ảnh công khai.
-- Payment đang là phần xử lý riêng, không nằm trong phạm vi hardening hiện tại.
+- Payment tạo request từ giá đã persist trên Trip, không tin amount do client gửi. Hotel room type dùng inventory và transaction để trả 409 khi stay interval chồng lấp đã hết chỗ. Cash chỉ là cổng test local; endpoint tắt ở production và Flutter release chỉ hiện khi build có `--dart-define=ALLOW_TEST_PAYMENTS=true`. Provider callback vẫn cần được kiểm thử sandbox end-to-end trước khi phát hành.

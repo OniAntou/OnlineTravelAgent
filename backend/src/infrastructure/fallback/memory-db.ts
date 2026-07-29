@@ -38,6 +38,8 @@ export interface MemTrip {
   flightId?: string | null;
   hotelId?: string | null;
   roomId?: string | null;
+  hotelCheckIn?: Date | null;
+  hotelCheckOut?: Date | null;
   totalPrice?: number | null;
   isCustom: boolean;
   requestId?: string | null;
@@ -216,6 +218,17 @@ class MemoryDB {
     if (!trip) return null;
     Object.assign(trip, data, { updatedAt: new Date() });
     return trip;
+  }
+
+  countActiveHotelStayOverlaps(roomId: string, checkIn: Date, checkOut: Date) {
+    return this.trips.filter((trip) =>
+      trip.roomId === roomId
+      && trip.status !== "CANCELLED"
+      && trip.hotelCheckIn instanceof Date
+      && trip.hotelCheckOut instanceof Date
+      && trip.hotelCheckIn < checkOut
+      && trip.hotelCheckOut > checkIn,
+    ).length;
   }
 
   // ---- Trip Change Requests ----

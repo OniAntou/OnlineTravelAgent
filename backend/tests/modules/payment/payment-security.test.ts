@@ -62,7 +62,7 @@ describe("payment security", () => {
     expect(mocks.createPaymentUrl).not.toHaveBeenCalled();
   });
 
-  it("rejects creating VNPAY payment with a tampered amount", async () => {
+  it("uses the persisted trip total instead of a caller-supplied amount", async () => {
     mocks.tripFindUnique.mockResolvedValue({
       id: "trip-1",
       userId: "owner-1",
@@ -74,20 +74,64 @@ describe("payment security", () => {
       .set("Authorization", `Bearer ${tokenFor("owner-1")}`)
       .send({ tripId: "trip-1", amount: 1 });
 
-    expect(res.status).toBe(400);
-    expect(mocks.createPaymentUrl).not.toHaveBeenCalled();
+    expect(res.status).toBe(200);
+    expect(res.body.amount).toBe(1000);
+    expect(mocks.createPaymentUrl).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 1000 }),
+    );
   });
 
-  it("does not mark MoMo return paid without a valid signature", async () => {
-    const res = await request(app)
-      .get("/api/payment/momo/return")
-      .query({
-        resultCode: "0",
-        orderId: "trip-1-123",
-        extraData: Buffer.from("trip-1").toString("base64"),
-      });
+  it("settles an owned trip through the local cash test gateway", async () => {
+    mocks.tripFindUnique.mockResolvedValue({
+      id: "trip-1",
+      userId: "owner-1",
+      totalPrice: 1000,
+      status: "PENDING",
+    });
+    mocks.tripUpdate.mockResolvedValue({});
 
-    expect(res.status).toBe(400);
+    const res = await request(app)
+      .post("/api/payment/test/cash/confirm")
+      .set("Authorization", `Bearer ${tokenFor("owner-1")}`)
+      .send({ tripId: "trip-1" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.paymentStatus).toBe("SUCCESS");
+    expect(mocks.tripUpdate).toHaveBeenCalledWith(expect.objectContaining({
+      where: { id: "trip-1" },
+      data: expect.objectContaining({
+        paymentMethod: "cash_test",
+        paymentStatus: "SUCCESS",
+        status: "ONGOING",
+      }),
+    }));
+  });
+
+  it("does not expose the cash test gateway in production", async () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+
+    try {
+      const res = await request(app)
+        .post("/api/payment/test/cash/confirm")
+        .set("Authorization", `Bearer ${tokenFor("owner-1")}`)
+        .send({ tripId: "trip-1" });
+
+      expect(res.status).toBe(404);
+      expect(mocks.tripFindUnique).not.toHaveBeenCalled();
+    } finally {
+      process.env.NODE_ENV = originalNodeEnv;
+    }
+  });
+
+  it.each([
+    ["post", "/api/payment/momo/create"],
+    ["get", "/api/payment/momo/return"],
+    ["post", "/api/payment/momo/ipn"],
+  ] as const)("does not expose the removed MoMo endpoint %s %s", async (method, path) => {
+    const res = await request(app)[method](path);
+
+    expect(res.status).toBe(404);
     expect(mocks.tripUpdate).not.toHaveBeenCalled();
   });
 

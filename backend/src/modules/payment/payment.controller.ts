@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import crypto from "crypto";
 import prisma from "../../infrastructure/database/prisma.js";
 import { vnpayService } from "./vnpay.service.js";
 import { asyncHandler } from "../../core/utils/asyncHandler.js";
@@ -7,11 +6,6 @@ import { PaymentStatus, Prisma, TripStatus } from "@prisma/client";
 import { memoryDb } from "../../infrastructure/fallback/memory-db.js";
 import { invalidateBootstrapUserCache } from "../../core/config/cache.js";
 
-const MOMO_PARTNER_CODE = process.env.MOMO_PARTNER_CODE ?? "MOMO";
-const MOMO_ACCESS_KEY = process.env.MOMO_ACCESS_KEY ?? "";
-const MOMO_SECRET_KEY = process.env.MOMO_SECRET_KEY ?? "";
-const MOMO_URL =
-  process.env.MOMO_URL ?? "https://test-payment.momo.vn/v2/gateway/api/create";
 const PAYMENT_AMOUNT_TOLERANCE = 1;
 
 type PaymentTrip = {
@@ -23,7 +17,7 @@ type PaymentTrip = {
 };
 
 type ConfirmedPaymentFields = {
-  paymentMethod: "vnpay" | "momo";
+  paymentMethod: "vnpay" | "cash_test";
   paymentTxnRef: string;
   paymentTxnNumber: string | null;
 };
@@ -63,8 +57,12 @@ async function loadPaymentTrip(tripId: string): Promise<PaymentTrip | null> {
 async function validateClientPaymentRequest(
   userId: string | undefined,
   tripId: string,
-  amount: number,
-): Promise<{ status?: number; message?: string; trip?: PaymentTrip }> {
+): Promise<{
+  status?: number;
+  message?: string;
+  trip?: PaymentTrip;
+  amount?: number;
+}> {
   const trip = await loadPaymentTrip(tripId);
   if (!trip) return { status: 404, message: "Trip not found" };
   if (!userId || trip.userId !== userId) {
@@ -73,16 +71,21 @@ async function validateClientPaymentRequest(
       message: "Forbidden - Trip does not belong to this user",
     };
   }
-  if (!amountMatches(trip.totalPrice, amount)) {
-    return { status: 400, message: "Payment amount does not match trip total" };
+  const amount = parsePositiveAmount(trip.totalPrice);
+  if (!amount) {
+    return { status: 409, message: "Trip total is unavailable for payment" };
   }
-  return { trip };
+  return { trip, amount };
 }
 
 function tripIdFromTxnRef(txnRef: string): string {
   const parts = txnRef.split("-");
   parts.pop();
   return parts.join("-");
+}
+
+function testPaymentsEnabled() {
+  return process.env.NODE_ENV !== "production" && process.env.ALLOW_TEST_PAYMENTS !== "false";
 }
 
 function confirmedPaymentTripUpdate(
@@ -146,87 +149,6 @@ async function markVnpayResult(result: {
   return true;
 }
 
-function buildMomoRawSignature(query: Record<string, string>): string {
-  const fields = [
-    "accessKey",
-    "amount",
-    "extraData",
-    "message",
-    "orderId",
-    "orderInfo",
-    "orderType",
-    "partnerCode",
-    "payType",
-    "requestId",
-    "responseTime",
-    "resultCode",
-    "transId",
-  ];
-
-  return fields
-    .map(
-      (field) =>
-        `${field}=${field === "accessKey" ? MOMO_ACCESS_KEY : (query[field] ?? "")}`,
-    )
-    .join("&");
-}
-
-function verifyMomoSignature(query: Record<string, string>): boolean {
-  if (!MOMO_SECRET_KEY || !MOMO_ACCESS_KEY || !query.signature) return false;
-  const expected = crypto
-    .createHmac("sha256", MOMO_SECRET_KEY)
-    .update(buildMomoRawSignature(query))
-    .digest("hex");
-  const left = Buffer.from(expected);
-  const right = Buffer.from(query.signature);
-  return left.length === right.length && crypto.timingSafeEqual(left, right);
-}
-
-async function markMomoResult(query: Record<string, string>): Promise<boolean> {
-  if (!verifyMomoSignature(query)) return false;
-
-  const tripId = Buffer.from(query["extraData"] ?? "", "base64").toString(
-    "utf-8",
-  );
-  const amount = parsePositiveAmount(query["amount"]);
-  const orderId = query["orderId"] ?? "";
-  if (!tripId || !amount || !orderId) return false;
-
-  const trip = await loadPaymentTrip(tripId);
-  if (
-    !trip ||
-    trip.paymentTxnRef !== orderId ||
-    !amountMatches(trip.totalPrice, amount)
-  ) {
-    return false;
-  }
-
-  const updateData = {
-    paymentMethod: "momo" as const,
-    paymentTxnRef: orderId,
-    paymentTxnNumber: query["transId"] ?? null,
-  };
-
-  if (query["resultCode"] === "0") {
-    try {
-      await prisma.trip.update({
-        where: { id: tripId },
-        data: confirmedPaymentTripUpdate(trip, updateData),
-      });
-    } catch {
-      memoryDb.updateTrip(tripId, confirmedPaymentTripUpdate(trip, updateData));
-    }
-  } else {
-    try {
-      await prisma.trip.update({ where: { id: tripId }, data: { ...updateData, paymentStatus: PaymentStatus.FAILED } });
-    } catch {
-      memoryDb.updateTrip(tripId, { ...updateData, paymentStatus: "FAILED" as const });
-    }
-  }
-  if (trip.userId) invalidateBootstrapUserCache(trip.userId);
-  return true;
-}
-
 function paymentResultHtml(
   provider: string,
   success: boolean,
@@ -261,20 +183,56 @@ function paymentResultHtml(
 }
 
 export const paymentController = {
+  confirmCashTestPayment: asyncHandler(async (req: Request, res: Response) => {
+    if (!testPaymentsEnabled()) {
+      res.status(404).json({ message: "Test payment gateway is disabled" });
+      return;
+    }
+
+    const { tripId } = req.body;
+    if (!tripId) {
+      res.status(400).json({ message: "tripId is required" });
+      return;
+    }
+
+    const validation = await validateClientPaymentRequest(req.userId, tripId);
+    if (!validation.trip || !validation.amount) {
+      res.status(validation.status ?? 400).json({ message: validation.message });
+      return;
+    }
+
+    const updateData = confirmedPaymentTripUpdate(validation.trip, {
+      paymentMethod: "cash_test",
+      paymentTxnRef: `cash-test-${tripId}-${Date.now()}`,
+      paymentTxnNumber: null,
+    });
+    try {
+      await prisma.trip.update({ where: { id: tripId }, data: updateData });
+    } catch {
+      memoryDb.updateTrip(tripId, updateData);
+    }
+    if (validation.trip.userId) invalidateBootstrapUserCache(validation.trip.userId);
+
+    res.json({
+      tripId,
+      amount: validation.amount,
+      paymentStatus: PaymentStatus.SUCCESS,
+      paymentMethod: "cash_test",
+    });
+  }),
+
   createVnpayPayment: asyncHandler(async (req: Request, res: Response) => {
-    const { tripId, amount, orderInfo } = req.body;
-    const parsedAmount = parsePositiveAmount(amount);
-    if (!tripId || !parsedAmount) {
-      res.status(400).json({ message: "tripId and amount are required" });
+    const { tripId, orderInfo } = req.body;
+    if (!tripId) {
+      res.status(400).json({ message: "tripId is required" });
       return;
     }
 
     const validation = await validateClientPaymentRequest(
       req.userId,
       tripId,
-      parsedAmount,
     );
-    if (!validation.trip) {
+    if (!validation.trip || !validation.amount) {
       res
         .status(validation.status ?? 400)
         .json({ message: validation.message });
@@ -292,7 +250,7 @@ export const paymentController = {
     try {
       const payment = vnpayService.createPaymentUrl({
         tripId,
-        amount: parsedAmount,
+        amount: validation.amount,
         orderInfo: orderInfo ?? `Thanh toan cho don hang ${tripId}`,
         ipAddr,
         locale,
@@ -317,7 +275,7 @@ export const paymentController = {
       paymentUrl,
       txnRef,
       tripId,
-      amount: parsedAmount,
+      amount: validation.amount,
     });
   }),
 
@@ -397,120 +355,4 @@ export const paymentController = {
     res.json(status);
   }),
 
-  createMomoPayment: asyncHandler(async (req: Request, res: Response) => {
-    const { tripId, amount, orderInfo } = req.body;
-    const parsedAmount = parsePositiveAmount(amount);
-    if (!tripId || !parsedAmount) {
-      res.status(400).json({ message: "tripId and amount are required" });
-      return;
-    }
-
-    const validation = await validateClientPaymentRequest(
-      req.userId,
-      tripId,
-      parsedAmount,
-    );
-    if (!validation.trip) {
-      res
-        .status(validation.status ?? 400)
-        .json({ message: validation.message });
-      return;
-    }
-
-    if (!MOMO_ACCESS_KEY || !MOMO_SECRET_KEY) {
-      res.status(501).json({
-        message: "MoMo payment is not configured. Please contact support.",
-        note: "Vui long lien he quan tri vien de cau hinh thanh toan MoMo.",
-      });
-      return;
-    }
-
-    const orderId = `${tripId}-${Date.now()}`;
-    const requestId = orderId;
-    const orderInfoStr = orderInfo ?? `Thanh toan Momo cho don hang ${tripId}`;
-    const redirectUrl = `${req.protocol}://${req.get("host")}/api/payment/momo/return`;
-    const ipnUrl = `${req.protocol}://${req.get("host")}/api/payment/momo/ipn`;
-    const extraData = Buffer.from(tripId).toString("base64");
-
-    const rawSignature = `accessKey=${MOMO_ACCESS_KEY}&amount=${parsedAmount}&extraData=${extraData}&ipnUrl=${ipnUrl}&orderId=${orderId}&orderInfo=${orderInfoStr}&partnerCode=${MOMO_PARTNER_CODE}&redirectUrl=${redirectUrl}&requestId=${requestId}&requestType=captureWallet`;
-    const signature = crypto
-      .createHmac("sha256", MOMO_SECRET_KEY)
-      .update(rawSignature)
-      .digest("hex");
-
-    const requestBody = {
-      partnerCode: MOMO_PARTNER_CODE,
-      partnerName: "Online Travel Agent",
-      storeId: "OnlineTravelAgent",
-      requestId,
-      amount: parsedAmount,
-      orderId,
-      orderInfo: orderInfoStr,
-      redirectUrl,
-      ipnUrl,
-      lang: "vi",
-      extraData,
-      requestType: "captureWallet",
-      signature,
-    };
-
-    try {
-      const response = await fetch(MOMO_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
-      const result = (await response.json()) as Record<string, string>;
-
-      if (result.resultCode === "0" || result.payUrl) {
-        try {
-          await prisma.trip.update({ where: { id: tripId }, data: { paymentStatus: PaymentStatus.PENDING, paymentMethod: "momo", paymentTxnRef: orderId } });
-        } catch {
-          memoryDb.updateTrip(tripId, { paymentStatus: "PENDING" as any, paymentMethod: "momo", paymentTxnRef: orderId });
-        }
-        if (validation.trip.userId) {
-          invalidateBootstrapUserCache(validation.trip.userId);
-        }
-        res.json({
-          payUrl: result.payUrl,
-          orderId,
-          tripId,
-          amount: parsedAmount,
-          deeplink: result.deeplink,
-          qrCodeUrl: result.qrCodeUrl,
-        });
-      } else {
-        res
-          .status(400)
-          .json({ message: result.message ?? "MoMo payment creation failed" });
-      }
-    } catch {
-      res.status(500).json({ message: "Failed to create MoMo payment" });
-    }
-  }),
-
-  momoReturn: asyncHandler(async (req: Request, res: Response) => {
-    const query = req.query as Record<string, string>;
-    const accepted = await markMomoResult(query);
-    if (!accepted) {
-      res.status(400).send("Invalid MoMo signature");
-      return;
-    }
-    res.send(
-      paymentResultHtml(
-        "MoMo",
-        query["resultCode"] === "0",
-        query["orderId"] ?? "",
-      ),
-    );
-  }),
-
-  momoIpn: asyncHandler(async (req: Request, res: Response) => {
-    const query = req.body as Record<string, string>;
-    if (await markMomoResult(query)) {
-      res.status(200).json({ resultCode: 0, message: "Confirm Success" });
-      return;
-    }
-    res.status(400).json({ resultCode: 97, message: "Invalid Signature" });
-  }),
 };

@@ -209,7 +209,7 @@ Client rejoin rooms sau reconnect. Khi nhận `schedule_updated`, trip provider 
 | auth | Login, register và restore session. |
 | dashboard/search/destinations | Khám phá catalog, tìm kiếm và destination. |
 | hotels/flights/tours | Duyệt detail và chọn dịch vụ. |
-| booking | Checkout, phương thức thanh toán, bank transfer, VNPay. |
+| booking | Checkout, VNPAY và tiền mặt làm cổng payment test ở local/test; Flutter release chỉ hiện cash với `--dart-define=ALLOW_TEST_PAYMENTS=true`; chuyển khoản/card trực tiếp bị ẩn đến khi có đối soát server-side. |
 | trips | My Trips, detail destination/tour, timeline lịch trình, gửi và xem trạng thái đổi lịch/hoàn tiền. |
 | favorites | Danh sách destination đã lưu. |
 | profile | Profile và documents. |

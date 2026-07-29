@@ -68,7 +68,7 @@ backend/src/
 │   ├── catalog/            stores for hotel, tour, search, review, promo
 │   ├── booking/            idempotency support
 │   ├── trips/              schedule, change-request service and realtime helpers
-│   ├── payment/            VNPay, MoMo and callbacks
+│   ├── payment/            VNPay callbacks and local test gateway
 │   ├── admin/              protected admin CRUD
 │   └── partner/            partner-scoped CRUD
 ├── app.ts
@@ -148,11 +148,11 @@ Routes ở backend/src/modules/payment/payment.routes.ts.
 | VNPay | GET /vnpay/return | Xử lý browser return. |
 | VNPay | POST /vnpay/ipn | Xử lý IPN và verify HMAC SHA-512. |
 | VNPay | GET /vnpay/status/:tripId | Owner kiểm tra payment status. |
-| MoMo | POST /momo/create | Khởi tạo request payment. |
-| MoMo | GET /momo/return | Xử lý browser return. |
-| MoMo | POST /momo/ipn | Xử lý IPN và verify HMAC SHA-256. |
+| Test cash | POST /test/cash/confirm | Chỉ local/test: owner xác nhận Trip qua cổng test; production luôn trả 404. |
 
-Payment controller xác minh user sở hữu Trip và amount gửi lên khớp totalPrice ở server trước khi tạo request. Booking mới bắt đầu với `TripStatus.PENDING`; callback thanh toán đã xác thực chỉ chuyển trạng thái đó sang `ONGOING`. Nếu Admin đã hủy booking, callback vẫn ghi nhận payment result nhưng không kích hoạt lại chuyến đi.
+Payment controller xác minh user sở hữu Trip, đọc `totalPrice` đã lưu trên Trip và không nhận amount từ client khi tạo request. Booking mới bắt đầu với `TripStatus.PENDING`; callback thanh toán đã xác thực chỉ chuyển trạng thái đó sang `ONGOING`. Nếu Admin đã hủy booking, callback vẫn ghi nhận payment result nhưng không kích hoạt lại chuyến đi.
+
+`POST /test/cash/confirm` chỉ tồn tại để kiểm thử UI/payment flow: nó ghi `paymentMethod=cash_test` và `PaymentStatus.SUCCESS` cho Trip của owner. Route trả `404` khi `NODE_ENV=production`, và local có thể tắt với `ALLOW_TEST_PAYMENTS=false`.
 
 ## Admin API
 

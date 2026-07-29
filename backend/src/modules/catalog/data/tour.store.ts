@@ -59,7 +59,7 @@ export const tourStore = {
     tourId: string,
     date: string,
     guests: string,
-    totalPrice?: number,
+    _clientTotalPrice?: number,
     requestId?: string,
   ) {
     if (requestId) {
@@ -84,7 +84,7 @@ export const tourStore = {
             imagePath: tour.imagePath,
             isUpcoming: true,
             tourPackageId: tour.id,
-            totalPrice: totalPrice,
+            totalPrice: tour.price,
             requestId,
           },
         });

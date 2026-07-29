@@ -43,6 +43,7 @@ describe("tour booking store", () => {
       name: "Ha Giang",
       departure: "Ha Noi",
       imagePath: "/uploads/tour.jpg",
+      price: 750,
     });
     mocks.createTrip.mockResolvedValue({ id: "trip-1", userId: "user-1" });
     mocks.copyTemplateToTrip.mockResolvedValue(undefined);
@@ -72,6 +73,11 @@ describe("tour booking store", () => {
         tripDate: "2026-08-01",
       },
       tx,
+    );
+    expect(mocks.createTrip).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ totalPrice: 750 }),
+      }),
     );
   });
 });

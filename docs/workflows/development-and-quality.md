@@ -162,7 +162,7 @@ CI file là .github/workflows/ci.yml. Nó chạy khi push hoặc pull request v�
 - Không start Express server với môi trường production-like.
 - Không chạy browser test Admin/Partner.
 - Không chạy Flutter device/emulator E2E.
-- Không gọi VNPay/MoMo sandbox hay webhook.
+- Không gọi VNPay sandbox hay webhook.
 - Không deploy tự động.
 
 Đây là CI cho dependency/build/static/unit integration scope, không phải toàn bộ production validation.

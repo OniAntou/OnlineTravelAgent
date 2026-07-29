@@ -46,6 +46,7 @@ describe("destination booking store", () => {
       name: "Da Lat",
       location: "Lam Dong",
       imagePath: "/uploads/dalat.jpg",
+      price: 900,
     });
     mocks.createTrip.mockResolvedValue({
       id: "trip-1",
@@ -76,6 +77,11 @@ describe("destination booking store", () => {
         tripDate: "2026-08-01",
       },
       tx,
+    );
+    expect(mocks.createTrip).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ totalPrice: 900 }),
+      }),
     );
   });
 

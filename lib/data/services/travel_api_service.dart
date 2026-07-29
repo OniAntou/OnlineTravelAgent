@@ -301,27 +301,17 @@ class TravelApiService {
       payment.checkPromoCode(code);
   Future<Map<String, dynamic>> createVnpayPayment({
     required String tripId,
-    required double amount,
     String? orderInfo,
     String? locale,
   }) => payment.createVnpayPayment(
     tripId: tripId,
-    amount: amount,
     orderInfo: orderInfo,
     locale: locale,
   );
   Future<Map<String, dynamic>> checkPaymentStatus(String tripId) =>
       payment.checkPaymentStatus(tripId);
-  Future<Map<String, dynamic>> createMomoPayment({
-    required String tripId,
-    required double amount,
-    String? orderInfo,
-  }) => payment.createMomoPayment(
-    tripId: tripId,
-    amount: amount,
-    orderInfo: orderInfo,
-  );
-
+  Future<Map<String, dynamic>> confirmCashTestPayment(String tripId) =>
+      payment.confirmCashTestPayment(tripId);
   // Delegated Partner Methods
   Future<List<Hotel>> getPartnerHotels() => partner.getPartnerHotels();
   Future<Hotel> createPartnerHotel(Map<String, dynamic> data) =>

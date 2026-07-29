@@ -76,6 +76,7 @@ export const adminRoomSchema = z.object({
   description: z.string().optional(),
   price: z.number().min(0, "price must be positive"),
   capacity: z.number().min(1, "capacity must be at least 1"),
+  inventory: z.number().int().min(1, "inventory must be at least 1").optional(),
   imagePath: z.string().optional(),
   amenities: z.array(z.string()).optional(),
 });

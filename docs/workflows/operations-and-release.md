@@ -153,7 +153,7 @@ For mobile releases, test an existing device cache with legacy Vietnamese trip l
 | Admin/partner access | Panel/API permission đúng role. |
 | Upload | Storage path và type/size rules hoạt động. |
 | Booking | requestId, Trip persistence và owner state đúng. |
-| VNPay/MoMo sandbox nếu thay payment | Callback signature/status/ref đúng. |
+| VNPay sandbox nếu thay payment | Callback signature/status/ref đúng. |
 | Schedule update nếu thay realtime | Event đến và client refetch schedule đúng. |
 
 ## Tương quan với CI

@@ -7,11 +7,11 @@ function renderTours(rows){
   tb.innerHTML=rows.map(t=>listRow([
     {label:'Tên Tour', val:t.name, cls:'w-1/3'},
     {label:'Khởi hành', val:t.departure},
-    {label:'Giá', val:`${fmtUSD(t.price)} ${t.originalPrice?`<s class="text-muted font-normal ml-2">${fmtUSD(t.originalPrice)}</s>`:''}`},
-    {label:'Tag', val:t.isPopular?'<span class="px-3 py-1 bg-primary text-white rounded-full text-[10px]">HOT</span>':''}
+    {label:'Giá', html:`${fmtUSD(t.price)} ${t.originalPrice?`<s class="text-muted font-normal ml-2">${fmtUSD(t.originalPrice)}</s>`:''}`},
+    {label:'Tag', html:t.isPopular?'<span class="px-3 py-1 bg-primary text-white rounded-full text-[10px]">HOT</span>':''}
   ], `
-    <button class="w-10 h-10 rounded-full bg-offwhite hover:bg-silver text-ink transition-all flex items-center justify-center" onclick="editTour('${t.id}')"><i class="fa-solid fa-pen"></i></button>
-    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('tour','${t.id}',decodeURIComponent('${encodeURIComponent(t.name).replace(/'/g,"%27")}'))"><i class="fa-solid fa-trash"></i></button>
+    <button class="w-10 h-10 rounded-full bg-offwhite hover:bg-silver text-ink transition-all flex items-center justify-center" onclick="editTour(decodeActionValue('${encodeActionValue(t.id)}'))"><i class="fa-solid fa-pen"></i></button>
+    <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDel('tour',decodeActionValue('${encodeActionValue(t.id)}'),decodeActionValue('${encodeActionValue(t.name)}'))"><i class="fa-solid fa-trash"></i></button>
   `)).join('');
 }
 function openTourModal(tour=null){

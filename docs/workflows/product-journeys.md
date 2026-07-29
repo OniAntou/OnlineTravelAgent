@@ -124,14 +124,14 @@ flowchart TD
 |---|---|---|
 | Destination/custom trip | POST /trips/book | Tạo Trip và có thể copy destination schedule. |
 | Flight | POST /trips/book-flight | Tạo Trip liên kết flight. |
-| Hotel/room | POST /hotels/book | Tạo Trip liên kết hotel/room. |
+| Hotel/room | POST /hotels/book | Tạo Trip liên kết hotel/room; trả 409 nếu room type hết unit trong khoảng lưu trú. |
 | Tour | POST /tours/book | Tạo Trip và copy tour schedule template. |
 
 ### Quy tắc server-side
 
 - Client sinh requestId; database có unique userId + requestId để retry không tạo trip trùng.
 - Backend kiểm source và dữ liệu booking trong transaction.
-- Trip lưu owner, source relation, total price, promo/discount và payment state. Booking mới có `TripStatus.PENDING`; callback thanh toán hợp lệ chuyển pending sang `ONGOING`, nhưng không được kích hoạt lại booking mà Admin đã hủy.
+- Trip lưu owner, source relation, total price, promo/discount và payment state. `totalPrice` được backend tính từ bản ghi catalog: destination/tour/flight dùng giá hiện hành của source, hotel dùng giá room nhân số đêm hợp lệ. Hotel stay lưu hai UTC date boundary; transaction khóa room type, chỉ đếm interval chồng lấp của Trip không `CANCELLED`, nên hủy Trip tự giải phóng một unit. Booking mới có `TripStatus.PENDING`; callback thanh toán hợp lệ chuyển pending sang `ONGOING`, nhưng không được kích hoạt lại booking mà Admin đã hủy.
 - Destination/tour dùng template-to-trip copy; hotel/flight không sinh cùng loại schedule copy.
 - User chỉ có thể đọc Trip của chính mình; thay đổi lịch hoặc hoàn tiền đi qua request có Admin xét duyệt.
 
@@ -144,27 +144,27 @@ Payment luôn bắt đầu với Trip đã được tạo, không để provider
 | Thành phần | Trách nhiệm |
 |---|---|
 | Flutter payment screens | Chọn phương thức, hiển thị redirect/status/error. |
-| Payment API | Xác minh Trip owner và amount; tạo provider request; xử lý callback. |
+| Payment API | Xác minh Trip owner, lấy amount từ `Trip.totalPrice`; tạo provider request; xử lý callback. |
 | Provider | Xác thực/payment processing và gửi return/IPN. |
 | PostgreSQL Trip | Lưu payment method, PaymentStatus và transaction references. |
 
 ### VNPay
 
-1. Flutter yêu cầu POST /payment/vnpay/create cho Trip của user.
-2. Backend đối chiếu amount client với totalPrice của Trip.
+1. Flutter yêu cầu POST /payment/vnpay/create chỉ với Trip của user (và thông tin hiển thị tùy chọn), không gửi amount.
+2. Backend đọc `Trip.totalPrice` đã lưu và từ chối Trip không có amount dương.
 3. Backend tạo request đã ký và trả URL/provider information.
 4. User hoàn tất ở VNPay.
 5. VNPay gọi return và IPN.
 6. Backend kiểm HMAC SHA-512, cập nhật PaymentStatus và transaction reference.
 7. Flutter kiểm GET /payment/vnpay/status/:tripId hoặc reload trip để hiển thị kết quả.
 
-### MoMo
-
-Backend có POST /payment/momo/create, GET /payment/momo/return và POST /payment/momo/ipn. Mobile payment menu hiện tại không nên được coi là đã expose hoàn chỉnh luồng MoMo chỉ vì backend integration tồn tại; trước khi hiển thị cho user, cần có caller/UI mapping và test callback hoàn chỉnh.
-
 ### Payment status contract
 
 Server enum là PENDING, SUCCESS hoặc FAILED. Client code phải map contract này một cách thống nhất; không nên thêm điều kiện string riêng như PAID mà không có mapper/API contract tương ứng.
+
+### Phương thức hiển thị trên mobile
+
+Mobile hiện chỉ hiển thị VNPAY cho luồng redirect đã có provider callback và tiền mặt làm cổng test thanh toán. Ở local/test, tiền mặt tạo Trip rồi gọi `POST /payment/test/cash/confirm` để ghi `PaymentStatus.SUCCESS`; endpoint này luôn bị tắt ở production và có thể tắt local bằng `ALLOW_TEST_PAYMENTS=false`. Flutter release chỉ hiển thị cổng này khi build có `--dart-define=ALLOW_TEST_PAYMENTS=true`. Chuyển khoản ngân hàng, card trực tiếp, PayPal và Apple Pay không được hiển thị cho đến khi có tích hợp/đối soát phía server; việc người dùng bấm “đã chuyển khoản” không bao giờ là bằng chứng thanh toán thành công.
 
 ## 6. My Trips và lịch trình
 
@@ -190,7 +190,7 @@ flowchart LR
     A -->|"Từ chối"| X["Trip giữ nguyên"]
 ~~~
 
-Admin có thể thêm ghi chú. Khi duyệt, service claim request `PENDING` trong cùng transaction để không có hai quyết định đồng thời. Refund là mô phỏng cho đồ án: hệ thống lưu số tiền được duyệt nhưng không gọi VNPay, MoMo hoặc provider khác; payment history của Trip vẫn giữ nguyên.
+Admin có thể thêm ghi chú. Khi duyệt, service claim request `PENDING` trong cùng transaction để không có hai quyết định đồng thời. Refund là mô phỏng cho đồ án: hệ thống lưu số tiền được duyệt nhưng không gọi provider refund endpoint; payment history của Trip vẫn giữ nguyên.
 
 Schedule detail UI không tự tin socket payload là toàn bộ timeline. Socket chỉ báo rằng cần tải lại dữ liệu từ server.
 
@@ -214,7 +214,7 @@ Admin API luôn được Basic Auth ngay cả khi static panel protection chưa 
 2. Partner panel gọi /api/partner.
 3. partnerAuth kiểm role.
 4. Controller lấy partnerId từ JWT.
-5. Partner CRUD hotel, tour, room và đọc stats trong scope của chính mình.
+5. Partner panel chỉ expose CRUD hotel, tour, room và đọc stats trong scope của chính mình; không tải các màn hình/route catalog, flight, trip, user, category hoặc document mà Partner API không hỗ trợ.
 6. Server từ chối record không thuộc partner dù UI có cố gọi URL thủ công.
 
 ## 9. Documents và reviews

@@ -12,14 +12,12 @@ class PaymentApiService {
 
   Future<Map<String, dynamic>> createVnpayPayment({
     required String tripId,
-    required double amount,
     String? orderInfo,
     String? locale,
   }) async {
     return _client.postJson('/api/payment/vnpay/create', {
       'tripId': tripId,
-      'amount': amount,
-      'orderInfo': orderInfo ?? 'Thanh toán đặt chỗ Online Travel Agent',
+      'orderInfo': orderInfo ?? 'Thanh toÃ¡n Ä‘áº·t chá»— Online Travel Agent',
       'locale': locale ?? 'vn',
     }, queueOnFailure: false);
   }
@@ -28,15 +26,9 @@ class PaymentApiService {
     return _client.getJson('/api/payment/vnpay/status/$tripId');
   }
 
-  Future<Map<String, dynamic>> createMomoPayment({
-    required String tripId,
-    required double amount,
-    String? orderInfo,
-  }) async {
-    return _client.postJson('/api/payment/momo/create', {
+  Future<Map<String, dynamic>> confirmCashTestPayment(String tripId) async {
+    return _client.postJson('/api/payment/test/cash/confirm', {
       'tripId': tripId,
-      'amount': amount,
-      'orderInfo': orderInfo ?? 'Thanh toán đặt chỗ Online Travel Agent',
     }, queueOnFailure: false);
   }
 }

@@ -72,6 +72,7 @@ export interface CreateRoomBody {
   description?: string;
   price: number;
   capacity: number;
+  inventory?: number;
   imagePath?: string;
   amenities?: string[];
 }

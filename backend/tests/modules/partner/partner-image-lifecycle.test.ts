@@ -83,6 +83,31 @@ describe("partner image lifecycle", () => {
     }));
   });
 
+  it("persists every tour field that the partner form submits", async () => {
+    const response = await request(app)
+      .post("/api/partner/tours")
+      .set("Authorization", `Bearer ${partnerToken}`)
+      .send({
+        name: "Complete tour",
+        departureDate: "2026-09-01",
+        originalPrice: 1200,
+        isPopular: true,
+        includesGuide: false,
+        guideFee: 55,
+      });
+
+    expect(response.status).toBe(201);
+    expect(mocks.tourCreate).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({
+        departureDate: "2026-09-01",
+        originalPrice: 1200,
+        isPopular: true,
+        includesGuide: false,
+        guideFee: 55,
+      }),
+    }));
+  });
+
   it("deletes the replaced tour image only after its database update", async () => {
     const response = await request(app)
       .put("/api/partner/tours/tour-1")
@@ -92,6 +117,18 @@ describe("partner image lifecycle", () => {
     expect(response.status).toBe(200);
     expect(mocks.tourUpdate).toHaveBeenCalledBefore(media.deleteManagedPublicImages as any);
     expect(media.deleteManagedPublicImages).toHaveBeenCalledWith([oldImage]);
+  });
+
+  it("keeps partner-editable tour fields when the tour is updated", async () => {
+    const response = await request(app)
+      .put("/api/partner/tours/tour-1")
+      .set("Authorization", `Bearer ${partnerToken}`)
+      .send({ name: "Updated tour", isPopular: true, includesGuide: false, guideFee: 35 });
+
+    expect(response.status).toBe(200);
+    expect(mocks.tourUpdate).toHaveBeenCalledWith(expect.objectContaining({
+      data: expect.objectContaining({ isPopular: true, includesGuide: false, guideFee: 35 }),
+    }));
   });
 
   it("deletes a removed room image after the room deletion", async () => {

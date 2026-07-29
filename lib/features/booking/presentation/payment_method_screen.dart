@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../data/services/api_provider.dart';
 import '../../../core/utils/api_exception.dart';
 import '../../../core/utils/app_utils.dart';
-import 'bank_transfer_screen.dart';
+import '../application/payment_test_gateway.dart';
 // removed vnpay_webview_screen
 
 class PaymentMethod {
@@ -37,7 +38,7 @@ class PaymentMethodScreen extends ConsumerStatefulWidget {
     super.key,
     required this.totalPrice,
     required this.onPaymentSuccess,
-    this.initialMethodId = 'mastercard',
+    this.initialMethodId = 'vnpay',
   });
 
   @override
@@ -47,8 +48,12 @@ class PaymentMethodScreen extends ConsumerStatefulWidget {
 
 class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
   late List<PaymentMethod> _methods;
-  String _selectedMethodId = 'mastercard';
+  String _selectedMethodId = 'vnpay';
   bool _isProcessing = false;
+
+  static const _cashTestPaymentsExplicitlyEnabled = bool.fromEnvironment(
+    'ALLOW_TEST_PAYMENTS',
+  );
 
   @override
   void initState() {
@@ -62,48 +67,17 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
         description: 'Thanh toán qua mã QR, thẻ ATM, Visa',
         logo: _buildVnpayLogo(),
       ),
-      PaymentMethod(
-        id: 'mastercard',
-        name: 'Master Card',
-        type: 'mastercard',
-        description: 'Thanh toán qua thẻ quốc tế Mastercard',
-        logo: _buildMasterCardLogo(),
-      ),
-      PaymentMethod(
-        id: 'visa',
-        name: 'Visa',
-        type: 'visa',
-        description: 'Thanh toán qua thẻ quốc tế Visa',
-        logo: _buildVisaLogo(),
-      ),
-      PaymentMethod(
-        id: 'bank_transfer',
-        name: 'Chuyển khoản ngân hàng',
-        type: 'bank_transfer',
-        description: 'Chuyển khoản qua tài khoản ngân hàng',
-        logo: _buildBankTransferLogo(),
-      ),
-      PaymentMethod(
-        id: 'paypal',
-        name: 'PayPal',
-        type: 'paypal',
-        description: 'Thanh toán quốc tế an toàn qua PayPal',
-        logo: _buildPayPalLogo(),
-      ),
-      PaymentMethod(
-        id: 'applepay',
-        name: 'Apple Pay',
-        type: 'applepay',
-        description: 'Thanh toán nhanh qua ví Apple Pay',
-        logo: _buildApplePayLogo(),
-      ),
-      PaymentMethod(
-        id: 'cash',
-        name: 'Tiền mặt',
-        type: 'cash',
-        description: 'Thanh toán trực tiếp khi khởi hành',
-        logo: _buildCashLogo(),
-      ),
+      if (isCashTestPaymentEnabled(
+        isReleaseBuild: kReleaseMode,
+        allowTestPayments: _cashTestPaymentsExplicitlyEnabled,
+      ))
+        PaymentMethod(
+          id: 'cash',
+          name: 'Tiền mặt',
+          type: 'cash',
+          description: 'Cổng thanh toán test cục bộ',
+          logo: _buildCashLogo(),
+        ),
     ];
   }
 
@@ -125,135 +99,6 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
           fontWeight: FontWeight.bold,
           fontSize: 9,
         ),
-      ),
-    );
-  }
-
-  Widget _buildBankTransferLogo() {
-    return Container(
-      width: 44,
-      height: 28,
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E3A5F),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      alignment: Alignment.center,
-      child: const Icon(Icons.account_balance, color: Colors.white, size: 16),
-    );
-  }
-
-  Widget _buildMasterCardLogo() {
-    return SizedBox(
-      width: 44,
-      height: 28,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned(
-            left: 4,
-            child: Container(
-              width: 20,
-              height: 20,
-              decoration: const BoxDecoration(
-                color: Color(0xFFEB001B),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-          Positioned(
-            right: 4,
-            child: Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF79E1B).withValues(alpha: 0.85),
-                shape: BoxShape.circle,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildVisaLogo() {
-    return Container(
-      width: 44,
-      height: 28,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F7FA),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-      ),
-      alignment: Alignment.center,
-      child: const Text(
-        'VISA',
-        style: TextStyle(
-          color: Color(0xFF1A1F71),
-          fontWeight: FontWeight.bold,
-          fontStyle: FontStyle.italic,
-          fontSize: 12,
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPayPalLogo() {
-    return Container(
-      width: 44,
-      height: 28,
-      decoration: BoxDecoration(
-        color: const Color(0xFFE8F0FE),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFFD2E3FC)),
-      ),
-      alignment: Alignment.center,
-      child: RichText(
-        text: const TextSpan(
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.bold,
-            fontStyle: FontStyle.italic,
-          ),
-          children: [
-            TextSpan(
-              text: 'Pay',
-              style: TextStyle(color: Color(0xFF003087)),
-            ),
-            TextSpan(
-              text: 'Pal',
-              style: TextStyle(color: Color(0xFF0079C1)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildApplePayLogo() {
-    return Container(
-      width: 44,
-      height: 28,
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      alignment: Alignment.center,
-      child: const Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.apple, color: Colors.white, size: 14),
-          SizedBox(width: 1),
-          Text(
-            'Pay',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 10,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -291,12 +136,11 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
         return;
       }
 
-      if (selectedMethod.type == 'bank_transfer') {
-        await _handleBankTransfer();
+      if (selectedMethod.type == 'cash') {
+        await _handleCashTestPayment();
         return;
       }
 
-      // Other methods (card, cash, etc.)
       final tripId = await widget.onPaymentSuccess();
       setState(() => _isProcessing = false);
       if (tripId != null && mounted) {
@@ -360,10 +204,7 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
       }
 
       final api = ref.read(apiProvider);
-      final result = await api.createVnpayPayment(
-        tripId: tripId,
-        amount: widget.totalPrice,
-      );
+      final result = await api.createVnpayPayment(tripId: tripId);
 
       if (!mounted) return;
       setState(() => _isProcessing = false);
@@ -387,7 +228,9 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
         _showSuccessDialog(tripId);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Thanh toán VNPAY bị hủy hoặc thất bại')),
+          const SnackBar(
+            content: Text('Thanh toán VNPAY bị hủy hoặc thất bại'),
+          ),
         );
       }
     } catch (e) {
@@ -398,6 +241,19 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
         ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
       }
     }
+  }
+
+  Future<void> _handleCashTestPayment() async {
+    final tripId = await widget.onPaymentSuccess();
+    if (tripId == null) {
+      if (mounted) setState(() => _isProcessing = false);
+      return;
+    }
+
+    await ref.read(apiProvider).confirmCashTestPayment(tripId);
+    if (!mounted) return;
+    setState(() => _isProcessing = false);
+    _showSuccessDialog(tripId);
   }
 
   Future<bool> _pollPaymentStatus(String tripId) async {
@@ -426,22 +282,29 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
                 isCompleted = true;
                 Navigator.pop(dialogContext);
               },
-              child: const Text('Hủy bỏ', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-            )
+              child: const Text(
+                'Hủy bỏ',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
 
     int attempts = 0;
-    while (!isCompleted && attempts < 120) { // Timeout sau 10 phút
+    while (!isCompleted && attempts < 120) {
+      // Timeout sau 10 phút
       await Future.delayed(const Duration(seconds: 5));
       if (isCompleted || !mounted) break;
 
       try {
         final statusRes = await api.checkPaymentStatus(tripId);
         final status = statusRes['paymentStatus'] as String?;
-        if (status == 'PAID') {
+        if (status == 'SUCCESS') {
           isSuccess = true;
           isCompleted = true;
           if (mounted) Navigator.pop(context); // Đóng dialog
@@ -463,43 +326,6 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
     }
 
     return isSuccess;
-  }
-
-  Future<void> _handleBankTransfer() async {
-    try {
-      final tripId = await widget.onPaymentSuccess();
-      if (tripId == null) {
-        if (mounted) {
-          setState(() => _isProcessing = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Không thể tạo đơn hàng')),
-          );
-        }
-        return;
-      }
-
-      if (!mounted) return;
-      setState(() => _isProcessing = false);
-
-      final confirmed = await Navigator.push<bool>(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              BankTransferScreen(amount: widget.totalPrice, tripId: tripId),
-        ),
-      );
-
-      if (confirmed == true && mounted) {
-        _showSuccessDialog(tripId);
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isProcessing = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
-      }
-    }
   }
 
   void _showSuccessDialog(String tripId) {
@@ -561,7 +387,7 @@ class _PaymentMethodScreenState extends ConsumerState<PaymentMethodScreen> {
                   const SizedBox(height: 12),
                   Text(
                     _selectedMethodId == 'cash'
-                        ? 'Yêu cầu đặt tour của bạn đã được ghi nhận. Quý khách vui lòng chuẩn bị thanh toán bằng tiền mặt khi khởi hành chuyến đi.'
+                        ? 'Thanh toán tiền mặt (cổng test) đã được xác nhận thành công. Bạn có thể kiểm tra chi tiết trong mục Chuyến đi.'
                         : 'Yêu cầu dịch vụ của bạn đã được xác nhận thành công. Bạn có thể kiểm tra chi tiết trong mục Chuyến đi.',
                     style: const TextStyle(
                       color: Colors.grey,

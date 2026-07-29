@@ -25,7 +25,7 @@ flowchart LR
     AP -->|"Admin API"| B
     PP -->|"Partner API"| B
     B -->|"Prisma"| DB[("PostgreSQL")]
-    B -->|"signed request/callback"| PAY["VNPay / MoMo"]
+    B -->|"signed request/callback"| PAY["VNPay"]
     B -->|"file storage path"| UP["Uploads directory"]
 ~~~
 

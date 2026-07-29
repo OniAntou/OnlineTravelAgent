@@ -64,7 +64,21 @@ export const partnerController = {
 
   createTour: asyncHandler(async (req: Request, res: Response) => {
     const partnerId = (req as any).userId;
-    const { name, description, duration, price, imagePath, destinations, includes, departure } = req.body;
+    const {
+      name,
+      description,
+      duration,
+      price,
+      originalPrice,
+      imagePath,
+      destinations,
+      includes,
+      departure,
+      departureDate,
+      isPopular,
+      includesGuide,
+      guideFee,
+    } = req.body;
     
     const tour = await prisma.tourPackage.create({
       data: {
@@ -74,10 +88,15 @@ export const partnerController = {
         description,
         duration: duration || "3N2Đ",
         price: price || 0,
+        originalPrice: originalPrice ?? null,
         imagePath: imagePath || "assets/images/tour_placeholder.jpg",
         destinations: destinations || [],
         includes: includes || ["Khách sạn", "Xe đưa đón", "Ăn sáng"],
-        departure: departure || "TP.HCM"
+        departure: departure || "TP.HCM",
+        departureDate: departureDate || null,
+        isPopular: isPopular ?? false,
+        includesGuide: includesGuide ?? true,
+        guideFee: guideFee ?? 50,
       }
     });
     res.status(201).json(tour);
@@ -127,7 +146,7 @@ export const partnerController = {
     const id = req.params.id as string;
     const tour = await prisma.tourPackage.findFirst({ where: { id, partnerId } });
     if (!tour) return res.status(404).json({ message: "Not found or unauthorized" });
-    const { id: _id, partnerId: _partnerId, isPopular: _isPopular, ...data } = req.body;
+    const { id: _id, partnerId: _partnerId, ...data } = req.body;
     
     const updated = await prisma.tourPackage.update({
       where: { id },
@@ -167,7 +186,7 @@ export const partnerController = {
     const hotelId = req.params.hotelId as string;
     const hotel = await prisma.hotel.findFirst({ where: { id: hotelId, partnerId } });
     if (!hotel) return res.status(404).json({ message: "Not found or unauthorized" });
-    const { name, description, price, capacity, imagePath, amenities } = req.body;
+    const { name, description, price, capacity, inventory, imagePath, amenities } = req.body;
     const room = await prisma.room.create({
       data: {
         id: `room-${crypto.randomUUID()}`,
@@ -176,6 +195,7 @@ export const partnerController = {
         description: description || "",
         price: Number(price) || 0,
         capacity: Number(capacity) || 1,
+        inventory: inventory ?? 1,
         imagePath: imagePath || "",
         amenities: amenities || []
       }
@@ -194,10 +214,10 @@ export const partnerController = {
       select: { imagePath: true },
     });
     
-    const { name, description, price, capacity, imagePath, amenities } = req.body;
+    const { name, description, price, capacity, inventory, imagePath, amenities } = req.body;
     await prisma.room.updateMany({
       where: { id: roomId, hotelId },
-      data: { name, description, price: Number(price) || 0, capacity: Number(capacity) || 1, imagePath, amenities }
+      data: { name, description, price: Number(price) || 0, capacity: Number(capacity) || 1, inventory, imagePath, amenities }
     });
     await deleteManagedPublicImages(replacedImagePath(room?.imagePath ?? "", imagePath));
     res.json({ success: true });

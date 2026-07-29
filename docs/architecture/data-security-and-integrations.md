@@ -53,7 +53,7 @@ Role chỉ là một lớp authorization. Ownership checks vẫn cần thực hi
 Trip ghi:
 
 - mô tả/lịch sử display như destination, location, date, guests, image path;
-- source relation tùy loại booking: destinationId, tourPackageId, hotelId, roomId hoặc flightId;
+- source relation tùy loại booking: destinationId, tourPackageId, hotelId, roomId hoặc flightId; hotel Trip còn có hotelCheckIn/hotelCheckOut UTC;
 - userId owner;
 - totalPrice, promoCode, discount;
 - requestId;
@@ -71,7 +71,8 @@ Trip không thay thế catalog entity. Nó lưu snapshot/quan hệ đủ để l
 | Trip liên kết source hợp lệ | Foreign-key/relation và validation/transaction trong booking flow. |
 | User chỉ thấy trip của mình | userId filter và authorization ở client router. |
 | Partner không sửa dữ liệu của partner khác | partnerId scope trong partner controller. |
-| Payment không tin amount client | Server đối chiếu với totalPrice lưu trên Trip. |
+| Payment không tin amount client | Server chỉ dùng totalPrice lưu trên Trip; request tạo payment không nhận amount từ client. |
+| Không overbook room type | Room.inventory là số unit dương; transaction khóa Room, đếm stay interval chồng lấp không CANCELLED và trả 409 khi hết unit. |
 | Một Trip chỉ có một yêu cầu đang chờ | Service kiểm tra trước khi ghi và partial unique index theo `trip_id` khi status là `PENDING`. |
 | Đổi lịch/hoàn tiền chỉ thay Trip khi duyệt | Transaction claim request `PENDING`, lưu quyết định rồi mới cập nhật date hoặc `CANCELLED` atomically. |
 | Lý do và quyết định không lộ qua Data API | `trip_change_requests` bật RLS, revoke quyền các role API Supabase; chỉ server-side Prisma truy cập. |
@@ -163,7 +164,8 @@ Secrets được lấy từ environment; không đặt giá trị production tro
 | PENDING_IMAGE_CLEANUP_INTERVAL_MINUTES | Chu kỳ dọn upload tạm; mặc định 60 phút. |
 | UPLOAD_DIR | Chỉ đọc tương thích các URL `/uploads/...` cũ. |
 | REQUIRE_ADMIN_BASIC_AUTH | Bảo vệ static /admin panel bằng Basic Auth khi bật. |
-| Payment provider variables | Khóa/callback config của VNPay và MoMo. |
+| Payment provider variables | Khóa/callback config của VNPay. |
+| ALLOW_TEST_PAYMENTS | Bật cổng cash test ở local/test; production luôn tắt. Flutter release chỉ hiển thị cash khi build có `--dart-define=ALLOW_TEST_PAYMENTS=true`. |
 
 Env parser yêu cầu các secret cần thiết ngoài test; production yêu cầu CORS_ORIGINS để không accidentally mở CORS.
 
@@ -172,16 +174,10 @@ Env parser yêu cầu các secret cần thiết ngoài test; production yêu c�
 ### VNPay
 
 - Client yêu cầu tạo payment cho Trip đã tồn tại.
-- Backend kiểm ownership và total amount.
+- Backend kiểm ownership và lấy total amount từ `Trip.totalPrice` đã persist.
 - Backend tạo request signed.
 - Return và IPN được verify HMAC SHA-512.
 - PaymentStatus/transaction reference được cập nhật ở server.
-
-### MoMo
-
-- Backend tạo request cho Trip của owner.
-- Return/IPN được xử lý ở backend.
-- Callback dùng HMAC SHA-256.
 
 Provider callback là authority cho kết quả digital payment. UI phải luôn map PaymentStatus server-side thay vì suy luận thành công chỉ từ điều hướng browser.
 

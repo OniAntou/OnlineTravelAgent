@@ -33,7 +33,7 @@ OnlineTravelAgent là sản phẩm đặt và quản lý du lịch với:
 - PostgreSQL qua Prisma;
 - Drift/SQLite cache ở thiết bị;
 - Socket.IO cho cập nhật lịch trình;
-- VNPay và MoMo ở ranh giới thanh toán;
+- VNPay ở ranh giới thanh toán;
 - static Admin và Partner panels do backend phục vụ;
 - GitHub Actions CI cho backend và Flutter.
 
