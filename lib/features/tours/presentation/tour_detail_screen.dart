@@ -181,7 +181,7 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                     ),
                       // B. Title and Badge
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 32, 20, 0),
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
