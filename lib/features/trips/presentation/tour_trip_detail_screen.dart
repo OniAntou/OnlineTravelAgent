@@ -33,13 +33,10 @@ class _TourTripDetailScreenState extends ConsumerState<TourTripDetailScreen> {
   TourPackage? _findTourPackage(WidgetRef ref) {
     final tourPackages = ref.watch(toursProvider);
     final name = widget.trip.destination.toLowerCase().trim();
-    try {
-      return tourPackages.firstWhere(
-        (t) => t.name.toLowerCase().trim() == name,
-      );
-    } catch (_) {
-      return null;
-    }
+    return tourPackages.cast<TourPackage?>().firstWhere(
+      (t) => t?.name.toLowerCase().trim() == name,
+      orElse: () => null,
+    );
   }
 
   Color _statusColor() {

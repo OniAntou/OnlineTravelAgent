@@ -26,13 +26,10 @@ class PlaceTripDetailScreen extends ConsumerWidget {
   Destination? _findDestination(WidgetRef ref) {
     final destinations = ref.watch(destinationsProvider);
     final name = trip.destination.toLowerCase().trim();
-    try {
-      return destinations.firstWhere(
-        (d) => d.name.toLowerCase().trim() == name,
-      );
-    } catch (_) {
-      return null;
-    }
+    return destinations.cast<Destination?>().firstWhere(
+      (d) => d?.name.toLowerCase().trim() == name,
+      orElse: () => null,
+    );
   }
 
   Color _statusColor() {

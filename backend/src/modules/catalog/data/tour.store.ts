@@ -9,14 +9,20 @@ import {
   recoverIdempotentTrip,
 } from "../../booking/data/booking-idempotency.js";
 
+
 export const tourStore = {
   async getTours() {
     try {
       const tours = await prisma.tourPackage.findMany({ orderBy: { createdAt: "desc" } });
       return attachRealReviews(tours, "tour");
-    } catch {
-      assertMemoryFallbackEnabled();
-      return mockTourPackages;
+    } catch (error) {
+      console.error("[tour.store] Error fetching tours:", error);
+      try {
+        assertMemoryFallbackEnabled();
+        return mockTourPackages;
+      } catch {
+        throw error;
+      }
     }
   },
 
@@ -26,9 +32,14 @@ export const tourStore = {
       if (!tour) return null;
       const items = await attachRealReviews([tour], "tour");
       return items[0];
-    } catch {
-      assertMemoryFallbackEnabled();
-      return mockTourPackages.find((t) => t.id === id) || null;
+    } catch (error) {
+      console.error(`[tour.store] Error fetching tour by ID ${id}:`, error);
+      try {
+        assertMemoryFallbackEnabled();
+        return mockTourPackages.find((t) => t.id === id) || null;
+      } catch {
+        throw error;
+      }
     }
   },
 
@@ -48,9 +59,9 @@ export const tourStore = {
           },
         },
       });
-    } catch {
-      assertMemoryFallbackEnabled();
-      return null;
+    } catch (error) {
+      console.error(`[tour.store] Error fetching tour schedule for ${tourId}:`, error);
+      throw error;
     }
   },
 

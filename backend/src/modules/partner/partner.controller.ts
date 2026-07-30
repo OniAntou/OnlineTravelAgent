@@ -21,16 +21,14 @@ export const partnerController = {
 
   getStats: asyncHandler(async (req: Request, res: Response) => {
     const partnerId = (req as any).userId;
-    const hotels = await prisma.hotel.findMany({ where: { partnerId }, select: { id: true } });
-    const hotelIds = hotels.map(h => h.id);
-    const tours = await prisma.tourPackage.findMany({ where: { partnerId }, select: { id: true } });
-    const tourIds = tours.map(t => t.id);
+    const hotelsCount = await prisma.hotel.count({ where: { partnerId } });
+    const toursCount = await prisma.tourPackage.count({ where: { partnerId } });
 
     const trips = await prisma.trip.findMany({
       where: {
         OR: [
-          { hotelId: { in: hotelIds.length > 0 ? hotelIds : ['dummy-no-match'] } },
-          { tourPackageId: { in: tourIds.length > 0 ? tourIds : ['dummy-no-match'] } }
+          { hotel: { partnerId } },
+          { tourPackage: { partnerId } }
         ],
         status: { not: TripStatus.CANCELLED }
       },
@@ -38,11 +36,12 @@ export const partnerController = {
     });
 
     const totalRevenue = trips.reduce((sum, trip) => sum + (Number(trip.totalPrice) || 0), 0);
-    const revenueAfterCut = totalRevenue * 0.9;
+    const revenueShare = process.env.PARTNER_REVENUE_SHARE ? parseFloat(process.env.PARTNER_REVENUE_SHARE) : 0.9;
+    const revenueAfterCut = totalRevenue * revenueShare;
 
     res.json({
-      hotels: hotelIds.length,
-      tours: tourIds.length,
+      hotels: hotelsCount,
+      tours: toursCount,
       destinations: 0,
       flights: 0,
       trips: trips.length,
@@ -62,7 +61,6 @@ export const partnerController = {
         partnerId,
         name,
         location,
-        rating: "0.0", // Partners cannot set their own rating
         imagePath: imagePath || "assets/images/hotel_placeholder.jpg",
         description,
         priceFrom: priceFrom || 0,

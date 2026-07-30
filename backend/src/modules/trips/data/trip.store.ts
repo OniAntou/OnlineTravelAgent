@@ -184,6 +184,7 @@ export const tripStore = {
       const trips = memoryDb
         .findTripsByUserId(userId)
         .map((trip) => processTripStatus(trip as any)) as Array<{
+
         isUpcoming: boolean;
       }>;
       return filterTripsByType(trips, type);
@@ -193,6 +194,7 @@ export const tripStore = {
     const trips = await prisma.trip.findMany({
       where,
       orderBy: { createdAt: "desc" },
+      take: 100,
     });
     return filterTripsByType(trips.map(processTripStatus), type);
   },
@@ -203,12 +205,17 @@ export const tripStore = {
       if (departure) where.departure = { equals: departure, mode: "insensitive" };
       if (arrival) where.arrival = { equals: arrival, mode: "insensitive" };
       return await prisma.flight.findMany({ where });
-    } catch {
-      assertMemoryFallbackEnabled();
-      let results = mockFlights;
-      if (departure) results = results.filter((f) => f.departure.toLowerCase() === departure.toLowerCase());
-      if (arrival) results = results.filter((f) => f.arrival.toLowerCase() === arrival.toLowerCase());
-      return results;
+    } catch (error) {
+      console.error("[trip.store] Error searching flights:", error);
+      try {
+        assertMemoryFallbackEnabled();
+        let results = mockFlights;
+        if (departure) results = results.filter((f) => f.departure.toLowerCase() === departure.toLowerCase());
+        if (arrival) results = results.filter((f) => f.arrival.toLowerCase() === arrival.toLowerCase());
+        return results;
+      } catch {
+        throw error;
+      }
     }
   },
 };

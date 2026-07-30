@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 
+import '../domain/document_item.dart';
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../app/state/app_state_provider.dart';
@@ -402,15 +403,17 @@ class ProfileScreen extends ConsumerWidget {
                             final colorHex = reqDoc.colorHex;
 
                             // Check if user has added this document
-                            try {
-                              final existingDoc = documents.firstWhere(
-                                (d) => d.title == title,
-                              );
+                            final existingDoc = documents.cast<DocumentItem?>().firstWhere(
+                              (d) => d?.title == title,
+                              orElse: () => null,
+                            );
+
+                            if (existingDoc != null) {
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
                                 child: DocumentCard(doc: existingDoc),
                               );
-                            } catch (_) {
+                            } else {
                               // User hasn't added this document, show placeholder
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 12),
