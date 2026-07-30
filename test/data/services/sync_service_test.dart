@@ -67,13 +67,14 @@ void main() {
           const DocumentItem(
             id: 'doc1',
             title: 'Passport',
-            description: '',
+            description: 'Exp: 2030',
             icon: Icons.description,
             color: Colors.blue,
             iconName: 'description',
             colorHex: '#2196F3',
           ),
         ],
+        globalDocuments: [],
         hotels: [
           const Hotel(
             id: 'h1',
@@ -176,6 +177,7 @@ void main() {
           recommended: [],
           trips: [],
           documents: [],
+          globalDocuments: [],
           hotels: [],
           tourPackages: [],
         ),

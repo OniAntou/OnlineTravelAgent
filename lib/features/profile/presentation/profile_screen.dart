@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../../../core/router/app_routes.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../app/state/app_state_provider.dart';
 import '../../auth/application/auth_provider.dart';
 import '../application/profile_provider.dart';
 import 'widgets/document_card.dart';
@@ -33,30 +34,19 @@ class ProfileScreen extends ConsumerWidget {
       authProvider.select((state) => state.isLoggedIn),
     );
 
-    final requiredDocs = [
-      {
-        'title': 'CCCD / Passport',
-        'iconName': 'verified_user',
-        'colorHex': '#176FF2',
-      },
-      {'title': 'Visa', 'iconName': 'assignment', 'colorHex': '#34A853'},
-      {
-        'title': 'Vé máy bay',
-        'iconName': 'flight_takeoff',
-        'colorHex': '#EA4335',
-      },
-      {
-        'title': 'Bảo hiểm du lịch',
-        'iconName': 'verified_user',
-        'colorHex': '#FBBC05',
-      },
-    ];
+    final requiredDocs = ref.watch(globalDocumentsProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundGray,
       body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(bootstrapProvider);
+            await ref.read(bootstrapProvider.future);
+          },
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
             // Profile Header
             SliverToBoxAdapter(
               child: Container(
@@ -198,6 +188,26 @@ class ProfileScreen extends ConsumerWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
+                              if (isLoggedIn) ...[
+                                const SizedBox(height: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.25),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    profile.role,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -385,138 +395,152 @@ class ProfileScreen extends ConsumerWidget {
                   : Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
-                        children: requiredDocs.map((reqDoc) {
-                          final title = reqDoc['title']!;
-                          final iconName = reqDoc['iconName']!;
-                          final colorHex = reqDoc['colorHex']!;
+                        children: [
+                          ...requiredDocs.map((reqDoc) {
+                            final title = reqDoc.title;
+                            final iconName = reqDoc.iconName;
+                            final colorHex = reqDoc.colorHex;
 
-                          // Check if user has added this document
-                          try {
-                            final existingDoc = documents.firstWhere(
-                              (d) => d.title == title,
-                            );
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: DocumentCard(doc: existingDoc),
-                            );
-                          } catch (_) {
-                            // User hasn't added this document, show placeholder
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: GestureDetector(
-                                onTap: () => showAddDocumentSheet(
-                                  context,
-                                  ref,
-                                  title: title,
-                                  iconName: iconName,
-                                  colorHex: colorHex,
-                                ),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 20,
+                            // Check if user has added this document
+                            try {
+                              final existingDoc = documents.firstWhere(
+                                (d) => d.title == title,
+                              );
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: DocumentCard(doc: existingDoc),
+                              );
+                            } catch (_) {
+                              // User hasn't added this document, show placeholder
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: GestureDetector(
+                                  onTap: () => showAddDocumentSheet(
+                                    context,
+                                    ref,
+                                    title: title,
+                                    iconName: iconName,
+                                    colorHex: colorHex,
                                   ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(16),
-                                    border: Border.all(
-                                      color: Colors.grey.withValues(alpha: 0.2),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 20,
                                     ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.02,
-                                        ),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: Colors.grey.withValues(alpha: 0.2),
                                       ),
-                                    ],
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey.withValues(
-                                            alpha: 0.1,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.02,
                                           ),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
                                         ),
-                                        child: const Icon(
-                                          Icons.description_outlined,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 16),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              title,
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black87,
-                                              ),
+                                      ],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.withValues(
+                                              alpha: 0.1,
                                             ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              'Chưa cập nhật',
-                                              style: TextStyle(
-                                                fontSize: 13,
-                                                color: Colors.grey.withValues(
-                                                  alpha: 0.8,
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          child: const Icon(
+                                            Icons.description_outlined,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 16),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                title,
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black87,
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                'Chưa cập nhật',
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.grey.withValues(
+                                                    alpha: 0.8,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                      TextButton.icon(
-                                        onPressed: () => showAddDocumentSheet(
-                                          context,
-                                          ref,
-                                          title: title,
-                                          iconName: iconName,
-                                          colorHex: colorHex,
-                                        ),
-                                        icon: const Icon(
-                                          Icons.add_circle_outline,
-                                          size: 16,
-                                          color: AppTheme.primaryBlue,
-                                        ),
-                                        label: const Text(
-                                          'Thêm',
-                                          style: TextStyle(
+                                        TextButton.icon(
+                                          onPressed: () => showAddDocumentSheet(
+                                            context,
+                                            ref,
+                                            title: 'Giấy tờ khác',
+                                            iconName: 'folder_open',
+                                            colorHex: '#9E9E9E',
+                                            isCustom: true,
+                                          ),
+                                          icon: const Icon(
+                                            Icons.add_circle_outline,
+                                            size: 16,
                                             color: AppTheme.primaryBlue,
-                                            fontWeight: FontWeight.bold,
                                           ),
-                                        ),
-                                        style: TextButton.styleFrom(
-                                          backgroundColor: AppTheme.primaryBlue
-                                              .withValues(alpha: 0.1),
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 8,
+                                          label: const Text(
+                                            'Thêm',
+                                            style: TextStyle(
+                                              color: AppTheme.primaryBlue,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              20,
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: AppTheme.primaryBlue
+                                                .withValues(alpha: 0.1),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 8,
+                                            ),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                20,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
+                              );
+                            }
+                          }),
+                          // Also show custom documents that are NOT in requiredDocs
+                          ...documents
+                              .where(
+                                (doc) => !requiredDocs.any((r) => r.title == doc.title),
+                              )
+                              .map(
+                                (customDoc) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: DocumentCard(doc: customDoc),
+                                ),
                               ),
-                            );
-                          }
-                        }).toList(),
+                        ],
                       ),
                     ),
             ),
@@ -524,9 +548,10 @@ class ProfileScreen extends ConsumerWidget {
             // Bottom padding
             const SliverToBoxAdapter(child: SizedBox(height: 100)),
           ],
-        ),
-      ),
-    );
+        ), // close CustomScrollView
+        ), // close RefreshIndicator
+      ), // close SafeArea
+    ); // close Scaffold
   }
 
   Widget _buildQuickAction(

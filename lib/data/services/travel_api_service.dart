@@ -30,6 +30,7 @@ class BootstrapData {
   final List<Destination> recommended;
   final List<Trip> trips;
   final List<DocumentItem> documents;
+  final List<DocumentItem> globalDocuments;
   final List<Hotel> hotels;
   final List<TourPackage> tourPackages;
   final List<Flight> flights;
@@ -40,6 +41,7 @@ class BootstrapData {
     required this.recommended,
     required this.trips,
     required this.documents,
+    required this.globalDocuments,
     required this.hotels,
     required this.tourPackages,
     this.flights = const [],
@@ -152,6 +154,7 @@ class TravelApiService {
       recommended: _parseList(data['recommended'], Destination.fromJson),
       trips: _parseList(data['trips'], Trip.fromJson),
       documents: _parseList(data['documents'], DocumentItem.fromJson),
+      globalDocuments: _parseList(data['globalDocuments'], DocumentItem.fromJson),
       hotels: _parseList(data['hotels'], Hotel.fromJson),
       tourPackages: _parseList(data['tourPackages'], TourPackage.fromJson),
       flights: _parseList(data['flights'], Flight.fromJson),

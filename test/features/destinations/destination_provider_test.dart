@@ -37,8 +37,14 @@ ProviderContainer createContainer({FakeTravelApiService? api}) {
   final fakeStorage = FakeSecureStorage();
   final fakeApi = api ?? FakeTravelApiService(secureStorage: fakeStorage);
   final emptyBootstrap = BootstrapData(
-    categories: [], destinations: [], recommended: [],
-    trips: [], documents: [], hotels: [], tourPackages: [],
+    categories: [],
+    destinations: [],
+    recommended: [],
+    trips: [],
+    documents: [],
+    globalDocuments: [],
+    hotels: [],
+    tourPackages: [],
   );
   return ProviderContainer(
     overrides: [

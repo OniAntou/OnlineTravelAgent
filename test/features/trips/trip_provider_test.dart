@@ -14,6 +14,7 @@ BootstrapData emptyBootstrap() => BootstrapData(
   recommended: [],
   trips: [],
   documents: [],
+  globalDocuments: [],
   hotels: [],
   tourPackages: [],
 );

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../application/profile_provider.dart';
+import '../../domain/document_item.dart';
 import '../../../../core/utils/snackbar_utils.dart';
 import '../../../../shared/widgets/custom_bottom_sheet.dart';
 
@@ -11,6 +12,8 @@ Future<void> showEditProfileSheet(BuildContext context, WidgetRef ref) async {
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController(text: profile.name);
   final emailController = TextEditingController(text: profile.email);
+  final phoneController = TextEditingController(text: profile.phone ?? '');
+  final addressController = TextEditingController(text: profile.address ?? '');
 
   try {
     bool isLoading = false;
@@ -90,6 +93,55 @@ Future<void> showEditProfileSheet(BuildContext context, WidgetRef ref) async {
                   return null;
                 },
               ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  labelText: 'Số điện thoại',
+                  prefixIcon: const Icon(Icons.phone_outlined, size: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(
+                      color: Colors.grey.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(
+                      color: AppTheme.primaryBlue,
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: addressController,
+                decoration: InputDecoration(
+                  labelText: 'Địa chỉ',
+                  prefixIcon: const Icon(Icons.location_on_outlined, size: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide(
+                      color: Colors.grey.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: const BorderSide(
+                      color: AppTheme.primaryBlue,
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(height: 28),
               SizedBox(
                 width: double.infinity,
@@ -111,9 +163,17 @@ Future<void> showEditProfileSheet(BuildContext context, WidgetRef ref) async {
 
                           final name = nameController.text.trim();
                           final email = emailController.text.trim();
+                          final phone = phoneController.text.trim();
+                          final address = addressController.text.trim();
+                          
                           ref
                               .read(profileProvider.notifier)
-                              .updateFromAuth(name: name, email: email);
+                              .updateFromAuth(
+                                name: name, 
+                                email: email,
+                                phone: phone.isEmpty ? null : phone,
+                                address: address.isEmpty ? null : address,
+                              );
 
                           if (!sheetContext.mounted) return;
                           Navigator.pop(sheetContext);
@@ -148,6 +208,8 @@ Future<void> showEditProfileSheet(BuildContext context, WidgetRef ref) async {
   } finally {
     nameController.dispose();
     emailController.dispose();
+    phoneController.dispose();
+    addressController.dispose();
   }
 }
 
@@ -157,9 +219,11 @@ Future<void> showAddDocumentSheet(
   required String title,
   required String iconName,
   required String colorHex,
+  bool isCustom = false,
 }) async {
   final formKey = GlobalKey<FormState>();
   final descriptionController = TextEditingController();
+  final titleController = TextEditingController(text: isCustom ? '' : title);
 
   try {
     bool isLoading = false;
@@ -174,47 +238,116 @@ Future<void> showAddDocumentSheet(
             children: [
               const Text(
                 'Thêm giấy tờ',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Bổ sung thông tin giấy tờ để chuyến đi suôn sẻ hơn',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                ),
               ),
               const SizedBox(height: 24),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryBlue.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: AppTheme.primaryBlue.withValues(alpha: 0.2),
+              if (!isCustom)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
                   ),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.description_outlined,
-                      size: 20,
-                      color: AppTheme.primaryBlue,
+                  decoration: BoxDecoration(
+                    color: DocumentItem.colorFromHex(colorHex).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: DocumentItem.colorFromHex(colorHex).withValues(alpha: 0.3),
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primaryBlue,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: DocumentItem.colorFromHex(colorHex).withValues(alpha: 0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          DocumentItem.iconFromName(iconName),
+                          size: 24,
+                          color: DocumentItem.colorFromHex(colorHex),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Loại giấy tờ',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              title,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: DocumentItem.colorFromHex(colorHex).withValues(alpha: 0.8),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                TextFormField(
+                  controller: titleController,
+                  decoration: InputDecoration(
+                    labelText: 'Tên giấy tờ (VD: Giấy khai sinh)',
+                    prefixIcon: const Icon(Icons.badge_outlined, size: 20),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(
+                        color: Colors.grey.withValues(alpha: 0.3),
                       ),
                     ),
-                  ],
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(
+                        color: AppTheme.primaryBlue,
+                        width: 1.5,
+                      ),
+                    ),
+                  ),
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? 'Vui lòng nhập tên giấy tờ'
+                      : null,
                 ),
-              ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               TextFormField(
                 controller: descriptionController,
+                minLines: 1,
+                maxLines: 3,
                 decoration: InputDecoration(
-                  labelText: 'Mô tả',
-                  prefixIcon: const Icon(Icons.info_outline, size: 20),
+                  labelText: 'Số giấy tờ / Thông tin chi tiết',
+                  alignLabelWithHint: true,
+                  prefixIcon: const Icon(Icons.assignment_outlined, size: 20),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
@@ -233,20 +366,21 @@ Future<void> showAddDocumentSheet(
                   ),
                 ),
                 validator: (value) => value == null || value.trim().isEmpty
-                    ? 'Vui lòng nhập mô tả'
+                    ? 'Vui lòng nhập thông tin'
                     : null,
               ),
               const SizedBox(height: 28),
               SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: 54,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryBlue,
                     foregroundColor: Colors.white,
-                    elevation: 0,
+                    elevation: 4,
+                    shadowColor: AppTheme.primaryBlue.withValues(alpha: 0.4),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                   onPressed: isLoading
@@ -258,7 +392,7 @@ Future<void> showAddDocumentSheet(
                           final ok = await ref
                               .read(documentsProvider.notifier)
                               .addDocument(
-                                title: title,
+                                title: isCustom ? titleController.text.trim() : title,
                                 description: descriptionController.text.trim(),
                                 icon: iconName,
                                 color: colorHex,

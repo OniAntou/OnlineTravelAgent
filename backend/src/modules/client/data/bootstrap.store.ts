@@ -15,6 +15,7 @@ import {
   mockFlights,
   mockTourPackages,
   mockDocuments,
+  mockGlobalDocuments,
 } from "../../../infrastructure/fallback/mock-data.js";
 import { memoryDb } from "../../../infrastructure/fallback/memory-db.js";
 import { assertMemoryFallbackEnabled } from "../../../core/config/data-availability.js";
@@ -34,16 +35,18 @@ type BootstrapBase = {
   hotels: Awaited<ReturnType<typeof attachRealReviews>>;
   tourPackages: Awaited<ReturnType<typeof attachRealReviews>>;
   flights: Awaited<ReturnType<typeof prisma.flight.findMany>>;
+  globalDocuments: any[];
 };
 
 async function loadFromDb(): Promise<BootstrapBase | null> {
   try {
-    const [categories, destinations, hotels, tourPackages, flights] = await Promise.all([
+    const [categories, destinations, hotels, tourPackages, flights, globalDocuments] = await Promise.all([
       prisma.category.findMany({ orderBy: { name: "asc" } }),
       prisma.destination.findMany(),
       prisma.hotel.findMany({ include: { rooms: true } }),
       prisma.tourPackage.findMany({ orderBy: { createdAt: "desc" } }),
       prisma.flight.findMany(),
+      prisma.documentItem.findMany({ where: { userId: null }, orderBy: { createdAt: "asc" } }),
     ]);
 
     if (!destinations.length && !hotels.length && !tourPackages.length) {
@@ -67,6 +70,7 @@ async function loadFromDb(): Promise<BootstrapBase | null> {
       hotels: realHotels,
       tourPackages: realTours,
       flights,
+      globalDocuments,
     };
   } catch {
     assertMemoryFallbackEnabled();
@@ -81,6 +85,7 @@ function loadMockData(): BootstrapBase {
     hotels: mockHotels as unknown as BootstrapBase["hotels"],
     tourPackages: mockTourPackages as unknown as BootstrapBase["tourPackages"],
     flights: mockFlights as unknown as BootstrapBase["flights"],
+    globalDocuments: mockGlobalDocuments,
   };
 }
 
@@ -129,6 +134,7 @@ export const bootstrapStore = {
       recommended: realRecommended,
       trips: trips.map(processTripStatus),
       documents,
+      globalDocuments: cachedBase.globalDocuments,
       hotels: cachedBase.hotels,
       tourPackages: cachedBase.tourPackages,
       flights: cachedBase.flights,

@@ -52,6 +52,7 @@ bool _hasCachedBootstrapData(BootstrapData data) {
       data.recommended.isNotEmpty ||
       data.trips.isNotEmpty ||
       data.documents.isNotEmpty ||
+      data.globalDocuments.isNotEmpty ||
       data.hotels.isNotEmpty ||
       data.tourPackages.isNotEmpty ||
       data.flights.isNotEmpty;
@@ -68,6 +69,7 @@ BootstrapData _withoutUserOwnedData(BootstrapData data) {
         .toList(growable: false),
     trips: const [],
     documents: const [],
+    globalDocuments: data.globalDocuments,
     hotels: data.hotels,
     tourPackages: data.tourPackages,
     flights: data.flights,

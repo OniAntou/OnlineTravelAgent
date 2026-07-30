@@ -830,7 +830,7 @@ export const adminController = {
     const data = await prisma.user.findMany({
       where: { role: "USER" },
       orderBy: { createdAt: "desc" },
-      select: { id: true, name: true, email: true, createdAt: true },
+      select: { id: true, name: true, email: true, phone: true, address: true, createdAt: true },
     });
     res.json(data);
   }),
@@ -839,9 +839,9 @@ export const adminController = {
     const body = req.body as CreateUserBody;
     const password = await passwordService.hash(body.password);
     const user = await prisma.user.create({
-      data: { name: body.name, email: body.email, password },
+      data: { name: body.name, email: body.email, password, phone: body.phone, address: body.address },
     });
-    res.status(201).json({ id: user.id, name: user.name, email: user.email });
+    res.status(201).json({ id: user.id, name: user.name, email: user.email, phone: user.phone, address: user.address });
   }),
 
   deleteUser: asyncHandler(async (req: Request, res: Response) => {
@@ -862,6 +862,8 @@ export const adminController = {
         id: true,
         name: true,
         email: true,
+        phone: true,
+        address: true,
         createdAt: true,
         _count: { select: { hotels: true, tours: true } },
       },
@@ -878,6 +880,8 @@ export const adminController = {
         email: body.email,
         password,
         role: "PARTNER",
+        phone: body.phone,
+        address: body.address,
       },
     });
     res.status(201).json({

@@ -511,6 +511,8 @@ async function handleUpload(fileInput, hiddenId, imgId){
         <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Tên</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="u-name"></div>
         <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Email</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="u-email" type="email"></div>
         <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Mật khẩu</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="u-pass" type="password"></div>
+        <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Số điện thoại</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="u-phone" type="tel"></div>
+        <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Địa chỉ</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="u-address"></div>
       </div>
       <div class="p-6 border-t border-silver bg-white flex justify-end">
         <button class="bg-primary text-white font-bold py-4 px-10 rounded-full hover:bg-black transition-all w-full" onclick="saveUser()">Tạo Tài Khoản</button>
@@ -533,8 +535,16 @@ async function handleUpload(fileInput, hiddenId, imgId){
       <div class="p-8 flex-1 flex flex-col gap-6">
         <input type="hidden" id="d-id">
         <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Tiêu đề</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="d-title"></div>
-        <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">FontAwesome Icon (VD: fa-passport)</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="d-icon"></div>
-        <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Tailwind Color (VD: text-blue-500)</label><input class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary" id="d-color"></div>
+        <div>
+          <label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Biểu tượng</label>
+          <input type="hidden" id="d-icon">
+          <div class="grid grid-cols-5 gap-3" id="icon-picker"></div>
+        </div>
+        <div>
+          <label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Màu sắc</label>
+          <input type="hidden" id="d-color">
+          <div class="flex flex-wrap gap-3" id="color-picker"></div>
+        </div>
         <div><label class="text-[10px] uppercase tracking-widest text-muted font-bold block mb-2">Mô tả</label><textarea class="w-full bg-white border border-silver rounded-xl px-6 py-4 text-sm font-semibold outline-none focus:border-primary h-24" id="d-desc"></textarea></div>
       </div>
       <div class="p-6 border-t border-silver bg-white flex justify-end">
@@ -1308,16 +1318,17 @@ function renderUsers(rows){
   if(!rows.length){tb.innerHTML='';em.style.display='block';return;}
   em.style.display='none';
   tb.innerHTML=rows.map(u=>listRow([
-    {label:'Tên', val:u.name, cls:'w-1/3'},
-    {label:'Email', val:u.email},
+    {label:'Tên', val:u.name, cls:'w-1/4'},
+    {label:'Email', val:u.email, cls:'w-1/4'},
+    {label:'Liên hệ', val:`${u.phone||'--'}<br><span class="text-xs text-muted">${u.address||'--'}</span>`, cls:'w-1/4'},
     {label:'Ngày tạo', val:new Date(u.createdAt).toLocaleDateString('vi-VN')}
   ], `
     <button class="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary hover:text-white text-primary transition-all flex items-center justify-center" onclick="promoteUser('${encodeActionValue(u.id)}')"><i class="fa-solid fa-handshake"></i></button><button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDelEncoded('user','${encodeActionValue(u.id)}','${encodeActionValue(u.name)}')"><i class="fa-solid fa-ban"></i></button>
   `)).join('');
 }
-function openUserModal(){ document.getElementById('u-name').value=''; document.getElementById('u-email').value=''; document.getElementById('u-pass').value=''; openModal('modal-user'); }
+function openUserModal(){ document.getElementById('u-name').value=''; document.getElementById('u-email').value=''; document.getElementById('u-pass').value=''; document.getElementById('u-phone').value=''; document.getElementById('u-address').value=''; openModal('modal-user'); }
 async function saveUser(){
-  try{ await req('/api/admin/users','POST',{name:v('u-name'), email:v('u-email'), password:v('u-pass')}); closeModal('modal-user'); await loadUsers(); toast('Đã tạo User','success'); }catch(e){toast(e.message,'error');}
+  try{ await req('/api/admin/users','POST',{name:v('u-name'), email:v('u-email'), password:v('u-pass'), phone:v('u-phone'), address:v('u-address')}); closeModal('modal-user'); await loadUsers(); toast('Đã tạo User','success'); }catch(e){toast(e.message,'error');}
 }
 
 async function loadPartners(){ data.partners=await req('/api/admin/partners'); renderPartners(data.partners); }
@@ -1345,10 +1356,35 @@ function renderDocuments(rows){
     <button class="w-10 h-10 rounded-full bg-red-50 hover:bg-red-500 hover:text-white text-red-500 transition-all flex items-center justify-center" onclick="confirmDelEncoded('document','${encodeActionValue(d.id)}','${encodeActionValue(d.title)}')"><i class="fa-solid fa-trash"></i></button>
   `)).join('');
 }
+const documentIcons = ['fa-passport', 'fa-ticket', 'fa-suitcase', 'fa-money-bill', 'fa-id-card', 'fa-plane', 'fa-map', 'fa-camera', 'fa-file-lines', 'fa-user-check'];
+const documentColors = ['text-blue-500', 'text-red-500', 'text-green-500', 'text-orange-500', 'text-purple-500', 'text-pink-500', 'text-yellow-500', 'text-teal-500', 'text-indigo-500', 'text-gray-500'];
+
+function renderDocumentPickers(selectedIcon, selectedColor) {
+  selectedIcon = selectedIcon || documentIcons[0];
+  selectedColor = selectedColor || documentColors[0];
+  document.getElementById('d-icon').value = selectedIcon;
+  document.getElementById('d-color').value = selectedColor;
+
+  document.getElementById('icon-picker').innerHTML = documentIcons.map(icon => `
+    <div class="w-12 h-12 rounded-xl flex items-center justify-center cursor-pointer transition-all border-2 ${selectedIcon === icon ? 'border-primary bg-primary/10 text-primary' : 'border-silver bg-offwhite text-muted hover:border-gray-300'}"
+         onclick="renderDocumentPickers('${icon}', document.getElementById('d-color').value)">
+      <i class="fa-solid ${icon} text-lg"></i>
+    </div>
+  `).join('');
+
+  document.getElementById('color-picker').innerHTML = documentColors.map(color => `
+    <div class="w-10 h-10 rounded-full cursor-pointer transition-all border-2 flex items-center justify-center ${selectedColor === color ? 'border-primary ring-2 ring-primary/20' : 'border-transparent hover:scale-110'}"
+         onclick="renderDocumentPickers(document.getElementById('d-icon').value, '${color}')">
+      <div class="w-8 h-8 rounded-full bg-current ${color}"></div>
+    </div>
+  `).join('');
+}
+
 function openDocumentModal(doc=null){
   document.getElementById('mdoc-title').textContent=doc?'Sửa Tài Liệu':'Thêm Tài Liệu';
   document.getElementById('d-id').value=doc?.id??'';
   ['title','icon','color','desc'].forEach(k=>document.getElementById(`d-${k}`).value=doc?.[k==='desc'?'description':k]??'');
+  renderDocumentPickers(doc?.icon, doc?.color);
   openModal('modal-document');
 }
 function editDocument(id){openDocumentModal(data.documents.find(x=>x.id===id));}

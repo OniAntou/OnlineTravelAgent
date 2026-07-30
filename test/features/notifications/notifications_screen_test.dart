@@ -21,6 +21,7 @@ BootstrapData _bootstrap({
     recommended: [],
     trips: trips,
     documents: documents,
+    globalDocuments: [],
     hotels: [],
     tourPackages: [],
   );

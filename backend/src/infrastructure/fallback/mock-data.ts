@@ -357,3 +357,10 @@ export const mockDocuments = [
   { id: "doc-3", title: "Bảo hiểm du lịch", description: "Bảo việt - Toàn cầu", icon: "verified_user", color: "#FF9800" },
   { id: "doc-4", title: "Vé máy bay", description: "Phú Quốc - Sài Gòn", icon: "flight_takeoff", color: "#E91E63" },
 ];
+
+export const mockGlobalDocuments = [
+  { id: "gdoc-1", title: "CCCD / Passport", description: "Chưa cập nhật", icon: "verified_user", color: "#176FF2", userId: null },
+  { id: "gdoc-2", title: "Visa", description: "Chưa cập nhật", icon: "assignment", color: "#34A853", userId: null },
+  { id: "gdoc-3", title: "Vé máy bay", description: "Chưa cập nhật", icon: "flight_takeoff", color: "#EA4335", userId: null },
+  { id: "gdoc-4", title: "Bảo hiểm du lịch", description: "Chưa cập nhật", icon: "verified_user", color: "#FBBC05", userId: null },
+];

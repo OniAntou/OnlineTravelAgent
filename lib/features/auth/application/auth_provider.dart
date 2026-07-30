@@ -41,7 +41,7 @@ class AuthNotifier extends Notifier<AuthState> {
         state = AuthState(isLoggedIn: true, token: api.token, user: user);
         ref
             .read(profileProvider.notifier)
-            .updateFromAuth(name: user.name, email: user.email);
+            .updateFromAuth(name: user.name, email: user.email, role: user.role);
       }
     } catch (e) {
       debugPrint('Session restore failed: $e');
@@ -64,7 +64,7 @@ class AuthNotifier extends Notifier<AuthState> {
       state = AuthState(isLoggedIn: true, token: token, user: user);
       ref
           .read(profileProvider.notifier)
-          .updateFromAuth(name: user.name, email: user.email);
+          .updateFromAuth(name: user.name, email: user.email, role: user.role);
 
       return null;
     } on AuthException catch (e) {
@@ -101,7 +101,7 @@ class AuthNotifier extends Notifier<AuthState> {
       state = AuthState(isLoggedIn: true, token: token, user: user);
       ref
           .read(profileProvider.notifier)
-          .updateFromAuth(name: user.name, email: user.email);
+          .updateFromAuth(name: user.name, email: user.email, role: user.role);
 
       return null;
     } on AuthException catch (e) {

@@ -281,6 +281,8 @@ model User {
   email     String   @unique
   password  String
   role      Role     @default(USER)
+  phone     String?
+  address   String?
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
 

@@ -28,6 +28,7 @@ class FakeTravelApiService extends TravelApiService {
       recommended: [],
       trips: [],
       documents: [],
+      globalDocuments: [],
       hotels: [],
       tourPackages: [],
     );

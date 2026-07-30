@@ -97,6 +97,8 @@ export interface CreateUserBody {
   name: string;
   email: string;
   password: string;
+  phone?: string;
+  address?: string;
 }
 
 export interface CreatePartnerBody extends CreateUserBody {}

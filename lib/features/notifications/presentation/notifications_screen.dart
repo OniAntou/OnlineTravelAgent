@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../app/state/app_state_provider.dart';
 import '../../profile/domain/document_item.dart';
 import '../../trips/domain/trip.dart';
 import '../../profile/application/profile_provider.dart';
@@ -24,16 +25,28 @@ class NotificationsScreen extends ConsumerWidget {
         foregroundColor: AppTheme.textBlack,
         elevation: 0,
       ),
-      body: notifications.isEmpty
-          ? const _EmptyNotifications()
-          : ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: notifications.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                return _NotificationCard(notification: notifications[index]);
-              },
-            ),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          ref.invalidate(bootstrapProvider);
+          await ref.read(bootstrapProvider.future);
+        },
+        child: notifications.isEmpty
+            ? Stack(
+                children: [
+                  ListView(), // allows pulling down even when empty
+                  const _EmptyNotifications(),
+                ],
+              )
+            : ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
+                itemCount: notifications.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  return _NotificationCard(notification: notifications[index]);
+                },
+              ),
+      ),
     );
   }
 }

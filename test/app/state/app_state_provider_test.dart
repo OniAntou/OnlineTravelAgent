@@ -44,6 +44,7 @@ void main() {
           recommended: const [],
           trips: const [],
           documents: const [],
+          globalDocuments: const [],
           hotels: const [],
           tourPackages: const [],
         ),

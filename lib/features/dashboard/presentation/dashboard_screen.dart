@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../app/state/app_state_provider.dart';
 import '../../destinations/domain/destination.dart';
 import '../../destinations/application/destination_provider.dart';
 import '../../trips/application/trip_provider.dart';
@@ -47,8 +48,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(bootstrapProvider);
+              await ref.read(bootstrapProvider.future);
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 24),
@@ -76,12 +83,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 const TravelStoriesSection(),
                 const SizedBox(height: 64),
               ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+            ), // closes Column
+          ), // closes SingleChildScrollView
+        ), // closes RefreshIndicator
+      ), // closes SafeArea
+    ), // closes GestureDetector
+  ); // closes Scaffold
+} // closes build
 
   Widget _buildHeader() {
     return Padding(

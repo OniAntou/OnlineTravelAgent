@@ -658,6 +658,7 @@ class SyncService {
       recommended: recommended,
       trips: trips,
       documents: documents,
+      globalDocuments: const [], // globalDocuments are currently not cached in sqlite
       hotels: hotels,
       tourPackages: tours,
       flights: flights,

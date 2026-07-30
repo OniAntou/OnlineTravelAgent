@@ -3,13 +3,26 @@ import '../domain/user_profile.dart';
 import '../domain/document_item.dart';
 import '../../../data/services/api_provider.dart';
 import 'package:flutter/foundation.dart';
+import '../../../app/state/app_state_provider.dart';
 
 class ProfileNotifier extends Notifier<UserProfile> {
   @override
   UserProfile build() => const UserProfile(name: 'User', email: '');
 
-  void updateFromAuth({required String name, required String email}) {
-    state = UserProfile(name: name, email: email);
+  void updateFromAuth({
+    required String name,
+    required String email,
+    String? role,
+    String? phone,
+    String? address,
+  }) {
+    state = UserProfile(
+      name: name,
+      email: email,
+      role: role ?? state.role,
+      phone: phone,
+      address: address,
+    );
   }
 }
 
@@ -64,3 +77,8 @@ final documentsProvider =
     NotifierProvider<DocumentsNotifier, List<DocumentItem>>(
       DocumentsNotifier.new,
     );
+
+final globalDocumentsProvider = Provider<List<DocumentItem>>((ref) {
+  final bootstrap = ref.watch(bootstrapProvider).value;
+  return bootstrap?.globalDocuments ?? [];
+});

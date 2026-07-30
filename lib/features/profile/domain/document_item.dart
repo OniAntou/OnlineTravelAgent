@@ -26,14 +26,14 @@ class DocumentItem {
       id: json['id']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
-      icon: _iconFromName(iconName),
-      color: _colorFromHex(colorHex),
+      icon: iconFromName(iconName),
+      color: colorFromHex(colorHex),
       iconName: iconName,
       colorHex: colorHex,
     );
   }
 
-  static IconData _iconFromName(String name) {
+  static IconData iconFromName(String name) {
     switch (name) {
       case 'assignment':
         return Icons.assignment;
@@ -46,7 +46,7 @@ class DocumentItem {
     }
   }
 
-  static Color _colorFromHex(String hex) {
+  static Color colorFromHex(String hex) {
     final normalized = hex.replaceFirst('#', '');
     final value = int.tryParse(normalized, radix: 16);
     if (value == null) return const Color(0xFF176FF2);
