@@ -160,17 +160,20 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
                 ),
-                child: ListView(
-                  controller: scrollController,
-                  physics: const ClampingScrollPhysics(),
-                  padding: const EdgeInsets.only(bottom: 120),
-                  children: [
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        margin: const EdgeInsets.only(top: 16, bottom: 20),
-                        decoration: BoxDecoration(
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeTop: true,
+                  child: ListView(
+                    controller: scrollController,
+                    physics: const ClampingScrollPhysics(),
+                    padding: const EdgeInsets.only(top: 16, bottom: 120),
+                    children: [
+                      Center(
+                        child: Container(
+                          width: 40,
+                          height: 4,
+                          margin: const EdgeInsets.only(bottom: 20),
+                          decoration: BoxDecoration(
                           color: Colors.grey.shade300,
                           borderRadius: BorderRadius.circular(2),
                         ),
@@ -745,6 +748,7 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                       ), // closes Content Container
                     ], // closes ListView's children
                   ), // closes ListView
+                ), // closes MediaQuery.removePadding
                 ); // closes Builder's root Container
               },
             ),

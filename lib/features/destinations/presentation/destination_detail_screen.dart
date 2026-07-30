@@ -142,11 +142,14 @@ class _DestinationDetailScreenState
                   color: Colors.white,
                   borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
                 ),
-                child: ListView(
-                  controller: scrollController,
-                  physics: const ClampingScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
-                  children: [
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeTop: true,
+                  child: ListView(
+                    controller: scrollController,
+                    physics: const ClampingScrollPhysics(),
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
+                    children: [
                     Center(
                       child: Container(
                         width: 40,
@@ -362,7 +365,8 @@ class _DestinationDetailScreenState
                     ),
                   ],
                 ),
-              );
+              ),
+            );
             },
           ),
         ],
