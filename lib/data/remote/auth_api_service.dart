@@ -33,10 +33,11 @@ class AuthApiService {
   Future<void> logout() => _client.logout();
 
   Future<Map<String, dynamic>> becomePartner() async {
-    return await _client.postJson(
+    final res = await _client.postJson(
       '/api/auth/become-partner',
       {},
       queueOnFailure: false,
     );
+    return _client.handleAuthResponse(res);
   }
 }

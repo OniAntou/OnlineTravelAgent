@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import crypto from "crypto";
-import { ReviewTargetType } from "@prisma/client";
+import { ReviewTargetType, TripStatus } from "@prisma/client";
 import { asyncHandler } from "../../core/utils/asyncHandler.js";
 import prisma from "../../infrastructure/database/prisma.js";
 import { deleteManagedPublicImages } from "../../core/storage/supabase-storage.js";
@@ -21,16 +21,33 @@ export const partnerController = {
 
   getStats: asyncHandler(async (req: Request, res: Response) => {
     const partnerId = (req as any).userId;
-    const hotelsCount = await prisma.hotel.count({ where: { partnerId } });
-    const toursCount = await prisma.tourPackage.count({ where: { partnerId } });
+    const hotels = await prisma.hotel.findMany({ where: { partnerId }, select: { id: true } });
+    const hotelIds = hotels.map(h => h.id);
+    const tours = await prisma.tourPackage.findMany({ where: { partnerId }, select: { id: true } });
+    const tourIds = tours.map(t => t.id);
+
+    const trips = await prisma.trip.findMany({
+      where: {
+        OR: [
+          { hotelId: { in: hotelIds.length > 0 ? hotelIds : ['dummy-no-match'] } },
+          { tourPackageId: { in: tourIds.length > 0 ? tourIds : ['dummy-no-match'] } }
+        ],
+        status: { not: TripStatus.CANCELLED }
+      },
+      select: { totalPrice: true }
+    });
+
+    const totalRevenue = trips.reduce((sum, trip) => sum + (Number(trip.totalPrice) || 0), 0);
+    const revenueAfterCut = totalRevenue * 0.9;
+
     res.json({
-      hotels: hotelsCount,
-      tours: toursCount,
+      hotels: hotelIds.length,
+      tours: tourIds.length,
       destinations: 0,
       flights: 0,
-      trips: 0,
+      trips: trips.length,
       users: 0,
-      revenue: 0,
+      revenue: revenueAfterCut,
       monthly: []
     });
   }),

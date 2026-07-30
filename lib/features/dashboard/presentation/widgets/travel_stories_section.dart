@@ -10,8 +10,7 @@ class TravelStoriesSection extends StatelessWidget {
     final stories = [
       {
         'name': 'Hồng Nhung',
-        'avatar':
-            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&fit=crop',
+        'avatar': 'https://randomuser.me/api/portraits/women/44.jpg',
         'location': 'Sa Pa, VN',
         'comment':
             'Bản Cát Cát thật yên bình, mây mù phủ kín thung lũng mộng mơ vào sáng sớm!',
@@ -20,8 +19,7 @@ class TravelStoriesSection extends StatelessWidget {
       },
       {
         'name': 'Quốc Anh',
-        'avatar':
-            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&fit=crop',
+        'avatar': 'https://randomuser.me/api/portraits/men/32.jpg',
         'location': 'Vịnh Hạ Long, VN',
         'comment':
             'Chèo thuyền kayak vượt qua Hang Luồn hoang sơ là một trải nghiệm không thể quên!',
@@ -30,8 +28,7 @@ class TravelStoriesSection extends StatelessWidget {
       },
       {
         'name': 'Minh Huy',
-        'avatar':
-            'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&fit=crop',
+        'avatar': 'https://randomuser.me/api/portraits/men/46.jpg',
         'location': 'Đà Nẵng, VN',
         'comment':
             'Hoàng hôn trên Cầu Vàng rất hùng vĩ, mây núi hòa quyện say đắm lòng người.',
@@ -118,10 +115,20 @@ class TravelStoriesSection extends StatelessWidget {
                                 children: [
                                   Row(
                                     children: [
-                                      CircleAvatar(
-                                        radius: 12,
-                                        backgroundImage: NetworkImage(
+                                      ClipOval(
+                                        child: Image.network(
                                           story['avatar']!,
+                                          width: 24,
+                                          height: 24,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) =>
+                                              Container(
+                                            width: 24,
+                                            height: 24,
+                                            color: Colors.grey[300],
+                                            child: const Icon(Icons.person,
+                                                size: 16, color: Colors.grey),
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(width: 6),

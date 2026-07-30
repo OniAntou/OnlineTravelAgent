@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/exceptions.dart';
 import '../../../core/theme/app_theme.dart';
@@ -8,12 +9,8 @@ import '../../hotels/domain/hotel.dart';
 import '../../tours/domain/tour_package.dart';
 import '../../profile/domain/user_profile.dart';
 import '../../../core/utils/api_exception.dart';
-import '../../../core/utils/dialog_utils.dart';
 import '../../../shared/widgets/shimmer_loading.dart';
-import 'room_manager_screen.dart';
-import 'widgets/hotel_form_dialog.dart';
-import 'widgets/tour_form_dialog.dart';
-
+import 'package:url_launcher/url_launcher.dart';
 class PartnerDashboardScreen extends ConsumerStatefulWidget {
   const PartnerDashboardScreen({super.key});
 
@@ -122,127 +119,15 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
     }
   }
 
-  // ── Hotel CRUD ──────────────────────────────────────────────────────
-
-  Future<void> _showHotelForm({Hotel? hotel}) async {
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder: (_) => HotelFormDialog(hotel: hotel),
-    );
-    if (result == null || !mounted) return;
-    setState(() => _isLoading = true);
-    try {
-      final api = ref.read(apiProvider);
-      if (hotel != null) {
-        await api.updatePartnerHotel(hotel.id, result);
-      } else {
-        await api.createPartnerHotel(result);
-      }
-      if (!mounted) return;
-      await _loadData();
-    } catch (e) {
+  Future<void> _openWebDashboard() async {
+    final url = Uri.parse('http://localhost:3000/partner');
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi thêm/sửa khách sạn: ${getErrorMessage(e)}'),
-            backgroundColor: Colors.red,
-          ),
+          const SnackBar(content: Text('Không thể mở trang web đối tác')),
         );
       }
-      if (mounted) setState(() => _isLoading = false);
     }
-  }
-
-  Future<void> _deleteHotel(Hotel hotel) async {
-    final confirm = await showConfirmDialog(
-      context: context,
-      title: 'Xóa khách sạn',
-      content: 'Bạn chắc chắn muốn xóa "${hotel.name}"?',
-      confirmText: 'Xóa',
-      isDestructive: true,
-    );
-    if (confirm != true || !mounted) return;
-    setState(() => _isLoading = true);
-    try {
-      await ref.read(apiProvider).deletePartnerHotel(hotel.id);
-      if (!mounted) return;
-      await _loadData();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Lỗi xóa khách sạn: ${getErrorMessage(e)}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  // ── Tour CRUD ───────────────────────────────────────────────────────
-
-  Future<void> _showTourForm({TourPackage? tour}) async {
-    final result = await showDialog<Map<String, dynamic>>(
-      context: context,
-      builder: (_) => TourFormDialog(tour: tour),
-    );
-    if (result == null || !mounted) return;
-    setState(() => _isLoading = true);
-    try {
-      final api = ref.read(apiProvider);
-      if (tour != null) {
-        await api.updatePartnerTour(tour.id, result);
-      } else {
-        await api.createPartnerTour(result);
-      }
-      if (!mounted) return;
-      await _loadData();
-    } catch (e) {
-      if (mounted) {
-        final msg = e is ApiException ? e.message : 'Không thể kết nối server';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg), backgroundColor: Colors.red),
-        );
-      }
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _deleteTour(TourPackage tour) async {
-    final confirm = await showConfirmDialog(
-      context: context,
-      title: 'Xóa tour',
-      content: 'Bạn chắc chắn muốn xóa "${tour.name}"?',
-      confirmText: 'Xóa',
-      isDestructive: true,
-    );
-    if (confirm != true || !mounted) return;
-    setState(() => _isLoading = true);
-    try {
-      await ref.read(apiProvider).deletePartnerTour(tour.id);
-      if (!mounted) return;
-      await _loadData();
-    } catch (e) {
-      if (mounted) {
-        final msg = e is ApiException ? e.message : 'Không thể kết nối server';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg), backgroundColor: Colors.red),
-        );
-      }
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  // ── Room Management ─────────────────────────────────────────────────
-
-  Future<void> _showRoomManager(Hotel hotel) async {
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => RoomManagerScreen(hotel: hotel)),
-    );
-    if (!mounted) return;
-    await _loadData();
   }
 
   // ── Build ───────────────────────────────────────────────────────────
@@ -388,6 +273,23 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryBlue,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: _openWebDashboard,
+            icon: const Icon(Icons.open_in_browser),
+            label: const Text(
+              'Quản lý chi tiết trên Web',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 24),
           const Text(
             'Thống kê',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -407,6 +309,24 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
                 'Tours',
                 '${_stats?['tours'] ?? 0}',
                 Colors.orange,
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _statCard(
+                Icons.attach_money,
+                'Doanh số',
+                NumberFormat.currency(locale: 'vi_VN', symbol: 'đ').format(_stats?['revenue'] ?? 0),
+                Colors.green,
+              ),
+              const SizedBox(width: 12),
+              _statCard(
+                Icons.receipt_long,
+                'Lượt đặt',
+                '${_stats?['trips'] ?? 0}',
+                Colors.purple,
               ),
             ],
           ),
@@ -481,7 +401,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
         child: _hotels.isEmpty
             ? const Center(
                 child: Text(
-                  'Chưa có khách sạn nào.\nNhấn + để thêm mới.',
+                  'Chưa có khách sạn nào.',
                   textAlign: TextAlign.center,
                 ),
               )
@@ -492,15 +412,6 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
                     _buildHotelCard(_hotels[index]),
               ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppTheme.primaryBlue,
-        onPressed: _showHotelForm,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Thêm Khách sạn',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
     );
   }
 
@@ -508,79 +419,57 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () => _showRoomManager(hotel),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  'https://picsum.photos/seed/${hotel.id}/100/100',
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                'https://picsum.photos/seed/${hotel.id}/100/100',
+                width: 60,
+                height: 60,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
                   width: 60,
                   height: 60,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: 60,
-                    height: 60,
-                    color: Colors.grey[200],
-                    child: const Icon(Icons.hotel, size: 30),
-                  ),
+                  color: Colors.grey[200],
+                  child: const Icon(Icons.hotel, size: 30),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      hotel.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    hotel.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${hotel.location} • ${hotel.address}',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${hotel.priceFrom.toInt()} VND/đêm',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.primaryBlue,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'edit') _showHotelForm(hotel: hotel);
-                  if (value == 'rooms') _showRoomManager(hotel);
-                  if (value == 'delete') _deleteHotel(hotel);
-                },
-                itemBuilder: (_) => [
-                  const PopupMenuItem(value: 'edit', child: Text('Chỉnh sửa')),
-                  const PopupMenuItem(
-                    value: 'rooms',
-                    child: Text('Quản lý phòng'),
                   ),
-                  const PopupMenuItem(
-                    value: 'delete',
-                    child: Text('Xóa', style: TextStyle(color: Colors.red)),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${hotel.location} • ${hotel.address}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${hotel.priceFrom.toInt()} VND/đêm',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.primaryBlue,
+                    ),
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -595,7 +484,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
         child: _tours.isEmpty
             ? const Center(
                 child: Text(
-                  'Chưa có tour nào.\nNhấn + để thêm mới.',
+                  'Chưa có tour nào.',
                   textAlign: TextAlign.center,
                 ),
               )
@@ -604,12 +493,6 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
                 itemCount: _tours.length,
                 itemBuilder: (context, index) => _buildTourCard(_tours[index]),
               ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppTheme.primaryBlue,
-        onPressed: _showTourForm,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Thêm Tour', style: TextStyle(color: Colors.white)),
       ),
     );
   }
@@ -665,19 +548,6 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
                   ),
                 ],
               ),
-            ),
-            PopupMenuButton<String>(
-              onSelected: (value) {
-                if (value == 'edit') _showTourForm(tour: tour);
-                if (value == 'delete') _deleteTour(tour);
-              },
-              itemBuilder: (_) => [
-                const PopupMenuItem(value: 'edit', child: Text('Chỉnh sửa')),
-                const PopupMenuItem(
-                  value: 'delete',
-                  child: Text('Xóa', style: TextStyle(color: Colors.red)),
-                ),
-              ],
             ),
           ],
         ),

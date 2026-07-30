@@ -168,7 +168,14 @@ export const adminController = {
         prisma.flight.count(),
         prisma.tourPackage.count(),
         prisma.trip.findMany({
-          select: { date: true, status: true, isUpcoming: true },
+          select: { 
+            date: true, 
+            status: true, 
+            isUpcoming: true, 
+            totalPrice: true,
+            hotel: { select: { partnerId: true } },
+            tourPackage: { select: { partnerId: true } }
+          },
         }),
       ]);
     const normalizedTrips = trips.map(processTripStatus);
@@ -177,6 +184,22 @@ export const adminController = {
     const tripsPending = normalizedTrips.filter(
       (trip) => trip.status === TripStatus.PENDING,
     ).length;
+    
+    let revenueApp = 0;
+    let revenuePartnerCommission = 0;
+
+    normalizedTrips.forEach((trip) => {
+      if (trip.status !== TripStatus.CANCELLED) {
+        const price = Number(trip.totalPrice ?? 0);
+        const hasPartner = trip.hotel?.partnerId || trip.tourPackage?.partnerId;
+        if (hasPartner) {
+          revenuePartnerCommission += price * 0.1;
+        } else {
+          revenueApp += price;
+        }
+      }
+    });
+
     res.json({
       destinations,
       hotels,
@@ -185,6 +208,9 @@ export const adminController = {
       tripsPending,
       tripsUpcoming,
       tripsHistory,
+      revenueApp,
+      revenuePartnerCommission,
+      revenue: revenueApp + revenuePartnerCommission,
     });
   }),
 
@@ -492,7 +518,16 @@ export const adminController = {
   }),
 
   getTrips: asyncHandler(async (_: Request, res: Response) => {
-    const data = await prisma.trip.findMany({ orderBy: { createdAt: "desc" } });
+    const data = await prisma.trip.findMany({ 
+      orderBy: { createdAt: "desc" },
+      include: {
+        user: {
+          select: { name: true, email: true }
+        }
+      }
+    });
+    // Map the returned trips to flatten or format them if needed, but since the frontend expects the standard trip objects, 
+    // we can just send the data directly and the frontend can access t.user.name
     res.json(data);
   }),
 

@@ -212,7 +212,7 @@
   <div class="relative">
     <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
-      <div class="grid grid-cols-3 gap-6 mb-16">
+      <div class="grid grid-cols-4 gap-6 mb-16">
         <div class="doppelrand cursor-pointer group" onclick="navigate('destinations')">
           <div class="doppelrand-inner p-8 flex flex-col justify-between h-48 bg-gradient-to-br from-white to-offwhite">
             <div class="w-12 h-12 rounded-full bg-silver flex items-center justify-center text-ink"><i class="fa-solid fa-map-pin"></i></div>
@@ -264,6 +264,24 @@
             <div>
               <p class="text-xs uppercase tracking-widest text-amber-800/60 font-bold mb-1">Đơn chờ xác nhận</p>
               <h3 class="text-4xl font-extrabold text-amber-950 tracking-tight" id="st-pending">—</h3>
+            </div>
+          </div>
+        </div>
+        <div class="doppelrand cursor-pointer group">
+          <div class="doppelrand-inner p-8 flex flex-col justify-between h-48 bg-purple-50">
+            <div class="w-12 h-12 rounded-full bg-purple-200/50 flex items-center justify-center text-purple-800"><i class="fa-solid fa-coins"></i></div>
+            <div>
+              <p class="text-xs uppercase tracking-widest text-purple-800/60 font-bold mb-1">Doanh thu App</p>
+              <h3 class="text-3xl font-extrabold text-purple-900 tracking-tight" id="st-revenue-app">—</h3>
+            </div>
+          </div>
+        </div>
+        <div class="doppelrand cursor-pointer group">
+          <div class="doppelrand-inner p-8 flex flex-col justify-between h-48 bg-purple-50">
+            <div class="w-12 h-12 rounded-full bg-purple-200/50 flex items-center justify-center text-purple-800"><i class="fa-solid fa-handshake"></i></div>
+            <div>
+              <p class="text-xs uppercase tracking-widest text-purple-800/60 font-bold mb-1">Hoa hồng (10%)</p>
+              <h3 class="text-3xl font-extrabold text-purple-900 tracking-tight" id="st-revenue-partner">—</h3>
             </div>
           </div>
         </div>
@@ -770,6 +788,8 @@ async function loadDashboard(){
   document.getElementById('st-tour').textContent=st.tours;
   document.getElementById('st-upcoming').textContent=st.tripsUpcoming;
   document.getElementById('st-pending').textContent=st.tripsPending;
+  document.getElementById('st-revenue-app').textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(st.revenueApp || 0);
+  document.getElementById('st-revenue-partner').textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(st.revenuePartnerCommission || 0);
 }
 
 // ── HOTELS & ROOMS ──
@@ -948,13 +968,15 @@ function renderTrips(rows){
   const search=document.getElementById('search-trips')?.value.trim().toLowerCase()||'';
   const filtered=rows.filter(t=>{
     const matchesStatus=!tripStatusFilter||t.status===tripStatusFilter;
-    const haystack=[t.destination,t.location,t.date,t.guests].filter(Boolean).join(' ').toLowerCase();
+    const userStr = t.user ? `${t.user.name} ${t.user.email}` : 'Khách vãng lai';
+    const haystack=[t.destination,t.location,t.date,t.guests,userStr].filter(Boolean).join(' ').toLowerCase();
     return matchesStatus&&(!search||haystack.includes(search));
   });
   if(!filtered.length){tb.innerHTML='';em.style.display='block';return;}
   em.style.display='none';
   tb.innerHTML=filtered.map(t=>listRow([
-    {label:'Điểm đến', val:t.destination, cls:'w-1/3'},
+    {label:'Điểm đến', val:t.destination, cls:'w-1/4'},
+    {label:'Người đặt', html:`<div class="font-bold text-sm text-ink truncate w-48">${escapeHtml(t.user?.name||'Khách')}</div><div class="text-xs text-muted truncate w-48">${escapeHtml(t.user?.email||'')}</div>`, cls:'w-1/4'},
     {label:'Ngày đi', val:t.date},
     {label:'Khách', val:t.guests??'—'},
     {label:'Trạng thái', html:`<span class="px-3 py-1 bg-silver text-ink rounded-full text-[10px] uppercase">${escapeHtml(tripStatusLabels[t.status]||t.status)}</span>`}
