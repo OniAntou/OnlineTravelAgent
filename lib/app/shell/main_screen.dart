@@ -13,6 +13,7 @@ import '../../features/trips/presentation/my_trips_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'main_tab_provider.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -22,7 +23,6 @@ class MainScreen extends ConsumerStatefulWidget {
 }
 
 class _MainScreenState extends ConsumerState<MainScreen> {
-  int _selectedIndex = 0;
   // Track visited tabs and only build them after first selection.
   final Set<int> _visitedTabs = {0};
 
@@ -43,6 +43,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Widget build(BuildContext context) {
     final bootstrapAsync = ref.watch(bootstrapProvider);
     final selectedDestination = ref.watch(selectedDestinationProvider);
+    final selectedIndex = ref.watch(mainTabIndexProvider);
+    
+    _visitedTabs.add(selectedIndex);
 
     // Lắng nghe lỗi favorite và hiển thị SnackBar
     ref.listen<String?>(destinationErrorProvider, (previous, next) {
@@ -79,17 +82,17 @@ class _MainScreenState extends ConsumerState<MainScreen> {
                     .read(destinationsProvider.notifier)
                     .toggleFavorite(selectedDestination.id),
               )
-            : _buildLazyIndexedStack(),
+            : _buildLazyIndexedStack(selectedIndex),
         bottomNavigationBar: selectedDestination == null
-            ? _buildBottomNavigationBar()
+            ? _buildBottomNavigationBar(selectedIndex)
             : null,
       ),
     );
   }
 
-  Widget _buildLazyIndexedStack() {
+  Widget _buildLazyIndexedStack(int selectedIndex) {
     return IndexedStack(
-      index: _selectedIndex,
+      index: selectedIndex,
       children: List.generate(4, (index) {
         if (!_visitedTabs.contains(index)) {
           return const SizedBox.shrink();
@@ -120,7 +123,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     }
   }
 
-  Widget _buildBottomNavigationBar() {
+  Widget _buildBottomNavigationBar(int selectedIndex) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -144,12 +147,9 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: BottomNavigationBar(
-            currentIndex: _selectedIndex,
+            currentIndex: selectedIndex,
             onTap: (index) {
-              setState(() {
-                _selectedIndex = index;
-                _visitedTabs.add(index);
-              });
+              ref.read(mainTabIndexProvider.notifier).setIndex(index);
             },
             type: BottomNavigationBarType.fixed,
             backgroundColor: Colors.white,

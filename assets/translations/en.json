@@ -49,6 +49,7 @@
     "error_password": "Password must be at least 6 characters"
   },
   "dashboard": {
+    "explore_now": "Explore now",
     "daily_tip": "Today's tip: Book flights 2-3 weeks in advance for better prices and timings.",
     "flight_banner_title": "Book Flights",
     "flight_banner_subtitle": "Find the cheapest flights",

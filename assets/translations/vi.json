@@ -49,6 +49,7 @@
     "error_password": "Mật khẩu phải từ 6 ký tự"
   },
   "dashboard": {
+    "explore_now": "Khám phá ngay",
     "daily_tip": "Mẹo hôm nay: Đặt chuyến trước 2-3 tuần để có giá tốt hơn và nhiều khung giờ đẹp.",
     "flight_banner_title": "Đặt vé máy bay",
     "flight_banner_subtitle": "Tìm chuyến bay giá rẻ nhất",

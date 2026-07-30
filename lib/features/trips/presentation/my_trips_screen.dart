@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 
-import '../../../core/router/app_routes.dart';
+import '../../../app/shell/main_tab_provider.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../domain/trip.dart';
@@ -330,10 +330,10 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
       title: 'Bắt đầu hành trình mới',
       subtitle:
           'Bạn chưa có chuyến đi nào được lên lịch. Hãy bắt đầu lên kế hoạch cho hành trình tiếp theo của bạn ngay hôm nay để nhận những ưu đãi hấp dẫn nhất.',
-      actionText: 'Khám phá ngay',
+      actionText: tr('dashboard.explore_now'),
       actionIcon: Icons.arrow_forward_rounded,
       onActionTap: () {
-        context.go(AppRoutes.main);
+        ref.read(mainTabIndexProvider.notifier).setIndex(0);
       },
     );
   }

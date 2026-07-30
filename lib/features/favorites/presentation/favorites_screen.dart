@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/router/app_routes.dart';
+import 'package:easy_localization/easy_localization.dart';
+import '../../../app/shell/main_tab_provider.dart';
 import '../../destinations/domain/destination.dart';
 import '../../../app/state/app_state_provider.dart';
 import '../../auth/application/auth_provider.dart';
@@ -56,10 +56,10 @@ class FavoritesScreen extends ConsumerWidget {
                       title: 'Chưa có địa điểm yêu thích nào',
                       subtitle:
                           'Hãy tìm kiếm và lưu lại các địa điểm\nbạn muốn ghé thăm trong tương lai.',
-                      actionText: 'Khám phá ngay',
+                      actionText: tr('dashboard.explore_now'),
                       actionIcon: Icons.arrow_forward_rounded,
                       onActionTap: () =>
-                          context.go(AppRoutes.main),
+                          ref.read(mainTabIndexProvider.notifier).setIndex(0),
                     ),
                   )
                 else

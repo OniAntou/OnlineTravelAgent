@@ -23,14 +23,34 @@ const server = app.listen(env.port, () => {
 const stopPendingImageCleanup = startPendingImageCleanup();
 
 // Graceful shutdown
-async function shutdown() {
+async function shutdown(exitCode: number = 0) {
   logger.info("\nShutting down gracefully...");
   stopPendingImageCleanup();
   server.close();
   await prisma.$disconnect();
   logger.info("Database disconnected. Goodbye!");
-  process.exit(0);
+  process.exit(exitCode);
 }
 
-process.on("SIGINT", shutdown);
-process.on("SIGTERM", shutdown);
+process.on("SIGINT", () => shutdown(0));
+process.on("SIGTERM", () => shutdown(0));
+
+process.on("uncaughtException", (err) => {
+  logger.error("UNCAUGHT EXCEPTION! 💥 Shutting down...");
+  if (err instanceof Error) {
+    logger.error(`${err.name}: ${err.message}\n${err.stack}`);
+  } else {
+    logger.error(err);
+  }
+  shutdown(1);
+});
+
+process.on("unhandledRejection", (err) => {
+  logger.error("UNHANDLED REJECTION! 💥 Shutting down...");
+  if (err instanceof Error) {
+    logger.error(`${err.name}: ${err.message}\n${err.stack}`);
+  } else {
+    logger.error(err);
+  }
+  shutdown(1);
+});

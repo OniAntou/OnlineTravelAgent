@@ -72,22 +72,37 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
       backgroundColor: AppTheme.backgroundGray,
       body: Stack(
         children: [
-          CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: [
-              // 1. Parallax Header Image
-              SliverAppBar(
-                expandedHeight: 340,
-                pinned: true,
-                stretch: true,
-                backgroundColor: AppTheme.primaryBlue,
-                elevation: 0,
-                leadingWidth: 70,
-                leading: Center(
-                  child: GestureDetector(
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: MediaQuery.sizeOf(context).height * 0.45,
+            child: Hero(
+              tag: 'tour_image_${t.name}',
+              child: AppImage(
+                t.imagePath,
+                fit: BoxFit.cover,
+                cacheWidth: (MediaQuery.sizeOf(context).width * MediaQuery.devicePixelRatioOf(context)).round(),
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Colors.grey[300],
+                  child: const Icon(
+                    Icons.image,
+                    size: 50,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: Container(
-                      margin: const EdgeInsets.only(left: 20),
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.9),
@@ -99,94 +114,68 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                       ),
                     ),
                   ),
-                ),
-                actions: [
-                  Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        ref.read(tourFavoritesProvider.notifier).toggle(t.id);
-                        final isFav = ref
-                            .read(tourFavoritesProvider)
-                            .contains(t.id);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              isFav
-                                  ? 'tour_detail.saved_to_favorites'.tr()
-                                  : 'tour_detail.removed_from_favorites'.tr(),
-                            ),
-                            duration: const Duration(seconds: 1),
+                  GestureDetector(
+                    onTap: () {
+                      ref.read(tourFavoritesProvider.notifier).toggle(t.id);
+                      final isFav = ref.read(tourFavoritesProvider).contains(t.id);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            isFav
+                                ? 'tour_detail.saved_to_favorites'.tr()
+                                : 'tour_detail.removed_from_favorites'.tr(),
+                          ),
+                          duration: const Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                    child: Builder(
+                      builder: (context) {
+                        final isFav = ref.watch(tourFavoritesProvider).contains(t.id);
+                        return Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            isFav ? Icons.favorite : Icons.favorite_border,
+                            color: isFav ? Colors.red : Colors.grey,
                           ),
                         );
                       },
-                      child: Builder(
-                        builder: (context) {
-                          final isFav = ref
-                              .watch(tourFavoritesProvider)
-                              .contains(t.id);
-                          return Container(
-                            margin: const EdgeInsets.only(right: 20),
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.9),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              isFav ? Icons.favorite : Icons.favorite_border,
-                              color: isFav ? Colors.red : Colors.grey,
-                            ),
-                          );
-                        },
-                      ),
                     ),
                   ),
                 ],
-                flexibleSpace: FlexibleSpaceBar(
-                  stretchModes: const [
-                    StretchMode.zoomBackground,
-                    StretchMode.blurBackground,
-                  ],
-                  background: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Hero(
-                        tag: 'tour_image_${t.name}',
-                        child: AppImage(
-                          t.imagePath,
-                          fit: BoxFit.cover,
-                          cacheWidth:
-                              (MediaQuery.sizeOf(context).width *
-                                      MediaQuery.devicePixelRatioOf(context))
-                                  .round(),
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                color: Colors.grey[300],
-                                child: const Icon(
-                                  Icons.image,
-                                  size: 50,
-                                  color: Colors.grey,
-                                ),
-                              ),
+              ),
+            ),
+          ),
+          DraggableScrollableSheet(
+            initialChildSize: 0.6,
+            minChildSize: 0.6,
+            maxChildSize: 0.95,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                ),
+                child: ListView(
+                  controller: scrollController,
+                  physics: const ClampingScrollPhysics(),
+                  padding: const EdgeInsets.only(bottom: 120),
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(top: 16, bottom: 20),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      // Clean background without overlay texts
-                    ],
-                  ),
-                ),
-              ),
-
-              // 2. Main Content Body
-              SliverToBoxAdapter(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(32),
                     ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
                       // B. Title and Badge
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 32, 20, 0),
@@ -750,30 +739,27 @@ class _TourDetailScreenState extends ConsumerState<TourDetailScreen> {
                                 ref.invalidate(bootstrapProvider);
                               },
                             ),
-                            const SizedBox(
-                              height: 120,
-                            ), // Bottom padding for sheet
-                          ],
-                        ),
-                      ),
-                    ],
+                            const SizedBox(height: 120), // Bottom padding for sheet
+                          ], // closes Column's children
+                        ), // closes Column
+                      ), // closes Content Container
+                    ], // closes ListView's children
+                  ), // closes ListView
+                ); // closes Builder's root Container
+              },
+            ),
+                  
+                  // 3. Floating Bottom Purchase Sheet
+                  TourBookingBottomBar(
+                    originalPrice: widget.tour.price,
+                    guestsCount: _guestsCount,
+                    totalPrice: _totalPrice,
+                    onBookPressed: _bookTour,
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
-
-          // 3. Floating Bottom Purchase Sheet
-          TourBookingBottomBar(
-            originalPrice: widget.tour.price,
-            guestsCount: _guestsCount,
-            totalPrice: _totalPrice,
-            onBookPressed: _bookTour,
-          ),
-        ],
-      ),
-    );
-  }
+            );
+          }
 
   void _bookTour() {
     if (!ref.read(authProvider).isLoggedIn) {
